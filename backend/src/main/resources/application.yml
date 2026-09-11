@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: booking-backend
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/platform_db
+    username: booking
+    password: booking
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+server:
+  port: 8080
