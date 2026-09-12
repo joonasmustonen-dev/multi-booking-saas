@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.example.booking.tenant.TenantJwtIntegrationTest
 -------------------------------------------------------------------------------
-Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.307 s -- in com.example.booking.tenant.TenantJwtIntegrationTest
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.021 s -- in com.example.booking.tenant.TenantJwtIntegrationTest

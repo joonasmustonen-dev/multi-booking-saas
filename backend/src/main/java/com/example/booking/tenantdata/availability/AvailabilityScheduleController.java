@@ -2,12 +2,16 @@ package com.example.booking.tenantdata.availability;
 
 import jakarta.validation.Valid;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/resources/{resourceId}/availability")
+@PreAuthorize(
+        "hasAnyRole('TENANT_ADMIN', 'STAFF')"
+)
 public class AvailabilityScheduleController {
 
     private final AvailabilityScheduleService service;

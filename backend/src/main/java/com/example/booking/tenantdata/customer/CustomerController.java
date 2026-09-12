@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.net.URI;
 import java.util.List;
@@ -15,6 +16,9 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/customers")
+@PreAuthorize(
+        "hasAnyRole('TENANT_ADMIN', 'STAFF')"
+)
 public class CustomerController {
 
     private final CustomerService customerService;
@@ -80,4 +84,6 @@ public class CustomerController {
 
         customerService.delete(id);
     }
+
+    
 }

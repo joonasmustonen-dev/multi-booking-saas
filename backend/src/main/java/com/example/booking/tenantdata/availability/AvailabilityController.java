@@ -1,6 +1,7 @@
 package com.example.booking.tenantdata.availability;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -9,6 +10,9 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/availability")
+@PreAuthorize(
+        "hasAnyRole('TENANT_ADMIN', 'STAFF', 'CUSTOMER')"
+)
 public class AvailabilityController {
 
     private final AvailabilityService service;

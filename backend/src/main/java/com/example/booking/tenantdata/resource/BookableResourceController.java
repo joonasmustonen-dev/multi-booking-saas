@@ -3,6 +3,7 @@ package com.example.booking.tenantdata.resource;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -11,6 +12,9 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/resources")
+@PreAuthorize(
+        "hasAnyRole('TENANT_ADMIN', 'STAFF')"
+)
 public class BookableResourceController {
 
     private final BookableResourceService service;

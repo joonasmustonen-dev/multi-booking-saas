@@ -1,4 +1,9 @@
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/booking
   application:
     name: booking-backend
 
@@ -28,4 +33,4 @@ app:
     username: booking
     password: booking
   security: 
-    jwt-enabled: false
+    jwt-enabled: true

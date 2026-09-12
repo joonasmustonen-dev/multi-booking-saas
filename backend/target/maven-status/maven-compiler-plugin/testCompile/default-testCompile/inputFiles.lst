@@ -1,7 +1,9 @@
 F:\multi-booking-saas\backend\src\test\java\com\example\booking\BookingBackendApplicationTests.java
+F:\multi-booking-saas\backend\src\test\java\com\example\booking\security\SecurityTenantBoundaryIntegrationTest.java
 F:\multi-booking-saas\backend\src\test\java\com\example\booking\tenant\TenantContextFilterTest.java
 F:\multi-booking-saas\backend\src\test\java\com\example\booking\tenant\TenantContextTest.java
 F:\multi-booking-saas\backend\src\test\java\com\example\booking\tenant\TenantJwtIntegrationTest.java
 F:\multi-booking-saas\backend\src\test\java\com\example\booking\tenant\TenantRoutingDataSourceTest.java
 F:\multi-booking-saas\backend\src\test\java\com\example\booking\tenant\TenantRoutingIntegrationTest.java
+F:\multi-booking-saas\backend\src\test\java\com\example\booking\tenantdata\appointment\AppointmentSafetyIntegrationTest.java
 F:\multi-booking-saas\backend\src\test\java\com\example\booking\tenantdata\CustomerRepositoryIntegrationTest.java

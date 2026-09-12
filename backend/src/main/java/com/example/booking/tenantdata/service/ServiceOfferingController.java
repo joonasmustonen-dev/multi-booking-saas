@@ -3,6 +3,7 @@ package com.example.booking.tenantdata.service;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -11,6 +12,9 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/services")
+@PreAuthorize(
+        "hasAnyRole('TENANT_ADMIN', 'STAFF')"
+)
 public class ServiceOfferingController {
 
     private final ServiceOfferingService service;
