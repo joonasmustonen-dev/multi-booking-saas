@@ -3,6 +3,7 @@ com\example\booking\tenant\TenantRoutingDataSourceTest.class
 com\example\booking\BookingBackendApplicationTests.class
 com\example\booking\tenant\TenantContextTest.class
 com\example\booking\tenant\TenantJwtIntegrationTest$TestEndpointConfiguration.class
+com\example\booking\tenantdata\CustomerRepositoryIntegrationTest.class
 com\example\booking\tenant\TenantRoutingDataSourceTest$TestRoutingDataSource.class
 com\example\booking\tenant\TenantContextFilterTest.class
 com\example\booking\tenant\TenantJwtIntegrationTest$JwtTestConfiguration.class
