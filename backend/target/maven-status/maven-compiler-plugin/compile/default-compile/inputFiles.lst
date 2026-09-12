@@ -1,6 +1,9 @@
 F:\multi-booking-saas\backend\src\main\java\com\example\booking\BookingApplication.java
 F:\multi-booking-saas\backend\src\main\java\com\example\booking\config\DataSourceConfig.java
+F:\multi-booking-saas\backend\src\main\java\com\example\booking\config\JpaConfig.java
+F:\multi-booking-saas\backend\src\main\java\com\example\booking\config\PlatformJpaRepositoryConfig.java
 F:\multi-booking-saas\backend\src\main\java\com\example\booking\config\SecurityConfig.java
+F:\multi-booking-saas\backend\src\main\java\com\example\booking\config\TenantJpaRepositoryConfig.java
 F:\multi-booking-saas\backend\src\main\java\com\example\booking\HealthController.java
 F:\multi-booking-saas\backend\src\main\java\com\example\booking\tenant\Tenant.java
 F:\multi-booking-saas\backend\src\main\java\com\example\booking\tenant\TenantContext.java
@@ -8,6 +11,11 @@ F:\multi-booking-saas\backend\src\main\java\com\example\booking\tenant\TenantCon
 F:\multi-booking-saas\backend\src\main\java\com\example\booking\tenant\TenantController.java
 F:\multi-booking-saas\backend\src\main\java\com\example\booking\tenant\TenantDataSourceConfig.java
 F:\multi-booking-saas\backend\src\main\java\com\example\booking\tenant\TenantDataSourceManager.java
+F:\multi-booking-saas\backend\src\main\java\com\example\booking\tenant\TenantMigrationRunner.java
+F:\multi-booking-saas\backend\src\main\java\com\example\booking\tenant\TenantMigrationService.java
 F:\multi-booking-saas\backend\src\main\java\com\example\booking\tenant\TenantRepository.java
 F:\multi-booking-saas\backend\src\main\java\com\example\booking\tenant\TenantRoutingDataSource.java
 F:\multi-booking-saas\backend\src\main\java\com\example\booking\tenant\TenantService.java
+F:\multi-booking-saas\backend\src\main\java\com\example\booking\tenantdata\Customer.java
+F:\multi-booking-saas\backend\src\main\java\com\example\booking\tenantdata\CustomerRepository.java
+F:\multi-booking-saas\backend\src\main\java\com\example\booking\tenantdata\CustomerService.java
