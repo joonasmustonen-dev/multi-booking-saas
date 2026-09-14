@@ -22,6 +22,7 @@ public class BookableResourceController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public ResponseEntity<ResourceResponse> create(
         @Valid @RequestBody ResourceRequest request
     ) {
@@ -43,6 +44,7 @@ public class BookableResourceController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public ResourceResponse update(
         @PathVariable UUID id,
         @Valid @RequestBody ResourceRequest request
@@ -51,6 +53,7 @@ public class BookableResourceController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
 
@@ -58,6 +61,7 @@ public class BookableResourceController {
     }
 
     @PatchMapping("/{id}/active")
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public ResourceResponse setActive(
         @PathVariable UUID id,
         @Valid @RequestBody com.example.booking.tenantdata.management.AssignmentActiveRequest request

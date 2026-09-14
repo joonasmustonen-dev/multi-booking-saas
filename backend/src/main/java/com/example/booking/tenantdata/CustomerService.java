@@ -48,23 +48,31 @@ public class CustomerService {
 
     @Transactional(value = "tenantTransactionManager", readOnly = true)
     public List<Customer> findAll() {
-        return customerRepository.findAll();
+        return findPage(0, 100);
+    }
+
+    @Transactional(value = "tenantTransactionManager", readOnly = true)
+    public List<Customer> findPage(int page, int size) {
+        if (page < 0 || page > 100000 || size < 1 || size > 200) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Invalid customer page or size (1–200)"
+            );
+        }
+        return customerRepository
+            .findDirectory(
+                com.example.booking.security.ApiPermissions.isTenantAdmin(),
+                org.springframework.data.domain.PageRequest.of(
+                    page,
+                    size,
+                    org.springframework.data.domain.Sort.by("id")
+                )
+            )
+            .getContent();
     }
 
     @Transactional(value = "tenantTransactionManager", readOnly = true)
     public Customer findById(UUID id) {
-        return customerRepository
-            .findById(id)
-            .orElseThrow(() ->
-                new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Customer not found"
-                )
-            );
-    }
-
-    @Transactional("tenantTransactionManager")
-    public Customer update(UUID id, UpdateCustomerRequest request) {
         Customer customer = customerRepository
             .findById(id)
             .orElseThrow(() ->
@@ -73,6 +81,39 @@ public class CustomerService {
                     "Customer not found"
                 )
             );
+
+        if (
+            customer.isProcessingRestricted() &&
+            !com.example.booking.security.ApiPermissions.isTenantAdmin()
+        ) {
+            throw new ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "Customer processing is restricted"
+            );
+        }
+        return customer;
+    }
+
+    @Transactional("tenantTransactionManager")
+    public Customer update(UUID id, UpdateCustomerRequest request) {
+        Customer customer = customerRepository
+            .findForUpdate(id)
+            .orElseThrow(() ->
+                new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Customer not found"
+                )
+            );
+
+        if (
+            customer.isProcessingRestricted() &&
+            !com.example.booking.security.ApiPermissions.isTenantAdmin()
+        ) {
+            throw new ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "Customer processing is restricted"
+            );
+        }
 
         customer.update(
             request.firstName(),
@@ -104,13 +145,18 @@ public class CustomerService {
     @Transactional("tenantTransactionManager")
     public void delete(UUID id) {
         Customer customer = customerRepository
-            .findById(id)
+            .findForUpdate(id)
             .orElseThrow(() ->
                 new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "Customer not found"
                 )
             );
+
+        if (customer.isLegalHold()) throw new ResponseStatusException(
+            HttpStatus.CONFLICT,
+            "Customer data is under a legal hold"
+        );
 
         if (
             appointments.existsByCustomer_Id(id)

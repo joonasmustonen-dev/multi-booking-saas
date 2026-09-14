@@ -20,6 +20,12 @@ public class TenantDataSourceManager {
 
     private final String password;
 
+    @Value("${app.tenant-database.port:5432}")
+    private int jdbcPort = 5432;
+
+    @Value("${app.tenant-database.ssl-mode:}")
+    private String sslMode = "";
+
     private final Map<String, HikariDataSource> dataSources =
         new ConcurrentHashMap<>();
 
@@ -39,6 +45,31 @@ public class TenantDataSourceManager {
     }
 
     public DataSource getDataSource(String tenantId) {
+        Tenant current = tenantRepository
+            .findBySlug(tenantId)
+            .filter(tenant -> "ACTIVE".equals(tenant.getStatus()))
+            .orElse(null);
+
+        if (current == null) {
+            closeDataSource(tenantId);
+
+            throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.FORBIDDEN,
+                "Workspace is unavailable"
+            );
+        }
+
+        if (!current.getDatabaseName().matches("[A-Za-z0-9_]{1,63}")) {
+            throw new IllegalStateException(
+                "Invalid workspace database identifier"
+            );
+        }
+        HikariDataSource cached = dataSources.get(tenantId);
+
+        if (
+            cached != null && !cached.getJdbcUrl().equals(jdbcUrl(current))
+        ) closeDataSource(tenantId);
+
         return dataSources.computeIfAbsent(tenantId, this::createDataSource);
     }
 
@@ -57,14 +88,7 @@ public class TenantDataSourceManager {
 
         HikariConfig config = new HikariConfig();
 
-        config.setJdbcUrl(
-            "jdbc:postgresql://" +
-                jdbcHost +
-                ":" +
-                "5432" +
-                "/" +
-                tenant.getDatabaseName()
-        );
+        config.setJdbcUrl(jdbcUrl(tenant));
 
         config.setUsername(username);
 
@@ -92,6 +116,32 @@ public class TenantDataSourceManager {
         }
     }
 
+    private String jdbcUrl(Tenant tenant) {
+        if (
+            !sslMode.isBlank() &&
+            !java.util.Set.of(
+                "disable",
+                "allow",
+                "prefer",
+                "require",
+                "verify-ca",
+                "verify-full"
+            ).contains(sslMode)
+        ) {
+            throw new IllegalStateException("Invalid database SSL mode");
+        }
+        return (
+            "jdbc:postgresql://" +
+            jdbcHost +
+            ":" +
+            jdbcPort +
+            "/" +
+            tenant.getDatabaseName() +
+            (sslMode.isBlank() ? "" : "?sslmode=" + sslMode)
+        );
+    }
+
+    @jakarta.annotation.PreDestroy
     public void closeAll() {
         dataSources.values().forEach(HikariDataSource::close);
 

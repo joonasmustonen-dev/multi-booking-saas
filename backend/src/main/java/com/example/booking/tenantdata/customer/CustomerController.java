@@ -46,9 +46,12 @@ public class CustomerController {
     }
 
     @GetMapping
-    public List<CustomerResponse> findAll() {
+    public List<CustomerResponse> findAll(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "100") int size
+    ) {
         return customerService
-            .findAll()
+            .findPage(page, size)
             .stream()
             .map(CustomerResponse::from)
             .toList();
@@ -57,9 +60,10 @@ public class CustomerController {
     @GetMapping("/search")
     public List<CustomerResponse> search(
         @RequestParam(defaultValue = "") String q,
-        @RequestParam(defaultValue = "25") int limit
+        @RequestParam(defaultValue = "25") int limit,
+        @RequestParam(defaultValue = "false") boolean bookingOnly
     ) {
-        return operations.search(q, limit);
+        return operations.search(q, limit, bookingOnly);
     }
 
     @GetMapping("/{id}/activity")
@@ -85,6 +89,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('TENANT_ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID id) {
         customerService.delete(id);

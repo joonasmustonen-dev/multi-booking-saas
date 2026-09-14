@@ -1892,7 +1892,7 @@ class BackendAssignmentIntegrationTest {
             mvc.perform(
                 put(url)
                     .param("weekStart", week.toString())
-                    .with(authenticated("STAFF"))
+                    .with(authenticated("TENANT_ADMIN"))
                     .contentType("application/json")
                     .content("{\"shifts\":[]}")
             )
@@ -1911,7 +1911,7 @@ class BackendAssignmentIntegrationTest {
             mvc.perform(
                 delete(url)
                     .param("weekStart", week.toString())
-                    .with(authenticated("STAFF"))
+                    .with(authenticated("TENANT_ADMIN"))
             ).andExpect(status().isNoContent());
 
             assertFalse(slots(f, 0, 0, 0).isEmpty());
@@ -1998,7 +1998,7 @@ class BackendAssignmentIntegrationTest {
 
                 mvc.perform(
                     put(path)
-                        .with(authenticated("STAFF"))
+                        .with(authenticated("TENANT_ADMIN"))
                         .contentType("application/json")
                         .content(
                             "{\"rules\":[" +
@@ -2019,7 +2019,7 @@ class BackendAssignmentIntegrationTest {
 
                 mvc.perform(
                     put(path)
-                        .with(authenticated("STAFF"))
+                        .with(authenticated("TENANT_ADMIN"))
                         .contentType("application/json")
                         .content(
                             "{\"rules\":[" +
@@ -2034,7 +2034,7 @@ class BackendAssignmentIntegrationTest {
 
                 mvc.perform(
                     put(path)
-                        .with(authenticated("STAFF"))
+                        .with(authenticated("TENANT_ADMIN"))
                         .contentType("application/json")
                         .content(
                             "{\"rules\":[" +
@@ -2051,7 +2051,7 @@ class BackendAssignmentIntegrationTest {
     }
 
     @Test
-    void recurringWeekClearAndDisabledDaysStayOwnerScopedAndRequireStaffAccess() {
+    void recurringWeekClearAndDisabledDaysStayOwnerScopedAndRequireAdministratorAccess() {
         inTenant(() -> {
             Fixture f = fixture(REQUIRED, REQUIRED, REQUIRED);
 
@@ -2064,7 +2064,7 @@ class BackendAssignmentIntegrationTest {
 
             mvc.perform(
                 put(path)
-                    .with(authenticated("STAFF"))
+                    .with(authenticated("TENANT_ADMIN"))
                     .contentType("application/json")
                     .content(body)
             )
@@ -2087,14 +2087,14 @@ class BackendAssignmentIntegrationTest {
 
             mvc.perform(
                 put(path)
-                    .with(authenticated("STAFF"))
+                    .with(authenticated("TENANT_ADMIN"))
                     .contentType("application/json")
                     .content("{\"rules\":[null]}")
             ).andExpect(status().isBadRequest());
 
             mvc.perform(
                 put(path)
-                    .with(authenticated("STAFF"))
+                    .with(authenticated("TENANT_ADMIN"))
                     .contentType("application/json")
                     .content("{\"rules\":[]}")
             )
@@ -2124,7 +2124,7 @@ class BackendAssignmentIntegrationTest {
                 put(
                     "/api/v1/staff/" + UUID.randomUUID() + "/availability/rules"
                 )
-                    .with(authenticated("STAFF"))
+                    .with(authenticated("TENANT_ADMIN"))
                     .contentType("application/json")
                     .content(body)
             ).andExpect(status().isNotFound());

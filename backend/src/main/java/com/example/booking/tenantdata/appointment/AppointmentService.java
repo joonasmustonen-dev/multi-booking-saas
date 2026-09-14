@@ -77,13 +77,17 @@ public class AppointmentService {
     @Transactional("tenantTransactionManager")
     public AppointmentResponse create(CreateAppointmentRequest request) {
         Customer customer = customerRepository
-            .findById(request.customerId())
+            .findForUpdate(request.customerId())
             .orElseThrow(() ->
                 new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     "Customer not found"
                 )
             );
+
+        requireBookableCustomer(customer);
+
+        customer.touch();
 
         ServiceOffering service = serviceRepository
             .findByIdWithResources(request.serviceId())
@@ -186,8 +190,25 @@ public class AppointmentService {
 
     @Transactional(value = "tenantTransactionManager", readOnly = true)
     public List<AppointmentResponse> findAll() {
+        return findPage(0, 100);
+    }
+
+    @Transactional(value = "tenantTransactionManager", readOnly = true)
+    public List<AppointmentResponse> findPage(int page, int size) {
+        if (page < 0 || page > 100000 || size < 1 || size > 200) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Invalid appointment page or size (1–200)"
+            );
+        }
         return appointmentRepository
-            .findAllByOrderByStartAtAsc()
+            .findAllBy(
+                org.springframework.data.domain.PageRequest.of(
+                    page,
+                    size,
+                    org.springframework.data.domain.Sort.by("startAt", "id")
+                )
+            )
             .stream()
             .map(AppointmentResponse::from)
             .toList();
@@ -240,6 +261,14 @@ public class AppointmentService {
         RescheduleAppointmentRequest request
     ) {
         Appointment appointment = getAppointment(appointmentId);
+
+        Customer customer = customerRepository
+            .findForUpdate(appointment.getCustomer().getId())
+            .orElseThrow();
+
+        requireBookableCustomer(customer);
+
+        customer.touch();
 
         if (
             appointment.getStatus() != AppointmentStatus.PENDING &&
@@ -318,6 +347,17 @@ public class AppointmentService {
         appointment.reschedule(staff, location, resource, startAt, endAt);
 
         return flushMutation(appointment);
+    }
+
+    private void requireBookableCustomer(Customer customer) {
+        if (
+            customer.isProcessingRestricted() || customer.getErasedAt() != null
+        ) {
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "New bookings and rescheduling are paused for this customer"
+            );
+        }
     }
 
     private void validateStatusTransition(
@@ -464,17 +504,25 @@ public class AppointmentService {
             .atStartOfDay(zone)
             .toOffsetDateTime();
 
-        return appointmentRepository
-            .findCalendar(
-                rangeStart,
-                rangeEnd,
-                resourceId,
-                staffId,
-                locationId,
-                customerId,
-                serviceId,
-                status
-            )
+        List<Appointment> calendar = appointmentRepository.findCalendar(
+            rangeStart,
+            rangeEnd,
+            resourceId,
+            staffId,
+            locationId,
+            customerId,
+            serviceId,
+            status,
+            org.springframework.data.domain.PageRequest.of(0, 10001)
+        );
+
+        if (calendar.size() > 10000) {
+            throw new ResponseStatusException(
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                "Too many appointments. Choose a shorter period or narrow the calendar filters."
+            );
+        }
+        return calendar
             .stream()
             .map(AppointmentCalendarResponse::from)
             .toList();

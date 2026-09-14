@@ -29,6 +29,7 @@ public class StaffMemberController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public ResponseEntity<StaffMemberResponse> create(
         @Valid @RequestBody StaffMemberRequest request
     ) {
@@ -40,6 +41,7 @@ public class StaffMemberController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public StaffMemberResponse update(
         @PathVariable UUID id,
         @Valid @RequestBody StaffMemberRequest request
@@ -48,6 +50,7 @@ public class StaffMemberController {
     }
 
     @PatchMapping("/{id}/active")
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public StaffMemberResponse setActive(
         @PathVariable UUID id,
         @Valid @RequestBody AssignmentActiveRequest request
@@ -56,6 +59,7 @@ public class StaffMemberController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public ResponseEntity<Void> remove(@PathVariable UUID id) {
         service.remove(id);
 

@@ -18,10 +18,23 @@ public class TenantContextFilter extends OncePerRequestFilter {
 
     private static final String TENANT_CLAIM = "tenant_id";
 
+    private TenantAccessService tenantAccess;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public void setTenantAccess(TenantAccessService tenantAccess) {
+        this.tenantAccess = tenantAccess;
+    }
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return (request.getContextPath() + "/api/health").equals(
-            request.getRequestURI()
+        return (
+            (request.getRequestURI() != null &&
+                request
+                    .getRequestURI()
+                    .startsWith(request.getContextPath() + "/api/platform/")) ||
+            (request.getContextPath() + "/api/health").equals(
+                request.getRequestURI()
+            )
         );
     }
 
@@ -47,14 +60,28 @@ public class TenantContextFilter extends OncePerRequestFilter {
                 return;
             }
 
-            String tenantId = jwtAuthentication
-                .getToken()
-                .getClaimAsString("tenant_id");
+            Object claim = jwtAuthentication.getToken().getClaim(TENANT_CLAIM);
 
-            if (tenantId == null || tenantId.isBlank()) {
+            if (
+                !(claim instanceof String tenantId) ||
+                !tenantId.matches("[a-z0-9][a-z0-9-]{0,62}")
+            ) {
                 response.sendError(
                     HttpServletResponse.SC_FORBIDDEN,
                     "tenant_id claim is required"
+                );
+
+                return;
+            }
+
+            try {
+                if (tenantAccess != null) tenantAccess.requireActive(tenantId);
+            } catch (
+                org.springframework.web.server.ResponseStatusException unavailable
+            ) {
+                response.sendError(
+                    HttpServletResponse.SC_FORBIDDEN,
+                    "Workspace is unavailable"
                 );
 
                 return;

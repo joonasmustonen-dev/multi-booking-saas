@@ -12,7 +12,10 @@ public record CustomerResponse(
     String email,
     String phone,
     UUID preferredStaffId,
-    OffsetDateTime createdAt
+    OffsetDateTime createdAt,
+    boolean processingRestricted,
+    boolean legalHold,
+    OffsetDateTime erasedAt
 ) {
     public static CustomerResponse from(Customer customer) {
         return new CustomerResponse(
@@ -22,7 +25,10 @@ public record CustomerResponse(
             customer.getEmail(),
             customer.getPhone(),
             customer.getPreferredStaffId(),
-            customer.getCreatedAt()
+            customer.getCreatedAt(),
+            customer.isProcessingRestricted(),
+            customer.isLegalHold(),
+            customer.getErasedAt()
         );
     }
 }

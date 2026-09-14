@@ -37,6 +37,8 @@ public class StaffMember {
     @Column(nullable = false)
     private boolean removed = false;
 
+    private OffsetDateTime removedAt;
+
     @ManyToMany
     @JoinTable(
         name = "staff_locations",
@@ -112,6 +114,8 @@ public class StaffMember {
     }
 
     public void remove() {
+        this.removedAt = OffsetDateTime.now();
+
         this.removed = true;
 
         this.active = false;

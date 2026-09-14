@@ -43,6 +43,14 @@ public class CustomerOperationsService {
     }
 
     public List<CustomerResponse> search(String query, int limit) {
+        return search(query, limit, false);
+    }
+
+    public List<CustomerResponse> search(
+        String query,
+        int limit,
+        boolean bookingOnly
+    ) {
         String q = query == null ? "" : query.trim();
 
         if (
@@ -66,6 +74,8 @@ public class CustomerOperationsService {
             .search(
                 text,
                 digits.isEmpty() ? "" : "%" + digits + "%",
+                !bookingOnly &&
+                    com.example.booking.security.ApiPermissions.isTenantAdmin(),
                 PageRequest.of(0, limit)
             )
             .stream()
@@ -96,6 +106,7 @@ public class CustomerOperationsService {
         );
 
         String preferredName =
+            customer.isProcessingRestricted() ||
             customer.getPreferredStaffId() == null
                 ? null
                 : staff
@@ -113,17 +124,19 @@ public class CustomerOperationsService {
             stats.getLastVisit() == null
                 ? null
                 : stats.getLastVisit().atOffset(java.time.ZoneOffset.UTC),
-            appointments
-                .frequentServices(id, now, PageRequest.of(0, 5))
-                .stream()
-                .map(s ->
-                    new CustomerActivityResponse.FrequentService(
-                        s.getServiceId(),
-                        s.getName(),
-                        s.getVisits()
-                    )
-                )
-                .toList(),
+            customer.isProcessingRestricted()
+                ? List.of()
+                : appointments
+                      .frequentServices(id, now, PageRequest.of(0, 5))
+                      .stream()
+                      .map(s ->
+                          new CustomerActivityResponse.FrequentService(
+                              s.getServiceId(),
+                              s.getName(),
+                              s.getVisits()
+                          )
+                      )
+                      .toList(),
             history
                 .stream()
                 .map(a ->

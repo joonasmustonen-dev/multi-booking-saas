@@ -23,8 +23,11 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Value("${app.security.jwt-enabled:false}")
+    @Value("${app.security.jwt-enabled:true}")
     private boolean jwtEnabled;
+
+    @Value("${app.security.cors-origins:http://localhost:5173}")
+    private List<String> corsOrigins;
 
     @Bean
     public FilterRegistrationBean<TenantContextFilter> tenantFilterRegistration(
@@ -48,10 +51,17 @@ public class SecurityConfig {
     ) throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource))
             .csrf(csrf -> csrf.disable())
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(
+                    org.springframework.security.config.http.SessionCreationPolicy.STATELESS
+                )
+            )
             .authorizeHttpRequests(auth ->
                 auth
                     .requestMatchers("/api/health")
                     .permitAll()
+                    .requestMatchers("/api/platform/**")
+                    .hasRole("PLATFORM_ADMIN")
                     .anyRequest()
                     .authenticated()
             );
@@ -74,7 +84,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedOrigins(corsOrigins);
 
         configuration.setAllowedMethods(
             List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")

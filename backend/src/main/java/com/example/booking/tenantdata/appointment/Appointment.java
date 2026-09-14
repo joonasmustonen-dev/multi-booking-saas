@@ -54,6 +54,10 @@ public class Appointment {
 
     private String notes;
 
+    public void clearNotes() {
+        notes = null;
+    }
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 

@@ -561,6 +561,19 @@ public class AvailabilityService {
             locationSchedules.isEmpty() ||
             resourceSchedules.isEmpty()
         ) return List.of();
+        long combinations =
+            (long) staffSchedules.size() *
+            locationSchedules.size() *
+            resourceSchedules.size();
+
+        long days = java.time.temporal.ChronoUnit.DAYS.between(from, to) + 1;
+
+        if (combinations > 2000 || combinations * days * 288 > 250000) {
+            throw new ResponseStatusException(
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                "Too many availability combinations. Choose a staff member, location or resource, or a shorter date range."
+            );
+        }
         List<Appointment> bookings = appointmentRepository
             .findAssignmentBookingsInRange(
                 rangeStart,
@@ -576,6 +589,8 @@ public class AvailabilityService {
             .toList();
 
         Set<AvailabilitySlotResponse> slots = new LinkedHashSet<>();
+
+        int evaluatedStarts = 0;
 
         var policy = tenantSettingsService.getSettings();
 
@@ -688,6 +703,12 @@ public class AvailabilityService {
                                     policy.slotIntervalMinutes()
                                 )
                             ) {
+                                if (++evaluatedStarts > 250000) {
+                                    throw new ResponseStatusException(
+                                        HttpStatus.UNPROCESSABLE_ENTITY,
+                                        "Availability request is too broad. Narrow the date range or assignment filters."
+                                    );
+                                }
                                 ZonedDateTime end = start.plusMinutes(
                                     service.getDurationMinutes()
                                 );
@@ -712,6 +733,12 @@ public class AvailabilityService {
                                         zone
                                     )
                                 ) {
+                                    if (
+                                        slots.size() >= 10000
+                                    ) throw new ResponseStatusException(
+                                        HttpStatus.UNPROCESSABLE_ENTITY,
+                                        "Too many available slots. Narrow the date range or assignment filters."
+                                    );
                                     slots.add(
                                         new AvailabilitySlotResponse(
                                             staffId,

@@ -18,5 +18,5 @@ public record CreateAppointmentRequest(
 
     @NotNull OffsetDateTime startAt,
 
-    String notes
+    @jakarta.validation.constraints.Size(max = 2000) String notes
 ) {}

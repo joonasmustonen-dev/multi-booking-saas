@@ -18,6 +18,37 @@ public interface AppointmentRepository
 {
     boolean existsByCustomer_Id(UUID customerId);
 
+    default List<Appointment> findCalendar(
+        OffsetDateTime from,
+        OffsetDateTime to,
+        UUID resourceId,
+        UUID staffId,
+        UUID locationId,
+        UUID customerId,
+        UUID serviceId,
+        AppointmentStatus status
+    ) {
+        List<Appointment> bookings = findCalendar(
+            from,
+            to,
+            resourceId,
+            staffId,
+            locationId,
+            customerId,
+            serviceId,
+            status,
+            org.springframework.data.domain.PageRequest.of(0, 10001)
+        );
+
+        if (bookings.size() > 10000) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
+                "Too many appointments. Choose a shorter period or narrow the filters."
+            );
+        }
+        return bookings;
+    }
+
     @EntityGraph(
         attributePaths = {
             "customer",
@@ -86,11 +117,33 @@ public interface AppointmentRepository
           and a.endAt > :rangeStart
         """
     )
-    List<Appointment> findAssignmentBookingsInRange(
+    List<Appointment> findAssignmentBookingsInRangeLimited(
         @Param("rangeStart") OffsetDateTime rangeStart,
         @Param("rangeEnd") OffsetDateTime rangeEnd,
-        @Param("statuses") Collection<AppointmentStatus> statuses
+        @Param("statuses") Collection<AppointmentStatus> statuses,
+        org.springframework.data.domain.Pageable pageable
     );
+
+    default List<Appointment> findAssignmentBookingsInRange(
+        OffsetDateTime rangeStart,
+        OffsetDateTime rangeEnd,
+        Collection<AppointmentStatus> statuses
+    ) {
+        List<Appointment> bookings = findAssignmentBookingsInRangeLimited(
+            rangeStart,
+            rangeEnd,
+            statuses,
+            org.springframework.data.domain.PageRequest.of(0, 10001)
+        );
+
+        if (bookings.size() > 10000) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
+                "Too many bookings in this period. Choose a shorter date range."
+            );
+        }
+        return bookings;
+    }
 
     @EntityGraph(
         attributePaths = {
@@ -121,6 +174,19 @@ public interface AppointmentRepository
     )
     List<Appointment> findAllByOrderByStartAtAsc();
 
+    @EntityGraph(
+        attributePaths = {
+            "customer",
+            "service",
+            "resource",
+            "staff",
+            "location"
+        }
+    )
+    org.springframework.data.domain.Page<Appointment> findAllBy(
+        org.springframework.data.domain.Pageable pageable
+    );
+
     @Query(
         """
         SELECT a
@@ -140,23 +206,23 @@ public interface AppointmentRepository
 
     @Query(
         """
-    SELECT a
-    FROM Appointment a
-    JOIN FETCH a.customer
-    JOIN FETCH a.service
-    LEFT JOIN FETCH a.resource
-    LEFT JOIN FETCH a.staff
-    LEFT JOIN FETCH a.location
-    WHERE a.startAt < :to
-      AND a.endAt > :from
-      AND (:resourceId IS NULL OR a.resource.id = :resourceId)
-      AND (:staffId IS NULL OR a.staff.id = :staffId)
-      AND (:locationId IS NULL OR a.location.id = :locationId)
-      AND (:customerId IS NULL OR a.customer.id = :customerId)
-      AND (:serviceId IS NULL OR a.service.id = :serviceId)
-      AND (:status IS NULL OR a.status = :status)
-    ORDER BY a.startAt ASC
-    """
+        SELECT a
+        FROM Appointment a
+        JOIN FETCH a.customer
+        JOIN FETCH a.service
+        LEFT JOIN FETCH a.resource
+        LEFT JOIN FETCH a.staff
+        LEFT JOIN FETCH a.location
+        WHERE a.startAt < :to
+          AND a.endAt > :from
+          AND (:resourceId IS NULL OR a.resource.id = :resourceId)
+          AND (:staffId IS NULL OR a.staff.id = :staffId)
+          AND (:locationId IS NULL OR a.location.id = :locationId)
+          AND (:customerId IS NULL OR a.customer.id = :customerId)
+          AND (:serviceId IS NULL OR a.service.id = :serviceId)
+          AND (:status IS NULL OR a.status = :status)
+        ORDER BY a.startAt ASC
+        """
     )
     List<Appointment> findCalendar(
         @Param("from") OffsetDateTime from,
@@ -166,7 +232,8 @@ public interface AppointmentRepository
         @Param("locationId") UUID locationId,
         @Param("customerId") UUID customerId,
         @Param("serviceId") UUID serviceId,
-        @Param("status") AppointmentStatus status
+        @Param("status") AppointmentStatus status,
+        org.springframework.data.domain.Pageable pageable
     );
 
     @Query(

@@ -28,6 +28,56 @@ public class Customer {
     @Column(name = "preferred_staff_id")
     private UUID preferredStaffId;
 
+    private boolean processingRestricted;
+
+    private boolean legalHold;
+
+    private OffsetDateTime erasedAt;
+
+    private OffsetDateTime lastActivityAt = OffsetDateTime.now();
+
+    public boolean isProcessingRestricted() {
+        return processingRestricted;
+    }
+
+    public boolean isLegalHold() {
+        return legalHold;
+    }
+
+    public OffsetDateTime getErasedAt() {
+        return erasedAt;
+    }
+
+    public OffsetDateTime getLastActivityAt() {
+        return lastActivityAt;
+    }
+
+    public void setPrivacy(boolean restricted, boolean hold) {
+        processingRestricted = restricted;
+
+        legalHold = hold;
+    }
+
+    public void touch() {
+        lastActivityAt = OffsetDateTime.now();
+    }
+
+    public void eraseContactDetails() {
+        firstName = "Erased";
+
+        lastName = "customer";
+
+        email = null;
+
+        phone = null;
+
+        preferredStaffId = null;
+
+        processingRestricted = true;
+
+        erasedAt = OffsetDateTime.now();
+    }
+
     public UUID getPreferredStaffId() {
         return preferredStaffId;
     }
@@ -90,6 +140,14 @@ public class Customer {
         String email,
         String phone
     ) {
+        if (
+            erasedAt != null
+        ) throw new org.springframework.web.server.ResponseStatusException(
+            org.springframework.http.HttpStatus.CONFLICT,
+            "Erased customer records cannot be edited"
+        );
+        touch();
+
         this.firstName = firstName;
 
         this.lastName = lastName;

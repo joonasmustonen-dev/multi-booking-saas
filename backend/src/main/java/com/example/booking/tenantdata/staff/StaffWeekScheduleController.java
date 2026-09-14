@@ -29,6 +29,7 @@ public class StaffWeekScheduleController {
     }
 
     @PutMapping
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public StaffWeekScheduleResponse save(
         @PathVariable UUID id,
         @RequestParam @DateTimeFormat(
@@ -40,6 +41,7 @@ public class StaffWeekScheduleController {
     }
 
     @DeleteMapping
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public ResponseEntity<Void> reset(
         @PathVariable UUID id,
         @RequestParam @DateTimeFormat(

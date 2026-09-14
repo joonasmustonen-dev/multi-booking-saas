@@ -36,8 +36,11 @@ public class AppointmentController {
     }
 
     @GetMapping
-    public List<AppointmentResponse> findAll() {
-        return service.findAll();
+    public List<AppointmentResponse> findAll(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "100") int size
+    ) {
+        return service.findPage(page, size);
     }
 
     @GetMapping("/{id}")

@@ -22,6 +22,7 @@ public class ServiceOfferingController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public ResponseEntity<ServiceResponse> create(
         @Valid @RequestBody CreateServiceRequest request
     ) {
@@ -43,6 +44,7 @@ public class ServiceOfferingController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public ServiceResponse update(
         @PathVariable UUID id,
         @Valid @RequestBody UpdateServiceRequest request
@@ -51,6 +53,7 @@ public class ServiceOfferingController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
 

@@ -11,6 +11,16 @@ public class TenantMigrationService {
 
     private final TenantDataSourceManager dataSourceManager;
 
+    @org.springframework.beans.factory.annotation.Value(
+        "${app.tenant-database.migration-username:}"
+    )
+    private String migrationUsername;
+
+    @org.springframework.beans.factory.annotation.Value(
+        "${app.tenant-database.migration-password:}"
+    )
+    private String migrationPassword;
+
     public TenantMigrationService(TenantDataSourceManager dataSourceManager) {
         this.dataSourceManager = dataSourceManager;
     }
@@ -18,8 +28,18 @@ public class TenantMigrationService {
     public void migrate(String tenantSlug) {
         DataSource dataSource = dataSourceManager.getDataSource(tenantSlug);
 
-        Flyway.configure()
-            .dataSource(dataSource)
+        var configuration = Flyway.configure();
+
+        if (migrationUsername != null && !migrationUsername.isBlank()) {
+            configuration.dataSource(
+                ((com.zaxxer.hikari.HikariDataSource) dataSource).getJdbcUrl(),
+                migrationUsername,
+                migrationPassword
+            );
+        } else {
+            configuration.dataSource(dataSource);
+        }
+        configuration
             .locations("classpath:db/tenant")
 
             // Existing development tenant DBs already contain

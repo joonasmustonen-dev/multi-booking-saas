@@ -29,6 +29,7 @@ public class LocationController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public ResponseEntity<LocationResponse> create(
         @Valid @RequestBody LocationRequest request
     ) {
@@ -40,6 +41,7 @@ public class LocationController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public LocationResponse update(
         @PathVariable UUID id,
         @Valid @RequestBody LocationRequest request
@@ -48,6 +50,7 @@ public class LocationController {
     }
 
     @PatchMapping("/{id}/active")
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public LocationResponse setActive(
         @PathVariable UUID id,
         @Valid @RequestBody AssignmentActiveRequest request

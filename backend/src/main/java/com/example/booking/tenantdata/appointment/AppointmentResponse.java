@@ -56,7 +56,10 @@ public record AppointmentResponse(
                 ? appointment.getLocation().getName()
                 : null,
 
-            appointment.getNotes(),
+            appointment.getCustomer().isProcessingRestricted() &&
+                !com.example.booking.security.ApiPermissions.isTenantAdmin()
+                ? null
+                : appointment.getNotes(),
 
             appointment.getCreatedAt()
         );

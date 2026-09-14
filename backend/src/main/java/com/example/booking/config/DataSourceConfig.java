@@ -17,7 +17,10 @@ public class DataSourceConfig {
     public DataSource platformDataSource(
         @Value("${spring.datasource.url}") String url,
         @Value("${spring.datasource.username}") String username,
-        @Value("${spring.datasource.password}") String password
+        @Value("${spring.datasource.password}") String password,
+        @Value(
+            "${app.platform-database.maximum-pool-size:5}"
+        ) int maximumPoolSize
     ) {
         HikariConfig config = new HikariConfig();
 
@@ -28,6 +31,10 @@ public class DataSourceConfig {
         config.setPassword(password);
 
         config.setPoolName("platform-pool");
+
+        config.setMaximumPoolSize(maximumPoolSize);
+
+        config.setMinimumIdle(1);
 
         return new HikariDataSource(config);
     }

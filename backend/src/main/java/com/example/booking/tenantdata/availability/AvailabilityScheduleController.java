@@ -33,6 +33,7 @@ public class AvailabilityScheduleController {
     }
 
     @PostMapping("/rules")
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public ResponseEntity<AvailabilityRuleResponse> createRule(
         @PathVariable String ownerType,
         @PathVariable UUID ownerId,
@@ -57,6 +58,7 @@ public class AvailabilityScheduleController {
     }
 
     @PutMapping("/rules")
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public List<AvailabilityRuleResponse> replaceRules(
         @PathVariable String ownerType,
         @PathVariable UUID ownerId,
@@ -70,6 +72,7 @@ public class AvailabilityScheduleController {
     }
 
     @PutMapping("/rules/{ruleId}")
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public AvailabilityRuleResponse updateRule(
         @PathVariable String ownerType,
         @PathVariable UUID ownerId,
@@ -85,6 +88,7 @@ public class AvailabilityScheduleController {
     }
 
     @DeleteMapping("/rules/{ruleId}")
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public ResponseEntity<Void> deleteRule(
         @PathVariable String ownerType,
         @PathVariable UUID ownerId,
@@ -111,6 +115,7 @@ public class AvailabilityScheduleController {
     }
 
     @PostMapping("/exceptions")
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public ResponseEntity<AvailabilityExceptionResponse> createException(
         @PathVariable String ownerType,
         @PathVariable UUID ownerId,
@@ -135,6 +140,7 @@ public class AvailabilityScheduleController {
     }
 
     @PutMapping("/exceptions/{exceptionId}")
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public AvailabilityExceptionResponse updateException(
         @PathVariable String ownerType,
         @PathVariable UUID ownerId,
@@ -150,6 +156,7 @@ public class AvailabilityScheduleController {
     }
 
     @DeleteMapping("/exceptions/{exceptionId}")
+    @PreAuthorize("hasRole(\'TENANT_ADMIN\')")
     public ResponseEntity<Void> deleteException(
         @PathVariable String ownerType,
         @PathVariable UUID ownerId,

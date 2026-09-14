@@ -34,6 +34,11 @@ public record AppointmentCalendarResponse(
             " " +
             appointment.getCustomer().getLastName();
 
+        if (
+            appointment.getCustomer().isProcessingRestricted() &&
+            !com.example.booking.security.ApiPermissions.isTenantAdmin()
+        ) customerName = "Restricted customer";
+
         return new AppointmentCalendarResponse(
             appointment.getId(),
 

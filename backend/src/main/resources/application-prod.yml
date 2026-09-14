@@ -1,0 +1,42 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+  datasource:
+    url: ${PLATFORM_DATABASE_URL}
+    username: ${DATABASE_RUNTIME_USER}
+    password: ${DATABASE_RUNTIME_PASSWORD}
+  flyway:
+    user: ${DATABASE_MIGRATION_USER}
+    password: ${DATABASE_MIGRATION_PASSWORD}
+
+server:
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+
+app:
+  security:
+    jwt-enabled: true
+    audience: ${BACKEND_AUDIENCE:booking-backend}
+    cors-origins: ${FRONTEND_ORIGIN}
+    requests-per-minute: ${API_REQUESTS_PER_MINUTE:240}
+  tenant-database:
+    host: ${TENANT_DATABASE_HOST}
+    port: ${TENANT_DATABASE_PORT:5432}
+    username: ${DATABASE_RUNTIME_USER}
+    password: ${DATABASE_RUNTIME_PASSWORD}
+    migration-username: ${DATABASE_MIGRATION_USER}
+    migration-password: ${DATABASE_MIGRATION_PASSWORD}
+    ssl-mode: verify-full
+
+logging:
+  level:
+    org.hibernate.SQL: OFF
+    org.hibernate.orm.jdbc.bind: OFF
+    org.hibernate.engine.jdbc.spi.SqlExceptionHelper: OFF
+    org.hibernate.orm.jdbc.error: OFF

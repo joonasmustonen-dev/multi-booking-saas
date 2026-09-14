@@ -8,6 +8,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/platform/tenants")
+@org.springframework.security.access.prepost.PreAuthorize(
+    "hasRole('PLATFORM_ADMIN')"
+)
 public class TenantController {
 
     private final TenantService tenantService;
@@ -16,8 +19,26 @@ public class TenantController {
         this.tenantService = tenantService;
     }
 
+    public record TenantSummary(
+        java.util.UUID id,
+        String slug,
+        String name,
+        String status
+    ) {}
+
     @GetMapping
-    public List<Tenant> getTenants() {
-        return tenantService.findAll();
+    public List<TenantSummary> getTenants() {
+        return tenantService
+            .findAll()
+            .stream()
+            .map(tenant ->
+                new TenantSummary(
+                    tenant.getId(),
+                    tenant.getSlug(),
+                    tenant.getName(),
+                    tenant.getStatus()
+                )
+            )
+            .toList();
     }
 }
