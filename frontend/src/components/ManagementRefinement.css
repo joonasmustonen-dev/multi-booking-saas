@@ -21,7 +21,7 @@
     cursor: pointer;
     white-space: nowrap;
 }
-.segmented-control button[aria-pressed=true] {
+.segmented-control button[aria-pressed="true"] {
     background: #fffdf9;
     color: #426c5c;
     box-shadow: 0 2px 5px #273a350c;
@@ -151,7 +151,7 @@
     overflow: auto;
     overflow-wrap: anywhere;
 }
-input[type=checkbox] {
+input[type="checkbox"] {
     appearance: none;
     -webkit-appearance: none;
     display: inline-block;
@@ -167,20 +167,21 @@ input[type=checkbox] {
     vertical-align: middle;
     cursor: pointer;
     transition:
-        background .15s,border-color .15s;
+        background 0.15s,
+        border-color 0.15s;
 }
-input[type=checkbox]:checked {
+input[type="checkbox"]:checked {
     border-color: #6d947d !important;
     background: #6d947d
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='19' height='19' viewBox='0 0 19 19'%3E%3Cpath d='m4 9 3.5 3.5L15 5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
         center !important;
 }
-input[type=checkbox]:focus-visible {
+input[type="checkbox"]:focus-visible {
     outline: 3px solid #aac5b4;
     outline-offset: 3px;
 }
-input[type=checkbox]:disabled {
-    opacity: .45;
+input[type="checkbox"]:disabled {
+    opacity: 0.45;
     cursor: not-allowed;
 }
 .check-row {
@@ -307,7 +308,7 @@ input[type=checkbox]:disabled {
     border-color: #edddd7;
 }
 .appointment-detail-actions .button:hover {
-    filter: brightness(.98);
+    filter: brightness(0.98);
     box-shadow: 0 3px 9px #273a350b;
 }
 .appointment-detail-actions > .field-note {
@@ -468,10 +469,10 @@ input[type=checkbox]:disabled {
     border-radius: 50%;
     background: #fffdf9;
 }
-.day-dot-button[aria-pressed=true] {
+.day-dot-button[aria-pressed="true"] {
     color: #426c5c;
 }
-.day-dot-button[aria-pressed=true]>span {
+.day-dot-button[aria-pressed="true"] > span {
     background: #6d947d;
     border-color: #6d947d;
     color: #fff;
@@ -764,5 +765,167 @@ input[type=checkbox]:disabled {
     .catalog-browser.catalog-list .staff-card > .form-actions {
         grid-row: auto;
         grid-column: 1/-1;
+    }
+}
+.catalog-grid-only .catalog-items {
+    overflow: visible;
+    max-height: none;
+}
+.catalog-browser.catalog-cards.catalog-grid-only .service-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+.catalog-browser.catalog-cards.catalog-grid-only .service-card {
+    min-width: 0;
+    min-height: 190px;
+    padding: 18px;
+}
+.catalog-browser.catalog-cards.catalog-grid-only .service-card > .field-note {
+    max-height: none;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+.catalog-grid-only .catalog-pagination {
+    margin-top: 16px;
+}
+.recurring-rota-days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 10px;
+    align-items: start;
+}
+.recurring-rota-days .rota-day {
+    min-width: 0;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #fffdf8;
+    border: 1px solid #dbe2d3;
+    border-radius: 16px;
+}
+.recurring-rota-days .rota-day.day-off {
+    background: #f4f5ed;
+    border-style: dashed;
+}
+.recurring-rota-days .rota-day > strong {
+    font-size: 12px;
+}
+.recurring-rota-days .day-dot-button {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+.recurring-rota-shift {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.recurring-rota-shift .form-field {
+    font-size: 11px;
+}
+.recurring-rota-shift .input {
+    min-width: 0;
+    font-size: 12px;
+}
+.recurring-rota-shift .recurring-remove {
+    align-self: flex-end;
+    padding: 7px;
+    min-height: 28px;
+}
+.recurring-rota-days .text-action {
+    font-size: 11px;
+}
+.recurring-presets > div {
+    margin-right: auto;
+}
+.recurring-presets h3 {
+    margin: 0 0 6px;
+}
+@media (max-width: 1399px) {
+    .catalog-browser.catalog-cards.catalog-grid-only .service-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 1250px) {
+    .recurring-rota-days {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+@media (max-width: 849px) {
+    .catalog-browser.catalog-cards.catalog-grid-only .service-grid {
+        grid-template-columns: 1fr;
+    }
+    .recurring-rota-days {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+.catalog-browser.catalog-cards.catalog-grid-only .service-card {
+    gap: 10px;
+    padding: 16px;
+}
+.catalog-grid-only .service-assignment {
+    padding-top: 6px;
+}
+.catalog-grid-only .service-assignment p {
+    margin-top: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 12px;
+}
+.catalog-grid-only .service-meta {
+    margin: 0;
+    font-size: 12px;
+}
+.catalog-grid-only .service-card .button {
+    padding: 8px 11px;
+    min-height: 34px;
+    font-size: 12px;
+}
+.catalog-grid-only .service-card h3 {
+    font-size: 17px;
+}
+
+/* Three equally sized settings cards avoid staggered edges and empty spans. */
+.settings-page .settings-sections {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+}
+.settings-page .settings-sections > :last-child {
+    grid-column: auto;
+}
+.settings-page .settings-sections > .management-panel {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 22px;
+    gap: 20px;
+}
+.settings-page .settings-sections .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+}
+.settings-page .settings-sections .section-heading {
+    min-height: 24px;
+}
+.settings-page .settings-sections .field-note {
+    margin: auto 0 0;
+    padding-top: 18px;
+    border-top: 1px solid rgba(109, 129, 112, 0.16);
+}
+@media (max-width: 1199px) {
+    .settings-page .settings-sections {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .settings-page .settings-sections .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 600px) {
+    .settings-page .settings-sections .form-grid {
+        grid-template-columns: minmax(0, 1fr);
     }
 }

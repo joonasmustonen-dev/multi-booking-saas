@@ -1,7 +1,6 @@
 import {
     Building2,
     CalendarDays,
-    ChevronDown,
     LayoutDashboard,
     LogOut,
     Package,
@@ -59,6 +58,7 @@ const navigation = [
 import TooltipLayer from "./TooltipLayer";
 export default function AppLayout() {
     const calendarPage = useLocation().pathname === "/appointments";
+    const dashboardPage = useLocation().pathname === "/";
     const settingsQuery = useTenantSettings();
 
     const username = keycloak.tokenParsed?.preferred_username as
@@ -72,7 +72,7 @@ export default function AppLayout() {
 
     return (
         <div
-            className={`app-shell${calendarPage ? " calendar-workspace" : ""}`}
+            className={`app-shell${calendarPage ? " calendar-workspace" : ""}${dashboardPage ? " dashboard-workspace" : ""}`}
         >
             <aside className="sidebar">
                 <div className="sidebar-brand">
@@ -87,7 +87,6 @@ export default function AppLayout() {
                     {navigation.map(({ to, label, icon: Icon, end }) => (
                         <NavLink
                             key={to}
-                            data-tooltip={label}
                             to={to}
                             end={end}
 
@@ -112,8 +111,6 @@ export default function AppLayout() {
                             {settingsQuery.data?.businessName ??
                                 "Booking workspace"}
                         </span>
-
-                        <ChevronDown size={15} />
                     </div>
 
                     <div className="sidebar-timezone">{timezone}</div>

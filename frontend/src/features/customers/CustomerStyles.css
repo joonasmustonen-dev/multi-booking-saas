@@ -30,7 +30,7 @@
     margin-top: 20px;
 }
 .customer-directory.with-detail {
-    grid-template-columns: minmax(240px, .8fr) minmax(0,1.4fr);
+    grid-template-columns: minmax(240px, 0.8fr) minmax(0, 1.4fr);
     align-items: start;
 }
 .customer-cards {
@@ -223,4 +223,40 @@
     .customer-cards {
         grid-template-columns: 1fr;
     }
+}
+
+.customer-privacy-panel {
+    padding: 20px;
+    margin-bottom: 24px;
+}
+.customer-privacy-panel h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.customer-privacy-panel .form-actions {
+    flex-wrap: wrap;
+}
+.privacy-settings {
+    display: grid;
+    gap: 24px;
+    margin-top: 24px;
+}
+.privacy-audit-list {
+    max-height: 280px;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+}
+.privacy-audit-list article {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid #e8dfd4;
+}
+.privacy-audit-list small {
+    display: block;
+    margin-top: 5px;
+    color: #72808b;
 }

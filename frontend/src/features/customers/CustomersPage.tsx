@@ -132,6 +132,10 @@ export default function CustomersPage() {
                                 <strong>
                                     {c.firstName} {c.lastName}
                                 </strong>
+                                {c.processingRestricted && (
+                                    <small>Processing restricted</small>
+                                )}
+                                {c.legalHold && <small>Legal hold</small>}
                                 <small>
                                     <Phone size={14} />
                                     {c.phone || "No phone added"}

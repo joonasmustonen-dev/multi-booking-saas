@@ -12,6 +12,9 @@ export async function invalidateBookingData(client: QueryClient) {
             "availability-rules",
             "availability-exceptions",
             "customer-activity",
+            "customer",
+            "customer-search",
+            "privacy-audit",
             "staff-week"
         ].map(key => client.invalidateQueries({ queryKey: [key] }))
     );

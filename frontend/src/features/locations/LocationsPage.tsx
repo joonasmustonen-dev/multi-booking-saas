@@ -1,3 +1,4 @@
+import { canManageWorkspace } from "../../auth/permissions";
 import { entityLabel } from "../assignments/entityLabels";
 import CatalogBrowser from "../../components/CatalogBrowser";
 import LocationEditorDialog from "./LocationEditorDialog";
@@ -90,7 +91,10 @@ function LocationForm({
                 <h2>{location ? "Edit location" : "Add location"}</h2>
                 <Building2 size={24} />
             </div>
-            <fieldset disabled={pending} className="editor-fields">
+            <fieldset
+                disabled={pending || !canManageWorkspace()}
+                className="editor-fields"
+            >
                 <div className="form-grid">
                     {textField("Location name", "name", 150)}
                     {textField("Address", "addressLine", 200)}
@@ -133,12 +137,15 @@ function LocationForm({
                 <button
                     className="button button-secondary"
                     type="button"
-                    disabled={pending}
+                    disabled={pending || !canManageWorkspace()}
                     onClick={onCancel}
                 >
                     Cancel
                 </button>
-                <button className="button button-primary" disabled={pending}>
+                <button
+                    className="button button-primary"
+                    disabled={pending || !canManageWorkspace()}
+                >
                     {pending ? "Saving…" : "Save location"}
                 </button>
             </div>
@@ -204,6 +211,7 @@ export default function LocationsPage() {
                 </div>
                 <button
                     className="button button-primary"
+                    disabled={!canManageWorkspace()}
                     onClick={() => setEditing("new")}
                 >
                     <Plus size={17} />
@@ -238,6 +246,7 @@ export default function LocationsPage() {
                 </div>
             ) : (
                 <CatalogBrowser
+                    gridOnly
                     items={query.data}
                     label="Locations"
                     searchText={item =>
@@ -304,6 +313,7 @@ export default function LocationsPage() {
                                         </button>
                                         <button
                                             className="button button-secondary"
+                                            disabled={!canManageWorkspace()}
                                             onClick={() => setEditing(location)}
                                         >
                                             <Pencil size={15} />
@@ -311,7 +321,9 @@ export default function LocationsPage() {
                                         </button>
                                         <button
                                             className="button button-secondary"
-                                            disabled={pending}
+                                            disabled={
+                                                pending || !canManageWorkspace()
+                                            }
                                             onClick={() => toggle(location)}
                                         >
                                             {location.active

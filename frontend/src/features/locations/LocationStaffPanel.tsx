@@ -1,3 +1,4 @@
+import { canManageWorkspace } from "../../auth/permissions";
 import { entityLabel } from "../assignments/entityLabels";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -90,11 +91,11 @@ export default function LocationStaffPanel({
                     onChange={setSelectedId}
                     ariaLabel="Assign staff to location"
                     placeholder="Type a staff member's name…"
-                    disabled={pending}
+                    disabled={pending || !canManageWorkspace()}
                 />
                 <button
                     className="button button-primary"
-                    disabled={pending || !selected}
+                    disabled={pending || !selected || !canManageWorkspace()}
                     onClick={() =>
                         selected &&
                         update(
@@ -140,7 +141,7 @@ export default function LocationStaffPanel({
                             </div>
                             <button
                                 className="button button-secondary"
-                                disabled={pending}
+                                disabled={pending || !canManageWorkspace()}
                                 data-tooltip={
                                     member.locationIds.length === 1
                                         ? "Allow this staff member to work at any service location."

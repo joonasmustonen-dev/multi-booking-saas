@@ -1,3 +1,4 @@
+import { canManageWorkspace } from "../../auth/permissions";
 import CatalogBrowser from "../../components/CatalogBrowser";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -67,6 +68,7 @@ export default function ResourcesPage() {
                 </div>
                 <button
                     className="button button-primary"
+                    disabled={!canManageWorkspace()}
                     onClick={() => setEditing("new")}
                 >
                     <Plus size={17} />
@@ -94,6 +96,7 @@ export default function ResourcesPage() {
                 </div>
             ) : (
                 <CatalogBrowser
+                    gridOnly
                     items={query.data}
                     label="Resources"
                     searchText={item =>
@@ -150,6 +153,7 @@ export default function ResourcesPage() {
                                         </button>
                                         <button
                                             className="button button-secondary"
+                                            disabled={!canManageWorkspace()}
                                             onClick={() => setEditing(resource)}
                                         >
                                             <Pencil size={15} />
@@ -157,7 +161,9 @@ export default function ResourcesPage() {
                                         </button>
                                         <button
                                             className="button button-secondary"
-                                            disabled={pending}
+                                            disabled={
+                                                pending || !canManageWorkspace()
+                                            }
                                             onClick={() =>
                                                 mutate(() =>
                                                     setAssignmentActive(
@@ -176,7 +182,9 @@ export default function ResourcesPage() {
                                             className="button button-danger"
                                             data-tooltip="Delete resource"
                                             aria-label="Delete resource"
-                                            disabled={pending}
+                                            disabled={
+                                                pending || !canManageWorkspace()
+                                            }
                                             onClick={() => {
                                                 if (
                                                     window.confirm(

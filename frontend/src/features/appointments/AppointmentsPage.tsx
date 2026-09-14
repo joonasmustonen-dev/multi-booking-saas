@@ -449,7 +449,7 @@ export default function AppointmentsPage() {
                         }}
                     >
                         <div className="calendar-time-header">
-                            <small>{zone.split("/").at(-1)}</small>
+                            <small>Time</small>
                         </div>
                         {visibleDays.map(day => (
                             <button

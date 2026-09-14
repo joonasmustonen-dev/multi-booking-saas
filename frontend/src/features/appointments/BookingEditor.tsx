@@ -1,3 +1,4 @@
+import DateTimeInput from "../../components/DateTimeInput";
 import SearchSelect from "../../components/SearchSelect";
 import { useState, type FormEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -239,7 +240,7 @@ export default function BookingEditor({
             )}
             <label className="form-field">
                 {appointment ? "New date" : "Date"}
-                <input
+                <DateTimeInput
                     className="input"
                     type="date"
                     required
@@ -356,6 +357,7 @@ export default function BookingEditor({
                     Notes
                     <textarea
                         className="textarea"
+                        maxLength={2000}
                         value={notes}
                         onChange={e => setNotes(e.target.value)}
                     />

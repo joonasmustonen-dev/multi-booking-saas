@@ -1,3 +1,5 @@
+import DateTimeInput from "../../components/DateTimeInput";
+import { canManageWorkspace } from "../../auth/permissions";
 import { useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -149,7 +151,7 @@ function WeekForm({
                     <button
                         className="button button-secondary"
                         type="button"
-                        disabled={pending}
+                        disabled={pending || !canManageWorkspace()}
                         onClick={copyPrevious}
                     >
                         <Copy size={15} />
@@ -158,7 +160,7 @@ function WeekForm({
                     <button
                         className="button button-secondary"
                         type="button"
-                        disabled={pending}
+                        disabled={pending || !canManageWorkspace()}
                         onClick={copyMonday}
                         data-tooltip="Copy Monday's shifts to Tuesday through Friday. Weekend shifts stay as they are."
                     >
@@ -166,7 +168,10 @@ function WeekForm({
                     </button>
                 </div>
             </div>
-            <fieldset disabled={pending} className="editor-fields rota-days">
+            <fieldset
+                disabled={pending || !canManageWorkspace()}
+                className="editor-fields rota-days"
+            >
                 {Array.from({ length: 7 }, (_, day) => {
                     const date = addDays(week.weekStart, day);
                     const entries = shifts
@@ -229,7 +234,7 @@ function WeekForm({
                                     <div className="rota-shift" key={index}>
                                         <label className="form-field">
                                             Start
-                                            <input
+                                            <DateTimeInput
                                                 className="input"
                                                 type="time"
                                                 required
@@ -248,7 +253,7 @@ function WeekForm({
                                         <span className="field-note">to</span>
                                         <label className="form-field">
                                             End
-                                            <input
+                                            <DateTimeInput
                                                 className="input"
                                                 type="time"
                                                 required
@@ -326,13 +331,16 @@ function WeekForm({
                     <button
                         className="button button-secondary"
                         type="button"
-                        disabled={pending}
+                        disabled={pending || !canManageWorkspace()}
                         onClick={reset}
                     >
                         Use recurring hours
                     </button>
                 )}
-                <button className="button button-primary" disabled={pending}>
+                <button
+                    className="button button-primary"
+                    disabled={pending || !canManageWorkspace()}
+                >
                     <Save size={16} />
                     {pending ? "Saving…" : "Save this week"}
                 </button>

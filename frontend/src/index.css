@@ -516,3 +516,51 @@ a {
         display: none;
     }
 }
+
+/* Keep the account controls aligned with page actions. */
+.topbar {
+    padding-inline: max(36px, calc((100% - 1500px) / 2 + 36px));
+}
+.dashboard-workspace .topbar {
+    padding-inline: max(28px, calc((100% - 1500px) / 2 + 28px));
+}
+.topbar-profile {
+    gap: 12px;
+    padding: 5px 6px 5px 5px;
+    border: 1px solid #e8e1d8;
+    border-radius: 28px;
+    background: #fffdf9;
+}
+.topbar-profile .profile-avatar {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+}
+.topbar-profile .profile-name {
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.topbar-profile .logout-button {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border-radius: 50%;
+    background: #f4efe8;
+}
+.topbar-profile .logout-button:hover {
+    background: #e9e0d5;
+    color: var(--ink);
+}
+.sidebar-business > svg {
+    flex-shrink: 0;
+}
+@media (max-width: 700px) {
+    .topbar,
+    .dashboard-workspace .topbar {
+        padding-inline: 16px;
+    }
+}

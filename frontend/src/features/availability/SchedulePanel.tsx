@@ -1,3 +1,5 @@
+import DateTimeInput from "../../components/DateTimeInput";
+import { canManageWorkspace } from "../../auth/permissions";
 import SearchSelect from "../../components/SearchSelect";
 import { useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -138,7 +140,7 @@ export default function SchedulePanel({
                     </div>
                     <button
                         className="button button-secondary"
-                        disabled={pending}
+                        disabled={pending || !canManageWorkspace()}
                         onClick={() => edit("new")}
                     >
                         <Plus size={16} />
@@ -152,11 +154,14 @@ export default function SchedulePanel({
                 )}
                 {editor && (
                     <form className="booking-form" onSubmit={submit}>
-                        <fieldset className="editor-fields" disabled={pending}>
+                        <fieldset
+                            className="editor-fields"
+                            disabled={pending || !canManageWorkspace()}
+                        >
                             <div className="form-grid">
                                 <label className="form-field">
                                     Starts
-                                    <input
+                                    <DateTimeInput
                                         className="input"
                                         required
                                         type="datetime-local"
@@ -166,7 +171,7 @@ export default function SchedulePanel({
                                 </label>
                                 <label className="form-field">
                                     Ends
-                                    <input
+                                    <DateTimeInput
                                         className="input"
                                         required
                                         type="datetime-local"
@@ -178,7 +183,9 @@ export default function SchedulePanel({
                                     Type
                                     <SearchSelect
                                         searchable={false}
-                                        disabled={pending}
+                                        disabled={
+                                            pending || !canManageWorkspace()
+                                        }
                                         value={
                                             available ? "available" : "blocked"
                                         }
@@ -214,14 +221,14 @@ export default function SchedulePanel({
                             <button
                                 type="button"
                                 className="button button-secondary"
-                                disabled={pending}
+                                disabled={pending || !canManageWorkspace()}
                                 onClick={() => setEditor(null)}
                             >
                                 Cancel
                             </button>
                             <button
                                 className="button button-primary"
-                                disabled={pending}
+                                disabled={pending || !canManageWorkspace()}
                             >
                                 {pending ? "Saving…" : "Save exception"}
                             </button>
@@ -263,7 +270,9 @@ export default function SchedulePanel({
                                 <div className="form-actions">
                                     <button
                                         className="button button-secondary"
-                                        disabled={pending}
+                                        disabled={
+                                            pending || !canManageWorkspace()
+                                        }
                                         onClick={() => edit(exception)}
                                     >
                                         <Pencil size={14} />
@@ -271,7 +280,9 @@ export default function SchedulePanel({
                                     </button>
                                     <button
                                         className="button button-danger"
-                                        disabled={pending}
+                                        disabled={
+                                            pending || !canManageWorkspace()
+                                        }
                                         onClick={() => {
                                             if (
                                                 window.confirm(

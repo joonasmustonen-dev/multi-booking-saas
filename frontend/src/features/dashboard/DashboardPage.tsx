@@ -135,7 +135,7 @@ export default function DashboardPage() {
         .toUpperCase();
 
     return (
-        <div>
+        <div className="dashboard-page">
             <div className="page-header">
                 <div>
                     <p className="page-eyebrow">{todayLabel}</p>
@@ -308,6 +308,19 @@ export default function DashboardPage() {
                     <div className={"dashboard-panel-header"}>
                         <h2 className={"dashboard-panel-title"}>Today</h2>
 
+                        <div className="dashboard-today-filter">
+                            <SearchSelect
+                                value={staffId}
+                                onChange={setStaffId}
+                                ariaLabel="Filter today by staff"
+                                options={[
+                                    { value: "", label: "All staff" },
+                                    ...staffOptions,
+                                    { value: "unassigned", label: "Unassigned" }
+                                ]}
+                            />
+                        </div>
+
                         <button
                             className={"button button-secondary"}
 
@@ -318,18 +331,6 @@ export default function DashboardPage() {
                         </button>
                     </div>
 
-                    <div className="dashboard-today-filter">
-                        <SearchSelect
-                            value={staffId}
-                            onChange={setStaffId}
-                            ariaLabel="Filter today by staff"
-                            options={[
-                                { value: "", label: "All staff" },
-                                ...staffOptions,
-                                { value: "unassigned", label: "Unassigned" }
-                            ]}
-                        />
-                    </div>
                     {todaysAppointments.length === 0 ? (
                         <div className={"dashboard-empty"}>
                             {staffId
@@ -390,7 +391,7 @@ export default function DashboardPage() {
 
                     {summary.team.length === 0 ? (
                         <div className={"dashboard-empty"}>
-                            No active staff members.
+                            No staff scheduled to work today.
                         </div>
                     ) : (
                         <div className="team-list">
@@ -426,44 +427,40 @@ export default function DashboardPage() {
                     )}
                 </article>
 
-                <div className="dashboard-right">
-                    <article className="card dashboard-panel">
-                        <div className="dashboard-panel-header">
-                            <h2 className="dashboard-panel-title">
-                                Popular services
-                            </h2>
+                <article className="card dashboard-panel">
+                    <div className="dashboard-panel-header">
+                        <h2 className="dashboard-panel-title">
+                            Popular services
+                        </h2>
+                    </div>
+
+                    {summary.popularServices.length === 0 ? (
+                        <div className="dashboard-empty">
+                            No bookings this week.
                         </div>
+                    ) : (
+                        <div className="popular-list">
+                            {summary.popularServices.map((service, index) => (
+                                <div
+                                    className="popular-row"
+                                    key={service.serviceId}
+                                >
+                                    <div className="popular-rank">
+                                        {index + 1}
+                                    </div>
 
-                        {summary.popularServices.length === 0 ? (
-                            <div className="dashboard-empty">
-                                No bookings this week.
-                            </div>
-                        ) : (
-                            <div className="popular-list">
-                                {summary.popularServices.map(
-                                    (service, index) => (
-                                        <div
-                                            className="popular-row"
-                                            key={service.serviceId}
-                                        >
-                                            <div className="popular-rank">
-                                                {index + 1}
-                                            </div>
+                                    <span className="popular-name">
+                                        {service.name}
+                                    </span>
 
-                                            <span className="popular-name">
-                                                {service.name}
-                                            </span>
-
-                                            <span className="popular-count">
-                                                {service.bookings} bookings
-                                            </span>
-                                        </div>
-                                    )
-                                )}
-                            </div>
-                        )}
-                    </article>
-                </div>
+                                    <span className="popular-count">
+                                        {service.bookings} bookings
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </article>
             </section>
         </div>
     );

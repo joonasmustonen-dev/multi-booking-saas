@@ -33,10 +33,11 @@ export function deleteCustomer(id: string) {
         method: "DELETE"
     });
 }
-export function searchCustomers(query = "", limit = 25) {
+export function searchCustomers(query = "", limit = 25, bookingOnly = false) {
     const params = new URLSearchParams({
         q: query.trim(),
-        limit: String(limit)
+        limit: String(limit),
+        bookingOnly: String(bookingOnly)
     });
     return apiFetch<Customer[]>(`/api/v1/customers/search?${params}`);
 }

@@ -6,6 +6,9 @@ export interface Customer {
     phone: string | null;
     preferredStaffId?: string | null;
     createdAt: string;
+    processingRestricted?: boolean;
+    legalHold?: boolean;
+    erasedAt?: string | null;
 }
 
 export interface CreateCustomerRequest {

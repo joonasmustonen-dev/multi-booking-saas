@@ -1,3 +1,4 @@
+import { canManageWorkspace } from "../../auth/permissions";
 import CatalogBrowser from "../../components/CatalogBrowser";
 import { useState } from "react";
 import { Plus, Pencil, Clock3 } from "lucide-react";
@@ -66,6 +67,7 @@ export default function ServicesPage() {
                 </div>
                 <button
                     className="button button-primary"
+                    disabled={!canManageWorkspace()}
                     onClick={() => setEditing("new")}
                 >
                     <Plus size={17} />
@@ -93,6 +95,7 @@ export default function ServicesPage() {
                 </div>
             ) : (
                 <CatalogBrowser
+                    gridOnly
                     items={services.data}
                     label="Services"
                     searchText={item => item.description ?? ""}
@@ -191,6 +194,7 @@ export default function ServicesPage() {
                                     <div className="form-actions">
                                         <button
                                             className="button button-secondary"
+                                            disabled={!canManageWorkspace()}
                                             onClick={() => setEditing(service)}
                                         >
                                             <Pencil size={15} />
@@ -198,7 +202,10 @@ export default function ServicesPage() {
                                         </button>
                                         <button
                                             className="button button-danger"
-                                            disabled={remove.isPending}
+                                            disabled={
+                                                remove.isPending ||
+                                                !canManageWorkspace()
+                                            }
                                             onClick={() => {
                                                 if (
                                                     window.confirm(

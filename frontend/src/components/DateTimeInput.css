@@ -1,0 +1,152 @@
+.date-time-control {
+    position: relative;
+    display: block;
+    width: 100%;
+    min-width: 0;
+}
+.date-time-control input {
+    width: 100% !important;
+    padding-right: 38px;
+    color-scheme: light;
+    font-variant-numeric: tabular-nums;
+}
+.date-time-control input::-webkit-calendar-picker-indicator {
+    display: none;
+}
+.date-time-trigger {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    border: 0;
+    background: transparent;
+    color: #557866;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    cursor: pointer;
+}
+.date-time-trigger:hover {
+    background: #e1ede4;
+}
+.date-time-control:has(input:disabled) .date-time-trigger {
+    pointer-events: none;
+    opacity: 0.45;
+}
+.date-time-popover {
+    position: fixed;
+    z-index: 1000;
+    width: 320px;
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    padding: 16px;
+    background: #fbf9f4;
+    border: 1px solid #dedfd2;
+    border-radius: 20px;
+    box-shadow: 0 18px 55px #293e3026;
+    color: #203b30;
+}
+.date-time-popover button {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    border-radius: 9px;
+}
+.date-time-popover button:hover {
+    background: #e4eee3;
+}
+.date-time-popover button:focus-visible {
+    outline: 2px solid #638e77;
+    outline-offset: 2px;
+}
+.date-time-popover button:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+.date-picker-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 14px;
+    text-transform: capitalize;
+}
+.date-picker-heading > div {
+    display: flex;
+}
+.date-picker-heading button {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+}
+.date-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+.date-picker-grid button {
+    height: 34px;
+    font-size: 13px;
+}
+.date-picker-weekdays {
+    margin-bottom: 7px;
+    text-align: center;
+    font-size: 11px;
+    color: #849083;
+}
+.date-picker-grid .outside-month {
+    color: #a3aaa0;
+}
+.date-picker-grid .is-today {
+    box-shadow: inset 0 0 0 1px #729883;
+}
+.date-time-popover button[aria-pressed="true"] {
+    background: #557e68;
+    color: white;
+}
+.date-picker-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    border-top: 1px solid #e2e5da;
+    padding-top: 10px;
+    margin-top: 12px;
+}
+.date-picker-footer button {
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 650;
+}
+.time-picker-section {
+    padding-top: 10px;
+}
+.time-picker-section strong {
+    font-size: 12px;
+}
+.time-picker-hours {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+    margin: 8px 0;
+}
+.time-picker-hours button,
+.time-picker-minutes button {
+    padding: 7px;
+    font-size: 12px;
+    background: #f0f1e9;
+}
+.time-picker-minutes {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    margin-bottom: 8px;
+}
+.time-picker-section small {
+    color: #899386;
+    font-size: 10px;
+}

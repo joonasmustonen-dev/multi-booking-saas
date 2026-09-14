@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, useEffect, type ReactNode } from "react";
 import {
     Search,
     List,
@@ -13,22 +13,39 @@ export default function CatalogBrowser<
     items,
     label,
     searchText,
-    children
+    children,
+    gridOnly = false
 }: {
     items: T[];
     label: string;
     searchText?: (item: T) => string;
     children: (items: T[]) => ReactNode;
+    gridOnly?: boolean;
 }) {
     const [query, setQuery] = useState("");
     const [status, setStatus] = useState("all");
     const [view, setView] = useState<"list" | "cards">("list");
     const [page, setPage] = useState(0);
+    const [height, setHeight] = useState(() =>
+        typeof window === "undefined" ? 900 : window.innerHeight
+    );
+    const [width, setWidth] = useState(() =>
+        typeof window === "undefined" ? 1440 : window.innerWidth
+    );
+    useEffect(() => {
+        const resize = () => {
+            setWidth(window.innerWidth);
+            setHeight(window.innerHeight);
+        };
+        window.addEventListener("resize", resize);
+        return () => window.removeEventListener("resize", resize);
+    }, []);
     const filtered = useMemo(
         () => filterCatalog(items, query, status, searchText),
         [items, query, status, searchText]
     );
-    const pageSize = 8;
+    const columns = width >= 1400 ? 3 : width >= 850 ? 2 : 1;
+    const pageSize = gridOnly ? columns * (height >= 1050 ? 2 : 1) : 8;
     const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
     const current = Math.min(page, totalPages - 1);
     const visible = filtered.slice(
@@ -37,7 +54,7 @@ export default function CatalogBrowser<
     );
     return (
         <section
-            className={`catalog-browser catalog-${view}`}
+            className={`catalog-browser catalog-${gridOnly ? "cards catalog-grid-only" : view}`}
             aria-label={`${label} directory`}
         >
             <div className="catalog-toolbar">
@@ -68,24 +85,26 @@ export default function CatalogBrowser<
                         </button>
                     ))}
                 </div>
-                <div className="segmented-control catalog-view">
-                    <button
-                        type="button"
-                        aria-label="List view"
-                        aria-pressed={view === "list"}
-                        onClick={() => setView("list")}
-                    >
-                        <List size={17} />
-                    </button>
-                    <button
-                        type="button"
-                        aria-label="Card view"
-                        aria-pressed={view === "cards"}
-                        onClick={() => setView("cards")}
-                    >
-                        <LayoutGrid size={17} />
-                    </button>
-                </div>
+                {!gridOnly && (
+                    <div className="segmented-control catalog-view">
+                        <button
+                            type="button"
+                            aria-label="List view"
+                            aria-pressed={view === "list"}
+                            onClick={() => setView("list")}
+                        >
+                            <List size={17} />
+                        </button>
+                        <button
+                            type="button"
+                            aria-label="Card view"
+                            aria-pressed={view === "cards"}
+                            onClick={() => setView("cards")}
+                        >
+                            <LayoutGrid size={17} />
+                        </button>
+                    </div>
+                )}
             </div>
             <p className="catalog-count">
                 {filtered.length
@@ -95,7 +114,7 @@ export default function CatalogBrowser<
             </p>
             {visible.length ? (
                 <div
-                    className={`catalog-items ${visible.length > 3 ? "catalog-items-scroll" : ""}`}
+                    className={`catalog-items ${!gridOnly && visible.length > 3 ? "catalog-items-scroll" : ""}`}
                 >
                     {children(visible)}
                 </div>
@@ -104,7 +123,7 @@ export default function CatalogBrowser<
                     No matches. Try another search or activity filter.
                 </div>
             )}
-            {totalPages > 1 && (
+            {(gridOnly || totalPages > 1) && (
                 <nav
                     className="catalog-pagination"
                     aria-label={`${label} pages`}

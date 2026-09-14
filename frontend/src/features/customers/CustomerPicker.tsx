@@ -13,8 +13,8 @@ export default function CustomerPicker({
     const [query, setQuery] = useState("");
     const deferred = useDeferredValue(query);
     const results = useQuery({
-        queryKey: ["customer-search", deferred],
-        queryFn: () => searchCustomers(deferred),
+        queryKey: ["customer-search", deferred, "booking"],
+        queryFn: () => searchCustomers(deferred, 25, true),
         staleTime: 30000
     });
     const selected = useQuery({

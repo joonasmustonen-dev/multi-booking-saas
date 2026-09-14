@@ -1,4 +1,5 @@
 import SearchSelect from "../../components/SearchSelect";
+import PrivacySettings from "./PrivacySettings";
 import { useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Building2, CalendarDays, Clock3, Save } from "lucide-react";
@@ -297,7 +298,7 @@ export default function SettingsPage() {
         keycloak.tokenParsed?.realm_access?.roles?.includes("TENANT_ADMIN") ??
         false;
     return (
-        <div className="management-page">
+        <div className="management-page settings-page">
             <div className="page-header">
                 <div>
                     <p className="page-eyebrow">Your workspace</p>
@@ -308,6 +309,7 @@ export default function SettingsPage() {
                 </div>
             </div>
             <SettingsEditor settings={query.data} editable={editable} />
+            {editable && <PrivacySettings />}
         </div>
     );
 }

@@ -1,6 +1,6 @@
 import keycloak from "../auth/keycloak";
 
-const API_URL = "http://localhost:8080";
+const API_URL = import.meta.env?.VITE_API_URL ?? "http://localhost:8080";
 
 export async function apiFetch<T>(
     path: string,
@@ -36,7 +36,18 @@ export async function apiFetch<T>(
     }
 
     if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
+        const problem = await response.json().catch(() => null);
+        const detail =
+            typeof problem?.detail === "string"
+                ? problem.detail
+                : response.status === 429
+                  ? "Too many requests. Wait a minute and try again."
+                  : `API request failed with status ${response.status}`;
+        const requestId =
+            response.status >= 500 && typeof problem?.requestId === "string"
+                ? ` Request ID: ${problem.requestId}`
+                : "";
+        throw new Error(detail + requestId);
     }
 
     if (response.status === 204) {

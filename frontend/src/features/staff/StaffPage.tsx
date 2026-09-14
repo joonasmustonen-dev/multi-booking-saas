@@ -1,3 +1,4 @@
+import { canManageWorkspace } from "../../auth/permissions";
 import { entityLabel } from "../assignments/entityLabels";
 import CatalogBrowser from "../../components/CatalogBrowser";
 import { useState, type FormEvent } from "react";
@@ -81,7 +82,10 @@ function StaffForm({
                 <h2>{member ? "Edit staff member" : "Add staff member"}</h2>
                 <Users size={24} />
             </div>
-            <fieldset className="editor-fields" disabled={pending}>
+            <fieldset
+                className="editor-fields"
+                disabled={pending || !canManageWorkspace()}
+            >
                 <div className="form-grid">
                     <label className="form-field">
                         Name
@@ -155,7 +159,7 @@ function StaffForm({
                                 setValues({ ...values, locationIds })
                             }
                             ariaLabel="Assigned staff locations"
-                            disabled={pending}
+                            disabled={pending || !canManageWorkspace()}
                         />
                     </div>
                 )}
@@ -178,13 +182,16 @@ function StaffForm({
             <div className="form-actions">
                 <button
                     className="button button-secondary"
-                    disabled={pending}
+                    disabled={pending || !canManageWorkspace()}
                     type="button"
                     onClick={onCancel}
                 >
                     Cancel
                 </button>
-                <button className="button button-primary" disabled={pending}>
+                <button
+                    className="button button-primary"
+                    disabled={pending || !canManageWorkspace()}
+                >
                     {pending ? "Saving…" : "Save staff member"}
                 </button>
             </div>
@@ -268,6 +275,7 @@ export default function StaffPage() {
                 </div>
                 <button
                     className="button button-primary"
+                    disabled={!canManageWorkspace()}
                     onClick={() => setEditing("new")}
                 >
                     <Plus size={17} />
@@ -367,6 +375,7 @@ export default function StaffPage() {
                                             </button>
                                             <button
                                                 className="button button-secondary"
+                                                disabled={!canManageWorkspace()}
                                                 onClick={() =>
                                                     setEditing(member)
                                                 }
@@ -376,7 +385,10 @@ export default function StaffPage() {
                                             </button>
                                             <button
                                                 className="button button-danger"
-                                                disabled={pending}
+                                                disabled={
+                                                    pending ||
+                                                    !canManageWorkspace()
+                                                }
                                                 onClick={() => remove(member)}
                                             >
                                                 <Trash2 size={15} />

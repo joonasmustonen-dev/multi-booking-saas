@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { canManageWorkspace } from "../../auth/permissions";
+import CustomerPrivacyPanel from "./CustomerPrivacyPanel";
 import BookingForm from "../appointments/BookingForm";
 import { createAppointment } from "../appointments/appointmentApi";
 import { invalidateBookingData } from "../assignments/invalidateBookingData";
@@ -97,12 +99,14 @@ export default function CustomerDetail({
                 <div className="form-actions">
                     <button
                         className="button button-primary"
+                        disabled={!!c.processingRestricted || !!c.erasedAt}
                         onClick={() => setBooking(true)}
                     >
                         New appointment
                     </button>
                     <button
                         className="button button-secondary"
+                        disabled={!!c.erasedAt}
                         onClick={() => onEdit(c)}
                     >
                         Edit customer
@@ -110,6 +114,32 @@ export default function CustomerDetail({
                 </div>
             </header>
             <div className="customer-detail-content">
+                {c.processingRestricted && (
+                    <p className="booking-summary">
+                        Customer processing is restricted. New bookings and
+                        rescheduling are paused.
+                    </p>
+                )}
+                {canManageWorkspace() && (
+                    <CustomerPrivacyPanel
+                        customer={c}
+                        onErased={onClose}
+                        onChanged={async () => {
+                            await Promise.all(
+                                [
+                                    "customer",
+                                    "customer-search",
+                                    "customer-activity"
+                                ].map(key =>
+                                    client.invalidateQueries({
+                                        queryKey: [key]
+                                    })
+                                )
+                            );
+                            await invalidateBookingData(client);
+                        }}
+                    />
+                )}
                 <div className="customer-stats">
                     <div>
                         <Clock3 size={18} />
@@ -209,11 +239,13 @@ export default function CustomerDetail({
                         Next
                     </button>
                 </div>
-                {onDelete && (
+                {onDelete && canManageWorkspace() && (
                     <div className="customer-delete-section">
                         <button
                             className="button button-danger"
-                            disabled={deleting || d.totalBookings > 0}
+                            disabled={
+                                deleting || d.totalBookings > 0 || !!c.legalHold
+                            }
                             onClick={() => void remove()}
                         >
                             {deleting ? "Deleting…" : "Delete customer"}
