@@ -1,3 +1,4 @@
+import { entityLabel } from "../assignments/entityLabels";
 import SearchSelect from "../../components/SearchSelect";
 import type { AssignmentCatalogs } from "./assignmentTypes";
 import type { ServiceOffering } from "../services/serviceTypes";
@@ -19,6 +20,6 @@ export default function AssignmentFilters({ service, catalogs, values, onChange 
     }
     return <div className="form-grid">{categories.filter(category => category.requirement !== "FORBIDDEN").map(category => {
         const eligible = catalogs[category.kind].filter(item => item.active && category.ids.includes(item.id));
-        return <div className="form-field" key={category.key}>{category.label}<span className="field-note">{category.requirement === "REQUIRED" ? "Required in every booking" : "Optional"}</span><SearchSelect value={values[category.key]} onChange={value => change(category.key, value)} ariaLabel={`Booking ${category.label.toLowerCase()}`} options={[{ value: "", label: category.requirement === "REQUIRED" ? `Any eligible ${category.label.toLowerCase()}` : `Any combination, including no ${category.label.toLowerCase()}` }, ...eligible.map(item => ({ value: item.id, label: item.name, description: category.kind === "staff" ? item.freeAgent === false ? "Assigned locations" : "Free agent" : undefined }))]} /></div>;
+        return <div className="form-field" key={category.key}>{category.label}<span className="field-note">{category.requirement === "REQUIRED" ? "Required in every booking" : "Optional"}</span><SearchSelect value={values[category.key]} onChange={value => change(category.key, value)} ariaLabel={`Booking ${category.label.toLowerCase()}`} options={[{ value: "", label: category.requirement === "REQUIRED" ? `Any eligible ${category.label.toLowerCase()}` : `Any combination, including no ${category.label.toLowerCase()}` }, ...eligible.map(item => ({ value: item.id, label: entityLabel(item, catalogs[category.kind]), description: category.kind === "staff" ? item.freeAgent === false ? "Assigned locations" : "Free agent" : undefined }))]} /></div>;
     })}</div>;
 }

@@ -21,19 +21,23 @@ export default function BookingEditor({ appointment, initialCustomerId, onSubmit
     const [customerId, setCustomerId] = useState(appointment?.customerId ?? initialCustomerId ?? "");
     const [serviceId, setServiceId] = useState(appointment?.serviceId ?? "");
     const [filters, setFilters] = useState<AssignmentFilterValues>({ staffId: appointment?.staffId ?? "", locationId: appointment?.locationId ?? "", resourceId: appointment?.resourceId ?? "" });
-    const [date, setDate] = useState(""); const [selectedKey, setSelectedKey] = useState("");
+    const [chosenDate, setDate] = useState(""); const [selectedKey, setSelectedKey] = useState("");
     const [notes, setNotes] = useState(""); const [submitting, setSubmitting] = useState(false); const [error, setError] = useState("");
     const service = services.data?.find(s => s.id === serviceId);
     const timeZone = settings.data?.timeZone;
+    const date = chosenDate || (timeZone ? dateKeyInTimeZone(new Date().toISOString(), timeZone) : "");
     const requested = {
         staffId: service?.staffRequirement !== "FORBIDDEN" && service?.staffIds.includes(filters.staffId) && catalogs.data.staff.some(item => item.id === filters.staffId && item.active) ? filters.staffId : "",
         locationId: service?.locationRequirement !== "FORBIDDEN" && service?.locationIds.includes(filters.locationId) && catalogs.data.locations.some(item => item.id === filters.locationId && item.active) ? filters.locationId : "",
         resourceId: service?.resourceRequirement !== "FORBIDDEN" && service?.resourceIds.includes(filters.resourceId) && catalogs.data.resources.some(item => item.id === filters.resourceId && item.active) ? filters.resourceId : "",
     };
+    const validDate = /^\d{4}-\d{2}-\d{2}$/.test(date) && Number(date.slice(0, 4)) >= 2000;
+    const canLoadAvailability = !!service?.active && validDate && !!timeZone && !catalogs.isPending && !catalogs.error;
     const availability = useQuery({
         queryKey: ["availability", appointment ? "reschedule" : "create", serviceId, appointment?.id, date, requested.staffId, requested.locationId, requested.resourceId],
         queryFn: () => appointment ? getRescheduleAvailability(appointment.id, date, requested) : getAvailability(serviceId, date, requested),
-        enabled: !!service?.active && !!date && !!timeZone && !catalogs.isPending && !catalogs.error,
+        enabled: canLoadAvailability,
+        retry: false,
         staleTime: 0,
     });
     const scope = JSON.stringify([serviceId, date, requested]);
@@ -64,10 +68,17 @@ export default function BookingEditor({ appointment, initialCustomerId, onSubmit
         {appointment && !service && <p role="alert" className="form-error">This service is no longer available.</p>}
         {service && !service.active && <p role="alert" className="form-error">This service is inactive. Activate it before rescheduling.</p>}
         <label className="form-field">{appointment ? "New date" : "Date"}<input className="input" type="date" required min={today} max={addDays(today, settings.data.bookingHorizonDays)} value={date} onChange={e => { setDate(e.target.value); setSelectedKey(""); setError(""); }} /></label>
+        <section className="booking-availability" aria-label="Booking availability" aria-live="polite">
+        {!service && <p className="field-note">Choose a service to see its available times and assignments.</p>}
+        {service && !validDate && <p className="field-note">Choose a complete booking date to find available times.</p>}
+        {service && validDate && !service.active && <p role="alert" className="form-error">This service is inactive. Choose an active service.</p>}
+        {canLoadAvailability && !availability.isFetching && !availability.error && !availability.data && <p className="field-note">Availability has not loaded. <button type="button" className="text-action" onClick={() => void availability.refetch()}>Find available times</button></p>}
         {availability.isFetching && <p className="field-note" aria-live="polite">Finding available combinations…</p>}
-        {availability.error && <p className="form-error" role="alert">{availability.error.message}</p>}
-        {service && date && availability.data && <div className="form-field">Available time and assignments<SearchSelect required ariaLabel="Available booking combination" value={selected ? selectedKey : ""} disabled={availability.isFetching} onChange={setSelectedKey} placeholder="Type a time, staff member, or location…" options={availability.data.map(slot => ({ value: `${scope}:${slotKey(slot)}`, label: `${formatTime(slot.start, zone)}–${formatTime(slot.end, zone)} · ${assignmentNames(slot, catalogs.data).join(" · ")}${service.resourceRequirement === "OPTIONAL" && !slot.resourceId ? " · No resource" : ""}` }))} /></div>}
-        {service && date && availability.data?.length === 0 && !availability.isFetching && <p className="field-note">No available combinations for this date. Try another date or broaden the assignment filters.</p>}
+        {availability.error && <p className="form-error" role="alert">Could not load availability: {availability.error.message} <button type="button" className="text-action" onClick={() => void availability.refetch()}>Retry</button></p>}
+        {service && validDate && !!availability.data?.length && <div className="form-field">Available time and assignments<SearchSelect required ariaLabel="Available booking combination" value={selected ? selectedKey : ""} disabled={availability.isFetching} onChange={setSelectedKey} placeholder="Type a time, staff member, or location…" options={availability.data.map(slot => ({ value: `${scope}:${slotKey(slot)}`, label: `${formatTime(slot.start, zone)}–${formatTime(slot.end, zone)} · ${assignmentNames(slot, catalogs.data).join(" · ")}${service.resourceRequirement === "OPTIONAL" && !slot.resourceId ? " · No resource" : ""}` }))} /></div>}
+        {service && date && availability.data?.length === 0 && !availability.isFetching && <p className="field-note">No availability for this date and assignment combination. Try another date, location or resource, or choose any eligible staff. Check recurring hours, closures and the service’s eligible assignments if no dates offer times.</p>}
+        </section>
+        {service?.staffRequirement === "FORBIDDEN" && <p className="field-note">This service does not use staff. Select an available time and location or resource combination.</p>}
         {selected && <div className="booking-summary">{formatTime(selected.start, zone)}–{formatTime(selected.end, zone)}<br />{assignmentNames(selected, catalogs.data).join(" · ")}</div>}
         {!appointment && <label className="form-field">Notes<textarea className="textarea" value={notes} onChange={e => setNotes(e.target.value)} /></label>}
         {error && <p className="form-error" role="alert">{error}</p>}

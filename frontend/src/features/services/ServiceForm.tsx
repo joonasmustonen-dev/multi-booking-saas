@@ -1,3 +1,4 @@
+import { entityLabel } from "../assignments/entityLabels";
 import SearchSelect from "../../components/SearchSelect";
 import { useState, type FormEvent } from "react";
 import type { AssignmentCatalogs } from "../assignments/assignmentTypes";
@@ -53,7 +54,7 @@ export default function ServiceForm({ service, catalogs, onSubmit, onCancel }: P
             <p className="field-note">{values[category.requirement] === "REQUIRED" ? "Every booking must include one." : values[category.requirement] === "OPTIONAL" ? "Bookings can include one or leave it out." : "This service does not use this category."}</p>
             {values[category.requirement] !== "FORBIDDEN" && <input className="input" aria-label={`Search eligible ${category.label.toLowerCase()}`} placeholder={`Search ${category.label.toLowerCase()}…`} value={searches[category.kind]} onChange={e => setSearches({ ...searches, [category.kind]: e.target.value })} />}
             {values[category.requirement] !== "FORBIDDEN" && <div className="choice-list">{catalogs[category.kind].length === 0 ? <p className="field-note">None configured. Add {category.label.toLowerCase()} in its management tab.</p> : catalogs[category.kind].filter(item => item.name.toLowerCase().includes(searches[category.kind].toLowerCase())).map(item =>
-                <label className="check-row" key={item.id}><input type="checkbox" checked={values[category.ids].includes(item.id)} disabled={!item.active && !values[category.ids].includes(item.id)} onChange={() => setValues({ ...values, [category.ids]: values[category.ids].includes(item.id) ? values[category.ids].filter(id => id !== item.id) : [...values[category.ids], item.id] })} />{item.name}{!item.active && <span className="field-note">Inactive</span>}</label>
+                <label className="check-row" key={item.id}><input type="checkbox" checked={values[category.ids].includes(item.id)} disabled={!item.active && !values[category.ids].includes(item.id)} onChange={() => setValues({ ...values, [category.ids]: values[category.ids].includes(item.id) ? values[category.ids].filter(id => id !== item.id) : [...values[category.ids], item.id] })} />{entityLabel(item, catalogs[category.kind])}{!item.active && <span className="field-note">Inactive</span>}</label>
             )}</div>}
         </fieldset>)}</div>
         {service && <label className="check-row"><input type="checkbox" checked={values.active} onChange={e => setValues({ ...values, active: e.target.checked })} />Service active</label>}

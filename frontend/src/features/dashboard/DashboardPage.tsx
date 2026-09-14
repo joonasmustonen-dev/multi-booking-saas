@@ -30,6 +30,9 @@ import type {
 } from "../appointments/appointmentTypes";
 
 import "./DashboardPage.css";
+import { entityLabel } from "../assignments/entityLabels";
+import { useState } from "react";
+import SearchSelect from "../../components/SearchSelect";
 import { appointmentAssignmentLabel } from "../assignments/assignmentLabels";
 
 
@@ -75,6 +78,7 @@ function initials(
 
 
 export default function DashboardPage() {
+    const [staffId, setStaffId] = useState("");
 
     const navigate =
         useNavigate();
@@ -141,6 +145,9 @@ export default function DashboardPage() {
     const summary =
         summaryQuery.data;
 
+
+    const todaysAppointments = summary.todaysAppointments.filter(appointment => !staffId || (staffId === "unassigned" ? !appointment.staffId : appointment.staffId === staffId));
+    const staffOptions = [...new Map([...summary.team.map(member => [member.staffId, member.name] as const), ...summary.todaysAppointments.filter(appointment => appointment.staffId).map(appointment => [appointment.staffId!, appointment.staffName || "Staff member"] as const)]).entries()].map(([value, label]) => ({ value, label: entityLabel({ id: value, name: label }, summary.team.map(member => ({ id: member.staffId, name: member.name }))) }));
 
     const maxDailyBookings =
         Math.max(
@@ -215,7 +222,7 @@ export default function DashboardPage() {
 
                     onClick={() =>
                         navigate(
-                            "/appointments"
+                            "/appointments?openCreate=1"
                         )
                     }
                 >
@@ -646,25 +653,22 @@ export default function DashboardPage() {
                     </div>
 
 
-                    {summary
-                        .todaysAppointments
-                        .length === 0 ? (
+                    <div className="dashboard-today-filter"><SearchSelect value={staffId} onChange={setStaffId} ariaLabel="Filter today by staff" options={[{ value: "", label: "All staff" }, ...staffOptions, { value: "unassigned", label: "Unassigned" }]} /></div>
+                    {todaysAppointments.length === 0 ? (
 
                         <div
                             className={
                                 "dashboard-empty"
                             }
                         >
-                            No appointments today.
+                            {staffId ? "No appointments for this staff selection today." : "No appointments today."}
                         </div>
 
                     ) : (
 
                         <div className="today-list">
 
-                            {summary
-                                .todaysAppointments
-                                .slice(0, 6)
+                            {todaysAppointments
                                 .map(
                                     appointment => (
 
@@ -790,7 +794,6 @@ export default function DashboardPage() {
                         <div className="team-list">
 
                             {summary.team
-                                .slice(0, 6)
                                 .map(
                                     member => (
 
@@ -824,7 +827,7 @@ export default function DashboardPage() {
                                                 }
                                             >
                                                 {
-                                                    member.name
+                                                    entityLabel({ id: member.staffId, name: member.name }, summary.team.map(item => ({ id: item.staffId, name: item.name })))
                                                 }
                                             </span>
 

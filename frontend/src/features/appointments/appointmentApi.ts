@@ -112,10 +112,10 @@ function availabilityParams(from: string, to: string, filters: AvailabilityFilte
 }
 export function getAvailability(serviceId: string, date: string, filters: AvailabilityFilters = {}) {
     const params = availabilityParams(date, date, filters); params.set("serviceId", serviceId);
-    return apiFetch<AvailabilitySlot[]>(`/api/v1/availability?${params}`);
+    return apiFetch<AvailabilitySlot[]>(`/api/v1/availability?${params}`, { signal: AbortSignal.timeout(20000) });
 }
 export function getRescheduleAvailability(id: string, date: string, filters: AvailabilityFilters = {}) {
-    return apiFetch<AvailabilitySlot[]>(`/api/v1/appointments/${id}/availability?${availabilityParams(date, date, filters)}`);
+    return apiFetch<AvailabilitySlot[]>(`/api/v1/appointments/${id}/availability?${availabilityParams(date, date, filters)}`, { signal: AbortSignal.timeout(20000) });
 }
 export function rescheduleAppointment(id: string, request: import("./appointmentTypes").RescheduleAppointmentRequest) {
     return apiFetch<AppointmentResponse>(`/api/v1/appointments/${id}/reschedule`, { method: "POST", body: JSON.stringify(request) });

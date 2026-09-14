@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { IsRestoringProvider, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 
 globalThis.isSecureContext = true;
@@ -306,6 +306,41 @@ try {
     });
     check('Appointment notes have a keyboard-accessible multiline scroll region', () => {
         assert(detailHtml.includes('role="region"')); assert(detailHtml.includes('hover or focus to scroll'));
+    });
+    const entityNames = await server.ssrLoadModule('/src/features/assignments/entityLabels.ts');
+    check('Duplicate names remain selectable and show stable identifying details', () => {
+        const people = [{ id: 'staff-00000001', name: 'Robert', email: 'one@example.test' }, { id: 'staff-00000002', name: ' robert ' }];
+        assert.notEqual(entityNames.entityLabel(people[0], people), entityNames.entityLabel(people[1], people));
+        assert(entityNames.entityLabel(people[0], people).includes('one@example.test'));
+        assert(entityNames.entityLabel(people[1], people).includes('00000002'));
+        assert.equal(entityNames.entityLabel(people[0], [people[0]]), 'Robert');
+    });
+    check('Create flow always includes a visible availability prerequisite', () => {
+        assert(directBookingHtml.includes('aria-label="Booking availability"'));
+        assert(directBookingHtml.includes('Choose a service to see its available times'));
+    });
+    const availabilityKey = ['availability', 'reschedule', item.serviceId, item.id, date, item.staffId, item.locationId, ''];
+    const stableEditor = () => wrap(React.createElement(IsRestoringProvider, { value: true }, React.createElement(editor, { appointment: item, onSubmit: async () => {}, onCancel() {} })));
+    client.setQueryData(availabilityKey, [{ ...base, start: item.startAt, end: item.endAt }]);
+    check('Rescheduling defaults to tenant today and exposes returned booking combinations', () => {
+        const html = stableEditor(); assert(html.includes(`value="${date}"`));
+        assert(html.includes('Available booking combination')); assert(html.includes('Sofia')); assert(html.includes('Room 1'));
+    });
+    client.setQueryData(availabilityKey, []);
+    check('Empty availability explicitly explains how to change the combination', () => {
+        const html = stableEditor(); assert(html.includes('No availability for this date and assignment combination'));
+        assert(!html.includes('aria-label="Available booking combination"'));
+    });
+    client.getQueryCache().find({ queryKey: availabilityKey, exact: true }).setState({ status: 'error', error: new Error('Connection unavailable') });
+    check('Availability failures expose an error and retry action', () => {
+        const html = stableEditor(); assert(html.includes('Connection unavailable')); assert(html.includes('Retry'));
+    });
+    check('Dashboard create route opens the booking editor immediately', () => {
+        const html = renderToStaticMarkup(React.createElement(QueryClientProvider, { client }, React.createElement(MemoryRouter, { initialEntries: ['/appointments?openCreate=1'] }, React.createElement(calendarPage))));
+        assert(html.includes('Create appointment')); assert(html.includes('Booking availability'));
+    });
+    check('Calendar day counts use the singular for one appointment', () => {
+        assert(calendarHtml.includes('1 appointment</span>')); assert(!calendarHtml.includes('1 appointments</span>'));
     });
     console.log(`Passed ${results.length} frontend API, identity, timezone, and render checks.`);
 } finally { await server.close(); }

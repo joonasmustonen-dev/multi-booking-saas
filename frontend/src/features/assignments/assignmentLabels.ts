@@ -1,3 +1,4 @@
+import { entityLabel } from "./entityLabels";
 import type { AssignmentCatalogs } from "./assignmentTypes";
 export interface BookingAssignments { staffId: string | null; locationId: string | null; resourceId: string | null }
 export function slotKey(slot: BookingAssignments & { start: string }) {
@@ -8,7 +9,7 @@ export function assignmentNames(slot: BookingAssignments, catalogs: AssignmentCa
         [slot.staffId, catalogs.staff, "Staff"],
         [slot.locationId, catalogs.locations, "Location"],
         [slot.resourceId, catalogs.resources, "Resource"],
-    ] as const).flatMap(([id, items, fallback]) => id ? [items.find(item => item.id === id)?.name ?? fallback] : []);
+    ] as const).flatMap(([id, items, fallback]) => id ? [items.find(item => item.id === id) ? entityLabel(items.find(item => item.id === id)!, items) : fallback] : []);
 }
 export function appointmentAssignmentLabel(item: { staffName?: string | null; locationName?: string | null; resourceName?: string | null }) {
     return [item.staffName, item.locationName, item.resourceName].filter(Boolean).join(" · ") || "No assignments";
