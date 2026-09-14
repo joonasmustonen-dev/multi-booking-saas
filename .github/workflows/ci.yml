@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend tests and build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: booking
+          POSTGRES_PASSWORD: booking
+          POSTGRES_DB: platform_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U booking -d platform_db"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Set up Java 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - name: Build bootstrap application
+        working-directory: backend
+        run: bash mvnw --batch-mode --no-transfer-progress -DskipTests package
+      - name: Initialize fresh test databases
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: bash scripts/ci-bootstrap-db.sh
+      - name: Run backend tests and package
+        working-directory: backend
+        run: bash mvnw --batch-mode --no-transfer-progress clean verify
+      - name: Upload test reports and bootstrap log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-test-reports
+          path: |
+            backend/target/surefire-reports/
+            backend/target/failsafe-reports/
+            ci-bootstrap.log
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Upload backend JAR
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-jar
+          path: backend/target/booking-backend-*.jar
+          if-no-files-found: error
+          retention-days: 7
+
+  frontend:
+    name: Frontend checks and build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Set up Node 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Run assignment checks
+        run: npm run test:assignments
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck and build
+        run: npm run build
+      - name: Upload frontend build
+        uses: actions/upload-artifact@v7
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+          if-no-files-found: error
+          retention-days: 7

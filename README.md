@@ -217,6 +217,12 @@ The frontend checks cover API contracts, assignment identity, date helpers, filt
 
 Build output is `backend/target/booking-backend-0.0.1-SNAPSHOT.jar` and `frontend/dist/`. Serve the frontend through a web server with SPA fallback for client routes. `vite preview` is useful for local build inspection and is not the production hosting setup.
 
+## GitHub Actions CI
+
+The workflow in .github/workflows/ci.yml runs on pushes, pull requests, and manual dispatch. It runs Java 21 backend tests/builds against disposable PostgreSQL 16 databases and Node 24 frontend checks, lint and build. It automatically initializes the platform registry and both test tenants; your local services do not need to be running. No custom GitHub secrets are required.
+
+Test reports, the backend JAR and frontend build are uploaded as short-lived artifacts. Real Keycloak login and browser end-to-end tests are not included. This workflow validates builds and tests; it does not deploy the application. See [CI setup and troubleshooting](docs/ci.md) for bootstrap details and required-check setup.
+
 ## Troubleshooting
 
 | Symptom | Check / action |
@@ -251,4 +257,4 @@ Prepare a dedicated production deployment rather than exposing the development C
 - Configure frontend SPA hosting, API HTTPS, structured logs and health monitoring.
 - Review customer data handling and retention requirements, and select a license before distributing the project for reuse.
 
-The current repository does not provide a production Compose stack, automated Keycloak realm provisioning, or a complete CI/CD pipeline. GitHub source hosting does not deploy the application or transfer existing Docker/database data.
+The current repository does not provide a production Compose stack, automated Keycloak realm provisioning, or deployment automation. GitHub Actions CI is included; see the CI section above. GitHub source hosting does not deploy the application or transfer existing Docker/database data.
