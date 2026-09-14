@@ -53,6 +53,34 @@ public class AvailabilityScheduleService {
     public void deleteRule(AvailabilityOwnerType type, UUID id, UUID ruleId) {
         owner(type, id); rules.delete(rule(type, id, ruleId));
     }
+    public List<AvailabilityRuleResponse> replaceRules(AvailabilityOwnerType type, UUID id,
+            ReplaceAvailabilityRulesRequest request) {
+        Owner owner = owner(type, id);
+        // Validate the complete draft before deleting any existing rules.
+        for (var draft : request.rules()) validateTimes(draft.startTime(), draft.endTime());
+        for (DayOfWeek day : DayOfWeek.values()) {
+            var active = request.rules().stream().filter(r -> r.dayOfWeek() == day && r.active())
+                    .sorted(java.util.Comparator.comparing(ReplaceAvailabilityRulesRequest.Rule::startTime)).toList();
+            LocalTime previousEnd = null;
+            for (var draft : active) {
+                if (previousEnd != null && draft.startTime().isBefore(previousEnd))
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Recurring hours overlap on " + day);
+                previousEnd = draft.endTime();
+            }
+        }
+        var existing = switch (type) {
+            case STAFF -> rules.findByStaff_IdOrderByDayOfWeekAscStartTimeAsc(id);
+            case LOCATION -> rules.findByLocation_IdOrderByDayOfWeekAscStartTimeAsc(id);
+            case RESOURCE -> rules.findByResource_IdOrderByDayOfWeekAscStartTimeAsc(id);
+        };
+        rules.deleteAll(existing);
+        return rules.saveAllAndFlush(request.rules().stream().map(draft -> {
+            var rule = new AvailabilityRule(owner.resource(), owner.staff(), owner.location(),
+                    draft.dayOfWeek(), draft.startTime(), draft.endTime());
+            rule.update(draft.dayOfWeek(), draft.startTime(), draft.endTime(), draft.active());
+            return rule;
+        }).toList()).stream().map(AvailabilityRuleResponse::from).toList();
+    }
     public AvailabilityExceptionResponse createException(AvailabilityOwnerType type, UUID id, AvailabilityExceptionRequest request) {
         Owner owner = owner(type, id);
         var times = exceptionTimes(request);

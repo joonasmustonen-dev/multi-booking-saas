@@ -587,6 +587,56 @@ class BackendAssignmentIntegrationTest {
         });
     }
 
+    @Test void wholeRecurringWeekSavesForEachOwnerAndInvalidDraftsLeaveExistingRulesUntouched() {
+        inTenant(() -> {
+            Fixture f = fixture(REQUIRED, REQUIRED, REQUIRED);
+            for (AvailabilityOwnerType type : AvailabilityOwnerType.values()) {
+                UUID id = owner(f, type);
+                String path = "/api/v1/" + switch (type) {
+                    case STAFF -> "staff"; case LOCATION -> "locations"; case RESOURCE -> "resources";
+                } + "/" + id + "/availability/rules";
+                schedules.createException(type, id, exception(f, 9, 10, false));
+                String rule = "{\"dayOfWeek\":\"" + f.date().getDayOfWeek() + "\",\"startTime\":\"09:00\",\"endTime\":\"12:00\",\"active\":true}";
+                mvc.perform(put(path).with(authenticated("STAFF")).contentType("application/json")
+                        .content("{\"rules\":[" + rule + "," + rule.replace("09:00", "13:00").replace("12:00", "17:00") + "]}"))
+                        .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2));
+                var saved = schedules.findRules(type, id);
+                assertEquals(2, saved.size());
+                mvc.perform(put(path).with(authenticated("STAFF")).contentType("application/json")
+                        .content("{\"rules\":[" + rule + "," + rule.replace("09:00", "11:00") + "]}"))
+                        .andExpect(status().isBadRequest());
+                assertEquals(saved, schedules.findRules(type, id));
+                mvc.perform(put(path).with(authenticated("STAFF")).contentType("application/json")
+                        .content("{\"rules\":[" + rule.replace("12:00", "08:00") + "]}"))
+                        .andExpect(status().isBadRequest());
+                assertEquals(saved, schedules.findRules(type, id));
+                assertEquals(1, schedules.findExceptions(type, id).size());
+            }
+        });
+    }
+
+    @Test void recurringWeekClearAndDisabledDaysStayOwnerScopedAndRequireStaffAccess() {
+        inTenant(() -> {
+            Fixture f = fixture(REQUIRED, REQUIRED, REQUIRED);
+            UUID id = f.staff().getFirst(); String path = "/api/v1/staff/" + id + "/availability/rules";
+            String body = "{\"rules\":[{\"dayOfWeek\":\"MONDAY\",\"startTime\":\"09:00\",\"endTime\":\"17:00\",\"active\":false}]}";
+            mvc.perform(put(path).with(authenticated("STAFF")).contentType("application/json").content(body))
+                    .andExpect(status().isOk()).andExpect(jsonPath("$[0].active").value(false));
+            assertFalse(schedules.findRules(AvailabilityOwnerType.STAFF, id).getFirst().active());
+            mvc.perform(put(path).with(authenticated("CUSTOMER")).contentType("application/json").content("{\"rules\":[]}"))
+                    .andExpect(status().isForbidden());
+            mvc.perform(put(path).with(authenticated("STAFF")).contentType("application/json").content("{\"rules\":[null]}"))
+                    .andExpect(status().isBadRequest());
+            mvc.perform(put(path).with(authenticated("STAFF")).contentType("application/json").content("{\"rules\":[]}"))
+                    .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(0));
+            assertTrue(schedules.findRules(AvailabilityOwnerType.STAFF, id).isEmpty());
+            assertFalse(schedules.findRules(AvailabilityOwnerType.STAFF, f.staff().get(1)).isEmpty());
+            assertFalse(schedules.findRules(AvailabilityOwnerType.LOCATION, f.locations().getFirst()).isEmpty());
+            mvc.perform(put("/api/v1/staff/" + UUID.randomUUID() + "/availability/rules").with(authenticated("STAFF"))
+                    .contentType("application/json").content(body)).andExpect(status().isNotFound());
+        });
+    }
+
     private RequestPostProcessor authenticated(String role) {
         return jwt().jwt(token -> token.claim("tenant_id", "tenant-a"))
                 .authorities(new SimpleGrantedAuthority("ROLE_" + role));

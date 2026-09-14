@@ -12,6 +12,7 @@ import "./index.css";
 import "./features/customers/CustomerStyles.css";
 import "./components/InteractionStyles.css";
 import "./features/assignments/AssignmentStyles.css";
+import "./components/ManagementRefinement.css";
 
 const queryClient = new QueryClient({
     defaultOptions: {

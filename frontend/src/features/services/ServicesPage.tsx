@@ -1,3 +1,4 @@
+import CatalogBrowser from "../../components/CatalogBrowser";
 import { useState } from "react";
 import { Plus, Pencil, Clock3 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -22,7 +23,7 @@ export default function ServicesPage() {
         <div className="page-header"><div><p className="page-eyebrow">Your offering</p><h1 className="page-title">Services</h1><p className="page-description">The people, places, and resources behind every booking.</p></div><button className="button button-primary" onClick={() => setEditing("new")}><Plus size={17} />Add service</button></div>
         {editing && <ServiceForm key={editing === "new" ? "new" : editing.id} service={editing === "new" ? undefined : editing} catalogs={catalogs.data} onSubmit={submit} onCancel={() => setEditing(null)} />}
         {remove.error && <p role="alert" className="form-error">{remove.error.message}</p>}
-        {services.data.length === 0 ? <div className="card empty-state"><h3>No services yet</h3><p>Add a service and define what each booking needs.</p></div> : <div className="service-grid">{services.data.map(service => <article className="card service-card" key={service.id}>
+        {services.data.length === 0 ? <div className="card empty-state"><h3>No services yet</h3><p>Add a service and define what each booking needs.</p></div> : <CatalogBrowser items={services.data} label="Services" searchText={item => item.description ?? ""}>{visible => <div className="service-grid">{visible.map(service => <article className="card service-card" key={service.id}>
             <div className="section-heading"><h3>{service.name}</h3><span className={`requirement-pill ${service.active ? "sage" : "muted"}`}>{service.active ? "Active" : "Inactive"}</span></div>
             {service.description && <p className="field-note">{service.description}</p>}
             <p className="service-meta"><Clock3 size={15} />{service.durationMinutes} min <span>{service.price == null ? "No price" : `${service.price} ${service.currency ?? ""}`}</span></p>
@@ -32,6 +33,6 @@ export default function ServicesPage() {
                 ["Resources", service.resourceRequirement, service.resourceIds, catalogs.data.resources],
             ] as const).map(([label, requirement, ids, items]) => <div className="service-assignment" key={label}><div><strong>{label}</strong><span className="requirement-pill">{requirement === "FORBIDDEN" ? "Not used" : requirement === "REQUIRED" ? "Required" : "Optional"}</span></div><p>{requirement === "FORBIDDEN" ? "—" : ids.map(id => { const item = items.find(i => i.id === id); return item ? `${item.name}${item.active ? "" : " (inactive)"}` : "Unavailable assignment"; }).join(", ") || "None selected"}</p></div>)}
             <div className="form-actions"><button className="button button-secondary" onClick={() => setEditing(service)}><Pencil size={15} />Edit</button><button className="button button-danger" disabled={remove.isPending} onClick={() => { if (window.confirm(`Delete ${service.name}?`)) remove.mutate(service.id); }}>Delete</button></div>
-        </article>)}</div>}
+        </article>)}</div>}</CatalogBrowser>}
     </div>;
 }

@@ -250,5 +250,62 @@ try {
         assert(directoryHtml.includes('aria-label="Search customers"')); assert(directoryHtml.includes('customer-card'));
         assert(directoryHtml.includes('emma@example.com')); assert(directoryHtml.includes('+358 456'));
     });
+    const presentation = await server.ssrLoadModule('/src/features/appointments/calendarPresentation.ts');
+    const calendarMath = await server.ssrLoadModule('/src/features/appointments/calendarLayout.ts');
+    const dense = [
+        { ...item, id: 'short-a', startAt: `${date}T10:00:00+03:00`, endAt: `${date}T10:10:00+03:00` },
+        { ...item, id: 'short-b', startAt: `${date}T10:10:00+03:00`, endAt: `${date}T10:20:00+03:00` },
+        { ...item, id: 'late', startAt: `${date}T23:50:00+03:00`, endAt: `${date}T23:59:00+03:00` },
+    ];
+    const display = presentation.calendarDisplayGroups(calendarMath.layoutDayAppointments(dense, 'Europe/Helsinki'), 0, 1440, 320);
+    check('Full-day calendar groups unreadable cards without losing bookings or overflowing', () => {
+        assert.deepEqual(display.flatMap(g => g.items.map(i => i.appointment.id)).sort(), dense.map(i => i.id).sort());
+        assert(display.some(g => g.grouped && g.items.length === 2));
+        assert(display.every(g => g.top >= 0 && g.top + g.height <= 320));
+    });
+    check('Calendar time ticks retain both boundaries and reduce density on long ranges', () => {
+        const ticks = presentation.calendarTickMinutes(0, 1440, 320);
+        assert.equal(ticks[0], 0); assert.equal(ticks.at(-1), 1440); assert(ticks.length < 15);
+        const usual = presentation.calendarTickMinutes(480, 1080, 640); assert.equal(usual[0], 480); assert.equal(usual.length, 11);
+    });
+    const browserModule = await server.ssrLoadModule('/src/components/CatalogBrowser.tsx');
+    const catalogFilter = await server.ssrLoadModule('/src/components/catalogFilter.ts');
+    const catalogItems = Array.from({ length: 24 }, (_, index) => ({ id: `entry-${index}`, name: index === 0 ? 'Sofía' : `Entry ${index}`, active: index % 2 === 0 }));
+    check('Catalog search combines accent-insensitive lookup and activity filtering', () => {
+        assert.equal(catalogFilter.filterCatalog(catalogItems, 'sofia', 'active').length, 1);
+        assert.equal(catalogFilter.filterCatalog(catalogItems, '', 'inactive').length, 12);
+    });
+    const browseHtml = wrap(React.createElement(browserModule.default, { items: catalogItems, label: 'Staff' }, visible => React.createElement('div', {}, visible.map(i => React.createElement('article', { key: i.id }, i.name)))));
+    check('Management catalogs default to a bounded list with page controls', () => {
+        assert(browseHtml.includes('catalog-list')); assert(browseHtml.includes('1–8 of 24'));
+        assert.equal((browseHtml.match(/<article/g) ?? []).length, 8); assert(browseHtml.includes('Page 1 of 3'));
+    });
+    const drafts = await server.ssrLoadModule('/src/features/availability/recurringDraft.ts');
+    check('Recurring day toggles preserve times and weekday presets leave weekends closed', () => {
+        const mon = [{ dayOfWeek: 'MONDAY', startTime: '10:00', endTime: '16:00', active: true }];
+        const closed = drafts.toggleRecurringDay(mon, 'MONDAY', false); assert.equal(closed[0].startTime, '10:00');
+        assert.equal(drafts.toggleRecurringDay(closed, 'MONDAY', true)[0].active, true);
+        assert.equal(drafts.recurringWeekdaysPreset().length, 5);
+        assert.equal(drafts.validateRecurringDraft([...mon, { ...mon[0], startTime: '15:00', endTime: '17:00' }]).includes('overlap'), true);
+    });
+    await schedules.replaceAvailabilityRules('locations', 'room-a', drafts.recurringWeekdaysPreset());
+    check('Recurring week save sends one atomic owner-scoped PUT with all day times', () => {
+        const request = requests.at(-1); assert.equal(request.method, 'PUT');
+        assert.equal(new URL(request.url).pathname, '/api/v1/locations/room-a/availability/rules'); assert.equal(request.body.rules.length, 5);
+    });
+    const recurringEditor = (await server.ssrLoadModule('/src/features/availability/RecurringWeekEditor.tsx')).default;
+    const recurringHtml = wrap(React.createElement(recurringEditor, { kind: 'staff', ownerId: 'staff-a', initialRules: [] }));
+    check('Recurring hours render seven accessible day dots and quick presets', () => {
+        assert.equal((recurringHtml.match(/aria-label="[A-Z][a-z]+ recurring hours"/g) ?? []).length, 7);
+        assert(recurringHtml.includes('Weekdays 09–17')); assert(recurringHtml.includes('Save recurring hours'));
+    });
+    const directBookingHtml = wrap(React.createElement(editor, { initialCustomerId: 'emma', onSubmit: async () => {}, onCancel() {} }));
+    check('Customer-originated booking prefills the customer and keeps full assignment selection', () => {
+        assert(directBookingHtml.includes('value="Emma Wilson"')); assert(directBookingHtml.includes('Customer context'));
+        assert(directBookingHtml.includes('Booking service')); assert(customerDetailHtml.includes('New appointment'));
+    });
+    check('Appointment notes have a keyboard-accessible multiline scroll region', () => {
+        assert(detailHtml.includes('role="region"')); assert(detailHtml.includes('hover or focus to scroll'));
+    });
     console.log(`Passed ${results.length} frontend API, identity, timezone, and render checks.`);
 } finally { await server.close(); }

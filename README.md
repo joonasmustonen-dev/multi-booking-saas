@@ -215,7 +215,7 @@ npm run lint
 npm run build
 ```
 
-The frontend checks cover API contracts, assignment identity, date helpers, filtering helpers, and server-rendered components. They are not browser end-to-end tests. Recent development verification passed 86 backend tests and 42 frontend checks; rerun these commands on your own checkout before merging or deploying.
+The frontend checks cover API contracts, assignment identity, date helpers, filtering helpers, and server-rendered components. They are not browser end-to-end tests. Recent development verification passed 88 backend tests and 51 frontend checks; rerun these commands on your own checkout before merging or deploying.
 
 Build output is `backend/target/booking-backend-0.0.1-SNAPSHOT.jar` and `frontend/dist/`. Serve the frontend through a web server with SPA fallback for client routes. `vite preview` is useful for local build inspection and is not the production hosting setup.
 
@@ -260,3 +260,7 @@ Prepare a dedicated production deployment rather than exposing the development C
 - Review customer data handling and retention requirements, and select a license before distributing the project for reuse.
 
 The current repository does not provide a production Compose stack, automated Keycloak realm provisioning, or deployment automation. GitHub Actions CI is included; see the CI section above. GitHub source hosting does not deploy the application or transfer existing Docker/database data.
+
+## Calendar and management refinements
+
+The calendar offers Week, Day and Agenda views, adaptive time labels and selectable groups for dense bookings. Booking details keep their header and actions visible, and customer details can open a prefilled appointment. Management pages offer searchable, paginated lists and optional cards. Recurring hours use day buttons and whole-week saving across staff, locations and resources. See [visual refinements](docs/visual-refinements.md) for the API contract and verification details.

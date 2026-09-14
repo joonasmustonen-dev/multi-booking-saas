@@ -23,6 +23,11 @@ public class AvailabilityScheduleController {
         var created = service.createRule(AvailabilityOwnerType.fromPath(ownerType), ownerId, request);
         return ResponseEntity.created(URI.create("/api/v1/" + ownerType + "/" + ownerId + "/availability/rules/" + created.id())).body(created);
     }
+    @PutMapping("/rules")
+    public List<AvailabilityRuleResponse> replaceRules(@PathVariable String ownerType, @PathVariable UUID ownerId,
+            @Valid @RequestBody ReplaceAvailabilityRulesRequest request) {
+        return service.replaceRules(AvailabilityOwnerType.fromPath(ownerType), ownerId, request);
+    }
     @PutMapping("/rules/{ruleId}")
     public AvailabilityRuleResponse updateRule(@PathVariable String ownerType, @PathVariable UUID ownerId,
             @PathVariable UUID ruleId, @Valid @RequestBody UpdateAvailabilityRuleRequest request) {

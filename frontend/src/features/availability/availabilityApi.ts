@@ -1,6 +1,7 @@
 import { apiFetch } from "../../api/apiClient";
 import type { AssignmentKind } from "../assignments/assignmentTypes";
 import type { AvailabilityRule, AvailabilityException, CreateAvailabilityRuleRequest, CreateAvailabilityExceptionRequest } from "./availabilityTypes";
+import type { RecurringDraft } from "./recurringDraft";
 const root = (kind: AssignmentKind, id: string) => `/api/v1/${kind}/${id}/availability`;
 export const getAvailabilityRules = (kind: AssignmentKind, id: string) => apiFetch<AvailabilityRule[]>(`${root(kind, id)}/rules`);
 export const getAvailabilityExceptions = (kind: AssignmentKind, id: string) => apiFetch<AvailabilityException[]>(`${root(kind, id)}/exceptions`);
@@ -8,3 +9,4 @@ export const saveAvailabilityRule = (kind: AssignmentKind, id: string, request: 
 export const saveAvailabilityException = (kind: AssignmentKind, id: string, request: CreateAvailabilityExceptionRequest, exceptionId?: string) => apiFetch<AvailabilityException>(`${root(kind, id)}/exceptions${exceptionId ? `/${exceptionId}` : ""}`, { method: exceptionId ? "PUT" : "POST", body: JSON.stringify(request) });
 export const deleteAvailabilityRule = (kind: AssignmentKind, id: string, ruleId: string) => apiFetch<void>(`${root(kind, id)}/rules/${ruleId}`, { method: "DELETE" });
 export const deleteAvailabilityException = (kind: AssignmentKind, id: string, exceptionId: string) => apiFetch<void>(`${root(kind, id)}/exceptions/${exceptionId}`, { method: "DELETE" });
+export const replaceAvailabilityRules = (kind: AssignmentKind, id: string, rules: RecurringDraft[]) => apiFetch<AvailabilityRule[]>(`${root(kind, id)}/rules`, { method: "PUT", body: JSON.stringify({ rules }) });

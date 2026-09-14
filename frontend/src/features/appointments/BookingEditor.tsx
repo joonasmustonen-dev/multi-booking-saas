@@ -13,12 +13,12 @@ import { dateKeyInTimeZone } from "./calendarLayout";
 import { addDays } from "./dateUtils";
 import { getAvailability, getRescheduleAvailability } from "./appointmentApi";
 import type { AppointmentCalendarItem, CreateAppointmentRequest } from "./appointmentTypes";
-interface Props { appointment?: AppointmentCalendarItem; onSubmit: (request: CreateAppointmentRequest) => Promise<void>; onCancel: () => void }
+interface Props { initialCustomerId?: string; appointment?: AppointmentCalendarItem; onSubmit: (request: CreateAppointmentRequest) => Promise<void>; onCancel: () => void }
 const emptyFilters: AssignmentFilterValues = { staffId: "", locationId: "", resourceId: "" };
-export default function BookingEditor({ appointment, onSubmit, onCancel }: Props) {
+export default function BookingEditor({ appointment, initialCustomerId, onSubmit, onCancel }: Props) {
     const catalogs = useAssignmentCatalogs(); const settings = useTenantSettings();
     const services = useQuery({ queryKey: ["services"], queryFn: getServices });
-    const [customerId, setCustomerId] = useState(appointment?.customerId ?? "");
+    const [customerId, setCustomerId] = useState(appointment?.customerId ?? initialCustomerId ?? "");
     const [serviceId, setServiceId] = useState(appointment?.serviceId ?? "");
     const [filters, setFilters] = useState<AssignmentFilterValues>({ staffId: appointment?.staffId ?? "", locationId: appointment?.locationId ?? "", resourceId: appointment?.resourceId ?? "" });
     const [date, setDate] = useState(""); const [selectedKey, setSelectedKey] = useState("");
