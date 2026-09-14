@@ -5,16 +5,14 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record ResourceRequest(
+    @NotBlank @Size(max = 200) String name,
 
-        @NotBlank
-        @Size(max = 200)
-        String name,
+    @NotNull ResourceType type,
 
-        @NotNull
-        ResourceType type,
-
-        boolean active,
-        @Size(max = 1000) String description
+    boolean active,
+    @Size(max = 1000) String description
 ) {
-    public ResourceRequest(String name, ResourceType type, boolean active) { this(name, type, active, null); }
+    public ResourceRequest(String name, ResourceType type, boolean active) {
+        this(name, type, active, null);
+    }
 }

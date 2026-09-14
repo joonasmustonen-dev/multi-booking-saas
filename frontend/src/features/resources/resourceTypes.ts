@@ -1,7 +1,4 @@
-export type ResourceType =
-    | "EQUIPMENT"
-    | "VEHICLE"
-    | "OTHER";
+export type ResourceType = "EQUIPMENT" | "VEHICLE" | "OTHER";
 
 export interface BookableResource {
     id: string;

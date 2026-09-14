@@ -28,90 +28,68 @@ public class SecurityConfig {
 
     @Bean
     public FilterRegistrationBean<TenantContextFilter> tenantFilterRegistration(
-            TenantContextFilter tenantContextFilter) {
+        TenantContextFilter tenantContextFilter
+    ) {
         FilterRegistrationBean<TenantContextFilter> registration =
-                new FilterRegistrationBean<>(tenantContextFilter);
+            new FilterRegistrationBean<>(tenantContextFilter);
+
         // Run only in the security chain, after bearer-token authentication.
         registration.setEnabled(false);
+
         return registration;
     }
 
-@Bean
-public SecurityFilterChain securityFilterChain(
+    @Bean
+    public SecurityFilterChain securityFilterChain(
         HttpSecurity http,
         TenantContextFilter tenantContextFilter,
         KeycloakJwtAuthenticationConverter jwtAuthenticationConverter,
-        CorsConfigurationSource corsConfigurationSource)
-        throws Exception {
+        CorsConfigurationSource corsConfigurationSource
+    ) throws Exception {
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource))
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth ->
+                auth
+                    .requestMatchers("/api/health")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated()
+            );
 
-    http
-        .cors(cors ->
-            cors.configurationSource(corsConfigurationSource)
-        )
-        .csrf(csrf -> csrf.disable())
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/api/health").permitAll()
-            .anyRequest().authenticated()
-        );
-
-    if (jwtEnabled) {
-
-        http
-            .oauth2ResourceServer(oauth2 ->
+        if (jwtEnabled) {
+            http.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwt ->
-                    jwt.jwtAuthenticationConverter(
-                        jwtAuthenticationConverter
-                    )
+                    jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)
                 )
-            )
-            .addFilterAfter(
+            ).addFilterAfter(
                 tenantContextFilter,
                 BearerTokenAuthenticationFilter.class
             );
-    }
+        }
 
-    return http.build();
-}
+        return http.build();
+    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
 
-        CorsConfiguration configuration =
-                new CorsConfiguration();
-
-        configuration.setAllowedOrigins(
-                List.of(
-                        "http://localhost:5173"
-                )
-        );
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
 
         configuration.setAllowedMethods(
-                List.of(
-                        "GET",
-                        "POST",
-                        "PUT",
-                        "PATCH",
-                        "DELETE",
-                        "OPTIONS"
-                )
+            List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
         );
 
         configuration.setAllowedHeaders(
-                List.of(
-                        "Authorization",
-                        "Content-Type"
-                )
+            List.of("Authorization", "Content-Type")
         );
 
         configuration.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
+            new UrlBasedCorsConfigurationSource();
 
-        source.registerCorsConfiguration(
-                "/api/**",
-                configuration
-        );
+        source.registerCorsConfiguration("/api/**", configuration);
 
         return source;
     }

@@ -27,30 +27,34 @@ public class BookableResource {
 
     @Column(nullable = false, length = 1000)
     private String description = "";
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
 
-    protected BookableResource() {
+    public String getDescription() {
+        return description;
     }
 
-    public BookableResource(
-            String name,
-            ResourceType type) {
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
+    protected BookableResource() {}
+
+    public BookableResource(String name, ResourceType type) {
         this.id = UUID.randomUUID();
+
         this.name = name;
+
         this.type = type;
+
         this.active = true;
+
         this.createdAt = OffsetDateTime.now();
     }
 
-    public void update(
-            String name,
-            ResourceType type,
-            boolean active) {
-
+    public void update(String name, ResourceType type, boolean active) {
         this.name = name;
+
         this.type = type;
+
         this.active = active;
     }
 
@@ -65,8 +69,6 @@ public class BookableResource {
     public ResourceType getType() {
         return type;
     }
-
-
 
     public boolean isActive() {
         return active;

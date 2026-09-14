@@ -6,14 +6,9 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 public record AvailabilityRuleRequest(
+    @NotNull DayOfWeek dayOfWeek,
 
-        @NotNull
-        DayOfWeek dayOfWeek,
+    @NotNull LocalTime startTime,
 
-        @NotNull
-        LocalTime startTime,
-
-        @NotNull
-        LocalTime endTime
-) {
-}
+    @NotNull LocalTime endTime
+) {}

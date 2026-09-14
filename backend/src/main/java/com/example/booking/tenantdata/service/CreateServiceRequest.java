@@ -9,27 +9,22 @@ import java.util.Set;
 import java.util.UUID;
 
 public record CreateServiceRequest(
+    @NotBlank String name,
 
-        @NotBlank
-        String name,
+    String description,
 
-        String description,
+    @NotNull @Min(1) Integer durationMinutes,
 
-        @NotNull
-        @Min(1)
-        Integer durationMinutes,
+    BigDecimal price,
 
-        BigDecimal price,
+    String currency,
 
-        String currency,
+    Set<UUID> staffIds,
 
-        Set<UUID> staffIds,
+    Set<UUID> locationIds,
 
-        Set<UUID> locationIds,
-
-        Set<UUID> resourceIds,
-        @NotNull AssignmentRequirement staffRequirement,
-        @NotNull AssignmentRequirement locationRequirement,
-        @NotNull AssignmentRequirement resourceRequirement
-) {
-}
+    Set<UUID> resourceIds,
+    @NotNull AssignmentRequirement staffRequirement,
+    @NotNull AssignmentRequirement locationRequirement,
+    @NotNull AssignmentRequirement resourceRequirement
+) {}

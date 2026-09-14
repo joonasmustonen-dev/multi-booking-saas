@@ -15,32 +15,23 @@ import java.util.Map;
 
 @Component
 public class KeycloakJwtAuthenticationConverter
-        implements Converter<Jwt, AbstractAuthenticationToken> {
+    implements Converter<Jwt, AbstractAuthenticationToken>
+{
 
     @Override
     public AbstractAuthenticationToken convert(Jwt jwt) {
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
 
-        Collection<GrantedAuthority> authorities =
-                new ArrayList<>();
-
-        Map<String, Object> realmAccess =
-                jwt.getClaim("realm_access");
+        Map<String, Object> realmAccess = jwt.getClaim("realm_access");
 
         if (realmAccess != null) {
-
-            Object rolesObject =
-                    realmAccess.get("roles");
+            Object rolesObject = realmAccess.get("roles");
 
             if (rolesObject instanceof List<?> roles) {
-
                 for (Object role : roles) {
-
                     if (role instanceof String roleName) {
-
                         authorities.add(
-                                new SimpleGrantedAuthority(
-                                        "ROLE_" + roleName
-                                )
+                            new SimpleGrantedAuthority("ROLE_" + roleName)
                         );
                     }
                 }
@@ -48,12 +39,9 @@ public class KeycloakJwtAuthenticationConverter
         }
 
         return new JwtAuthenticationToken(
-                jwt,
-                authorities,
-                jwt.getClaimAsString(
-                        "preferred_username"
-                )
+            jwt,
+            authorities,
+            jwt.getClaimAsString("preferred_username")
         );
     }
-    
 }

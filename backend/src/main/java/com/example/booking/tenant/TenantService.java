@@ -6,7 +6,7 @@ import java.util.List;
 
 @Service
 public class TenantService {
-    
+
     private final TenantRepository tenantRepository;
 
     public TenantService(TenantRepository tenantRepository) {

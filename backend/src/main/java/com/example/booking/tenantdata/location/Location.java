@@ -13,21 +13,14 @@ public class Location {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(
-            nullable = false,
-            length = 150
-    )
+    @Column(nullable = false, length = 150)
     private String name;
 
     @Column(nullable = false)
     private boolean active;
 
-    @Column(
-            name = "created_at",
-            nullable = false
-    )
+    @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
-
 
     @Column(name = "description", length = 1000)
     private String description = "";
@@ -47,57 +40,83 @@ public class Location {
     @Column(name = "phone", length = 40)
     private String phone = "";
 
-    protected Location() {
-    }
+    protected Location() {}
 
-
-    public Location(
-            String name) {
-
+    public Location(String name) {
         this.name = name;
-        this.active = true;
-        this.createdAt =
-                OffsetDateTime.now();
-    }
 
+        this.active = true;
+
+        this.createdAt = OffsetDateTime.now();
+    }
 
     public UUID getId() {
         return id;
     }
 
-
     public String getName() {
         return name;
     }
-
 
     public boolean isActive() {
         return active;
     }
 
-
     public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
 
-
-    public void update(
-            String name,
-            boolean active) {
-
+    public void update(String name, boolean active) {
         this.name = name;
+
         this.active = active;
     }
-    public String getDescription() { return description; }
-    public void setDescription(String value) { this.description = value; }
-    public String getAddressLine() { return addressLine; }
-    public void setAddressLine(String value) { this.addressLine = value; }
-    public String getCity() { return city; }
-    public void setCity(String value) { this.city = value; }
-    public String getPostalCode() { return postalCode; }
-    public void setPostalCode(String value) { this.postalCode = value; }
-    public String getCountryCode() { return countryCode; }
-    public void setCountryCode(String value) { this.countryCode = value; }
-    public String getPhone() { return phone; }
-    public void setPhone(String value) { this.phone = value; }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String value) {
+        this.description = value;
+    }
+
+    public String getAddressLine() {
+        return addressLine;
+    }
+
+    public void setAddressLine(String value) {
+        this.addressLine = value;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String value) {
+        this.city = value;
+    }
+
+    public String getPostalCode() {
+        return postalCode;
+    }
+
+    public void setPostalCode(String value) {
+        this.postalCode = value;
+    }
+
+    public String getCountryCode() {
+        return countryCode;
+    }
+
+    public void setCountryCode(String value) {
+        this.countryCode = value;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String value) {
+        this.phone = value;
+    }
 }

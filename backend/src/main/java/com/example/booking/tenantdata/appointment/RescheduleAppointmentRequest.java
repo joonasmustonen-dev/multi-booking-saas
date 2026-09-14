@@ -6,14 +6,11 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public record RescheduleAppointmentRequest(
+    UUID staffId,
 
-        UUID staffId,
+    UUID locationId,
 
-        UUID locationId,
+    UUID resourceId,
 
-        UUID resourceId,
-
-        @NotNull
-        OffsetDateTime startAt
-) {
-}
+    @NotNull OffsetDateTime startAt
+) {}

@@ -5,7 +5,7 @@ import type {
     AppointmentResponse,
     AppointmentStatus,
     AvailabilitySlot,
-    CreateAppointmentRequest,
+    CreateAppointmentRequest
 } from "./appointmentTypes";
 
 export interface AppointmentFilters {
@@ -17,108 +17,100 @@ export interface AppointmentFilters {
     status?: AppointmentStatus;
 }
 
-
 export function getAppointments(
     from: string,
     to: string,
     filters: AppointmentFilters = {}
 ) {
-
-    const params =
-        new URLSearchParams({
-            from,
-            to,
-        });
-
+    const params = new URLSearchParams({
+        from,
+        to
+    });
 
     if (filters.staffId) params.set("staffId", filters.staffId);
     if (filters.locationId) params.set("locationId", filters.locationId);
 
-    if (
-        filters.resourceId
-    ) {
-        params.set(
-            "resourceId",
-            filters.resourceId
-        );
+    if (filters.resourceId) {
+        params.set("resourceId", filters.resourceId);
     }
 
-
-    if (
-        filters.customerId
-    ) {
-        params.set(
-            "customerId",
-            filters.customerId
-        );
+    if (filters.customerId) {
+        params.set("customerId", filters.customerId);
     }
 
-
-    if (
-        filters.serviceId
-    ) {
-        params.set(
-            "serviceId",
-            filters.serviceId
-        );
+    if (filters.serviceId) {
+        params.set("serviceId", filters.serviceId);
     }
 
-
-    if (
-        filters.status
-    ) {
-        params.set(
-            "status",
-            filters.status
-        );
+    if (filters.status) {
+        params.set("status", filters.status);
     }
 
-
-    return apiFetch<
-        AppointmentCalendarItem[]
-    >(
+    return apiFetch<AppointmentCalendarItem[]>(
         `/api/v1/appointments/calendar?${params.toString()}`
     );
 }
 
-export function createAppointment(
-    request: CreateAppointmentRequest
-) {
-    return apiFetch<AppointmentResponse>(
-        "/api/v1/appointments",
-        {
-            method: "POST",
-            body: JSON.stringify(request),
-        }
-    );
+export function createAppointment(request: CreateAppointmentRequest) {
+    return apiFetch<AppointmentResponse>("/api/v1/appointments", {
+        method: "POST",
+        body: JSON.stringify(request)
+    });
 }
 
-export function cancelAppointment(
-    appointmentId: string
-) {
+export function cancelAppointment(appointmentId: string) {
     return apiFetch<AppointmentResponse>(
         `/api/v1/appointments/${appointmentId}/cancel`,
         {
-            method: "POST",
+            method: "POST"
         }
     );
 }
 
-export interface AvailabilityFilters { staffId?: string; locationId?: string; resourceId?: string }
-function availabilityParams(from: string, to: string, filters: AvailabilityFilters) {
+export interface AvailabilityFilters {
+    staffId?: string;
+    locationId?: string;
+    resourceId?: string;
+}
+function availabilityParams(
+    from: string,
+    to: string,
+    filters: AvailabilityFilters
+) {
     const params = new URLSearchParams({ from, to });
-    for (const [key, value] of Object.entries(filters)) if (value) params.set(key, value);
+    for (const [key, value] of Object.entries(filters))
+        if (value) params.set(key, value);
     return params;
 }
-export function getAvailability(serviceId: string, date: string, filters: AvailabilityFilters = {}) {
-    const params = availabilityParams(date, date, filters); params.set("serviceId", serviceId);
-    return apiFetch<AvailabilitySlot[]>(`/api/v1/availability?${params}`, { signal: AbortSignal.timeout(20000) });
+export function getAvailability(
+    serviceId: string,
+    date: string,
+    filters: AvailabilityFilters = {}
+) {
+    const params = availabilityParams(date, date, filters);
+    params.set("serviceId", serviceId);
+    return apiFetch<AvailabilitySlot[]>(`/api/v1/availability?${params}`, {
+        signal: AbortSignal.timeout(20000)
+    });
 }
-export function getRescheduleAvailability(id: string, date: string, filters: AvailabilityFilters = {}) {
-    return apiFetch<AvailabilitySlot[]>(`/api/v1/appointments/${id}/availability?${availabilityParams(date, date, filters)}`, { signal: AbortSignal.timeout(20000) });
+export function getRescheduleAvailability(
+    id: string,
+    date: string,
+    filters: AvailabilityFilters = {}
+) {
+    return apiFetch<AvailabilitySlot[]>(
+        `/api/v1/appointments/${id}/availability?${availabilityParams(date, date, filters)}`,
+        { signal: AbortSignal.timeout(20000) }
+    );
 }
-export function rescheduleAppointment(id: string, request: import("./appointmentTypes").RescheduleAppointmentRequest) {
-    return apiFetch<AppointmentResponse>(`/api/v1/appointments/${id}/reschedule`, { method: "POST", body: JSON.stringify(request) });
+export function rescheduleAppointment(
+    id: string,
+    request: import("./appointmentTypes").RescheduleAppointmentRequest
+) {
+    return apiFetch<AppointmentResponse>(
+        `/api/v1/appointments/${id}/reschedule`,
+        { method: "POST", body: JSON.stringify(request) }
+    );
 }
 
 export function updateAppointmentStatus(
@@ -131,10 +123,11 @@ export function updateAppointmentStatus(
             method: "PATCH",
 
             body: JSON.stringify({
-                status,
-            }),
+                status
+            })
         }
     );
 }
 
-export const getAppointment = (id: string) => apiFetch<AppointmentResponse>(`/api/v1/appointments/${id}`);
+export const getAppointment = (id: string) =>
+    apiFetch<AppointmentResponse>(`/api/v1/appointments/${id}`);

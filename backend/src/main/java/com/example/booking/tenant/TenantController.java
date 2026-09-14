@@ -9,7 +9,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/platform/tenants")
 public class TenantController {
-    
+
     private final TenantService tenantService;
 
     public TenantController(TenantService tenantService) {

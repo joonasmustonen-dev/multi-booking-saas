@@ -15,36 +15,24 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/appointments")
-@PreAuthorize(
-        "hasAnyRole('TENANT_ADMIN', 'STAFF')"
-)
+@PreAuthorize("hasAnyRole('TENANT_ADMIN', 'STAFF')")
 public class AppointmentController {
 
     private final AppointmentService service;
 
-    public AppointmentController(
-            AppointmentService service) {
-
+    public AppointmentController(AppointmentService service) {
         this.service = service;
     }
 
     @PostMapping
     public ResponseEntity<AppointmentResponse> create(
-            @Valid
-            @RequestBody
-            CreateAppointmentRequest request) {
+        @Valid @RequestBody CreateAppointmentRequest request
+    ) {
+        AppointmentResponse appointment = service.create(request);
 
-        AppointmentResponse appointment =
-                service.create(request);
-
-        return ResponseEntity
-                .created(
-                        URI.create(
-                                "/api/v1/appointments/"
-                                        + appointment.id()
-                        )
-                )
-                .body(appointment);
+        return ResponseEntity.created(
+            URI.create("/api/v1/appointments/" + appointment.id())
+        ).body(appointment);
     }
 
     @GetMapping
@@ -53,76 +41,47 @@ public class AppointmentController {
     }
 
     @GetMapping("/{id}")
-    public AppointmentResponse findById(
-            @PathVariable UUID id) {
-
+    public AppointmentResponse findById(@PathVariable UUID id) {
         return service.findById(id);
     }
 
     @PostMapping("/{id}/cancel")
-    public AppointmentResponse cancel(
-            @PathVariable UUID id) {
-
+    public AppointmentResponse cancel(@PathVariable UUID id) {
         return service.cancel(id);
     }
 
     @PostMapping("/{id}/reschedule")
     public AppointmentResponse reschedule(
-            @PathVariable UUID id,
-            @Valid
-            @RequestBody
-            RescheduleAppointmentRequest request) {
-
-        return service.reschedule(
-                id,
-                request
-        );
+        @PathVariable UUID id,
+        @Valid @RequestBody RescheduleAppointmentRequest request
+    ) {
+        return service.reschedule(id, request);
     }
 
     @PatchMapping("/{id}/status")
     public AppointmentResponse updateStatus(
-           @PathVariable UUID id,
-           @Valid
-           @RequestBody
-           UpdateAppointmentStatusRequest request) {
+        @PathVariable UUID id,
+        @Valid @RequestBody UpdateAppointmentStatusRequest request
+    ) {
+        return service.updateStatus(id, request.status());
+    }
 
-        return service.updateStatus(
-                id,
-                request.status()
-        );
-        }
-
-
-        @GetMapping("/calendar")
-public List<AppointmentCalendarResponse> findCalendar(
-
-        @RequestParam
-        @DateTimeFormat(
-                iso = DateTimeFormat.ISO.DATE
-        )
-        LocalDate from,
-
-        @RequestParam
-        @DateTimeFormat(
-                iso = DateTimeFormat.ISO.DATE
-        )
-        LocalDate to,
-
-        @RequestParam(required = false)
-        UUID resourceId,
-
+    @GetMapping("/calendar")
+    public List<AppointmentCalendarResponse> findCalendar(
+        @RequestParam @DateTimeFormat(
+            iso = DateTimeFormat.ISO.DATE
+        ) LocalDate from,
+        @RequestParam @DateTimeFormat(
+            iso = DateTimeFormat.ISO.DATE
+        ) LocalDate to,
+        @RequestParam(required = false) UUID resourceId,
         @RequestParam(required = false) UUID staffId,
         @RequestParam(required = false) UUID locationId,
-        @RequestParam(required = false)
-        UUID customerId,
-
-        @RequestParam(required = false)
-        UUID serviceId,
-
-        @RequestParam(required = false)
-        AppointmentStatus status) {
-
-    return service.findCalendar(
+        @RequestParam(required = false) UUID customerId,
+        @RequestParam(required = false) UUID serviceId,
+        @RequestParam(required = false) AppointmentStatus status
+    ) {
+        return service.findCalendar(
             from,
             to,
             resourceId,
@@ -132,16 +91,28 @@ public List<AppointmentCalendarResponse> findCalendar(
             serviceId,
             status
         );
-        }
+    }
 
     @GetMapping("/{id}/availability")
     public List<com.example.booking.tenantdata.availability.AvailabilitySlotResponse> findRescheduleAvailability(
-            @PathVariable UUID id,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
-            @RequestParam(required = false) UUID staffId,
-            @RequestParam(required = false) UUID locationId,
-            @RequestParam(required = false) UUID resourceId) {
-        return service.findRescheduleAvailability(id, from, to, staffId, locationId, resourceId);
+        @PathVariable UUID id,
+        @RequestParam @DateTimeFormat(
+            iso = DateTimeFormat.ISO.DATE
+        ) LocalDate from,
+        @RequestParam @DateTimeFormat(
+            iso = DateTimeFormat.ISO.DATE
+        ) LocalDate to,
+        @RequestParam(required = false) UUID staffId,
+        @RequestParam(required = false) UUID locationId,
+        @RequestParam(required = false) UUID resourceId
+    ) {
+        return service.findRescheduleAvailability(
+            id,
+            from,
+            to,
+            staffId,
+            locationId,
+            resourceId
+        );
     }
 }

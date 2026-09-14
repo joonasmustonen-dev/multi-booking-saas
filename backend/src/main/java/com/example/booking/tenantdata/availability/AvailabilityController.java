@@ -10,43 +10,35 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/availability")
-@PreAuthorize(
-        "hasAnyRole('TENANT_ADMIN', 'STAFF', 'CUSTOMER')"
-)
+@PreAuthorize("hasAnyRole('TENANT_ADMIN', 'STAFF', 'CUSTOMER')")
 public class AvailabilityController {
 
     private final AvailabilityService service;
 
-    public AvailabilityController(
-            AvailabilityService service) {
-
+    public AvailabilityController(AvailabilityService service) {
         this.service = service;
     }
 
     @GetMapping
     public List<AvailabilitySlotResponse> findAvailability(
-
-            @RequestParam UUID serviceId,
-
-            @RequestParam
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate from,
-
-            @RequestParam
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate to,
-
-            @RequestParam(required = false) UUID staffId,
-            @RequestParam(required = false) UUID locationId,
-            @RequestParam(required = false) UUID resourceId) {
-
+        @RequestParam UUID serviceId,
+        @RequestParam @DateTimeFormat(
+            iso = DateTimeFormat.ISO.DATE
+        ) LocalDate from,
+        @RequestParam @DateTimeFormat(
+            iso = DateTimeFormat.ISO.DATE
+        ) LocalDate to,
+        @RequestParam(required = false) UUID staffId,
+        @RequestParam(required = false) UUID locationId,
+        @RequestParam(required = false) UUID resourceId
+    ) {
         return service.findAvailability(
-                serviceId,
-                from,
-                to,
-                staffId,
-                locationId,
-                resourceId
+            serviceId,
+            from,
+            to,
+            staffId,
+            locationId,
+            resourceId
         );
     }
 }

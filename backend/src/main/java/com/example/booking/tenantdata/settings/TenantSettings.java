@@ -12,10 +12,7 @@ public class TenantSettings {
     @Id
     private Integer id;
 
-    @Column(
-            name = "time_zone",
-            nullable = false
-    )
+    @Column(name = "time_zone", nullable = false)
     private String timeZone;
 
     @Column(name = "business_name", nullable = false)
@@ -51,38 +48,101 @@ public class TenantSettings {
     @Column(name = "default_appointment_status", nullable = false)
     private String defaultAppointmentStatus = "CONFIRMED";
 
-    protected TenantSettings() {
-    }
+    protected TenantSettings() {}
 
     public String getTimeZone() {
         return timeZone;
     }
 
-    public void setTimeZone(
-            String timeZone) {
-
+    public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
     }
-    public String getBusinessName() { return businessName; }
-    public void setBusinessName(String value) { this.businessName = value; }
-    public String getContactEmail() { return contactEmail; }
-    public void setContactEmail(String value) { this.contactEmail = value; }
-    public String getContactPhone() { return contactPhone; }
-    public void setContactPhone(String value) { this.contactPhone = value; }
-    public String getDefaultCurrency() { return defaultCurrency; }
-    public void setDefaultCurrency(String value) { this.defaultCurrency = value; }
-    public int getSlotIntervalMinutes() { return slotIntervalMinutes; }
-    public void setSlotIntervalMinutes(int value) { this.slotIntervalMinutes = value; }
-    public int getMinimumNoticeMinutes() { return minimumNoticeMinutes; }
-    public void setMinimumNoticeMinutes(int value) { this.minimumNoticeMinutes = value; }
-    public int getBookingHorizonDays() { return bookingHorizonDays; }
-    public void setBookingHorizonDays(int value) { this.bookingHorizonDays = value; }
-    public int getCalendarStartHour() { return calendarStartHour; }
-    public void setCalendarStartHour(int value) { this.calendarStartHour = value; }
-    public int getCalendarEndHour() { return calendarEndHour; }
-    public void setCalendarEndHour(int value) { this.calendarEndHour = value; }
-    public int getWeekStartsOn() { return weekStartsOn; }
-    public void setWeekStartsOn(int value) { this.weekStartsOn = value; }
-    public String getDefaultAppointmentStatus() { return defaultAppointmentStatus; }
-    public void setDefaultAppointmentStatus(String value) { this.defaultAppointmentStatus = value; }
+
+    public String getBusinessName() {
+        return businessName;
+    }
+
+    public void setBusinessName(String value) {
+        this.businessName = value;
+    }
+
+    public String getContactEmail() {
+        return contactEmail;
+    }
+
+    public void setContactEmail(String value) {
+        this.contactEmail = value;
+    }
+
+    public String getContactPhone() {
+        return contactPhone;
+    }
+
+    public void setContactPhone(String value) {
+        this.contactPhone = value;
+    }
+
+    public String getDefaultCurrency() {
+        return defaultCurrency;
+    }
+
+    public void setDefaultCurrency(String value) {
+        this.defaultCurrency = value;
+    }
+
+    public int getSlotIntervalMinutes() {
+        return slotIntervalMinutes;
+    }
+
+    public void setSlotIntervalMinutes(int value) {
+        this.slotIntervalMinutes = value;
+    }
+
+    public int getMinimumNoticeMinutes() {
+        return minimumNoticeMinutes;
+    }
+
+    public void setMinimumNoticeMinutes(int value) {
+        this.minimumNoticeMinutes = value;
+    }
+
+    public int getBookingHorizonDays() {
+        return bookingHorizonDays;
+    }
+
+    public void setBookingHorizonDays(int value) {
+        this.bookingHorizonDays = value;
+    }
+
+    public int getCalendarStartHour() {
+        return calendarStartHour;
+    }
+
+    public void setCalendarStartHour(int value) {
+        this.calendarStartHour = value;
+    }
+
+    public int getCalendarEndHour() {
+        return calendarEndHour;
+    }
+
+    public void setCalendarEndHour(int value) {
+        this.calendarEndHour = value;
+    }
+
+    public int getWeekStartsOn() {
+        return weekStartsOn;
+    }
+
+    public void setWeekStartsOn(int value) {
+        this.weekStartsOn = value;
+    }
+
+    public String getDefaultAppointmentStatus() {
+        return defaultAppointmentStatus;
+    }
+
+    public void setDefaultAppointmentStatus(String value) {
+        this.defaultAppointmentStatus = value;
+    }
 }

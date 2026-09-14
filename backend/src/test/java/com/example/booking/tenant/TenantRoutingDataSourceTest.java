@@ -18,8 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class TenantRoutingDataSourceTest {
 
     private final TenantContextFilter filter = new TenantContextFilter();
-    private final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    private final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+
+    private final HttpServletRequest request = Mockito.mock(
+        HttpServletRequest.class
+    );
+
+    private final HttpServletResponse response = Mockito.mock(
+        HttpServletResponse.class
+    );
 
     @AfterEach
     void cleanup() {
@@ -45,6 +51,7 @@ public class TenantRoutingDataSourceTest {
     }
 
     private static class TestRoutingDataSource extends TenantRoutingDataSource {
+
         TestRoutingDataSource() {
             super(null, Mockito.mock(DataSource.class));
         }
@@ -54,33 +61,29 @@ public class TenantRoutingDataSourceTest {
         }
     }
 
-    @Test 
-    void tenantFilterClearsContextAfterRequest() throws Exception{
-
+    @Test
+    void tenantFilterClearsContextAfterRequest() throws Exception {
         Jwt jwt = Jwt.withTokenValue("token")
-                .header("alg", "none")
-                .claim("tenant_id", "tenant-a")
-                .build();
-        
+            .header("alg", "none")
+            .claim("tenant_id", "tenant-a")
+            .build();
+
         Authentication authentication = new JwtAuthenticationToken(jwt);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        
-        filter.doFilter(
-                request, 
-                response, 
-                (req, res) -> {
-                    // Inside the filter chain, the tenant context should be set
-                    assertEquals("tenant-a", TenantContext.getTenantId());
-                }
-        );
+
+        filter.doFilter(request, response, (req, res) -> {
+            // Inside the filter chain, the tenant context should be set
+            assertEquals("tenant-a", TenantContext.getTenantId());
+        });
 
         assertNull(TenantContext.getTenantId());
     }
 
     @Test
-    void tenantContextMustNotLeakBetweenRequests(){
+    void tenantContextMustNotLeakBetweenRequests() {
         TenantContext.setTenantId("tenant-a");
+
         assertEquals("tenant-a", TenantContext.getTenantId());
 
         // Simulate request completion

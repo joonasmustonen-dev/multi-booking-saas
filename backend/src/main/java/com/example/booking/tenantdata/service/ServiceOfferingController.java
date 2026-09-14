@@ -12,32 +12,24 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/services")
-@PreAuthorize(
-        "hasAnyRole('TENANT_ADMIN', 'STAFF')"
-)
+@PreAuthorize("hasAnyRole('TENANT_ADMIN', 'STAFF')")
 public class ServiceOfferingController {
 
     private final ServiceOfferingService service;
 
-    public ServiceOfferingController(
-            ServiceOfferingService service) {
-
+    public ServiceOfferingController(ServiceOfferingService service) {
         this.service = service;
     }
 
     @PostMapping
     public ResponseEntity<ServiceResponse> create(
-            @Valid @RequestBody CreateServiceRequest request) {
-
+        @Valid @RequestBody CreateServiceRequest request
+    ) {
         ServiceResponse created = service.create(request);
 
-        return ResponseEntity
-                .created(
-                        URI.create(
-                                "/api/v1/services/" + created.id()
-                        )
-                )
-                .body(created);
+        return ResponseEntity.created(
+            URI.create("/api/v1/services/" + created.id())
+        ).body(created);
     }
 
     @GetMapping
@@ -46,24 +38,20 @@ public class ServiceOfferingController {
     }
 
     @GetMapping("/{id}")
-    public ServiceResponse findById(
-            @PathVariable UUID id) {
-
+    public ServiceResponse findById(@PathVariable UUID id) {
         return service.findById(id);
     }
 
     @PutMapping("/{id}")
     public ServiceResponse update(
-            @PathVariable UUID id,
-            @Valid @RequestBody UpdateServiceRequest request) {
-
+        @PathVariable UUID id,
+        @Valid @RequestBody UpdateServiceRequest request
+    ) {
         return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(
-            @PathVariable UUID id) {
-
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
 
         return ResponseEntity.noContent().build();

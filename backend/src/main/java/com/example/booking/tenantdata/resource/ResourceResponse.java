@@ -4,24 +4,21 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public record ResourceResponse(
-        UUID id,
-        String name,
-        ResourceType type,
-        boolean active,
-        OffsetDateTime createdAt,
-        String description
+    UUID id,
+    String name,
+    ResourceType type,
+    boolean active,
+    OffsetDateTime createdAt,
+    String description
 ) {
-
-    public static ResourceResponse from(
-            BookableResource resource) {
-
+    public static ResourceResponse from(BookableResource resource) {
         return new ResourceResponse(
-                resource.getId(),
-                resource.getName(),
-                resource.getType(),
-                resource.isActive(),
-                resource.getCreatedAt(),
-                resource.getDescription()
+            resource.getId(),
+            resource.getName(),
+            resource.getType(),
+            resource.isActive(),
+            resource.getCreatedAt(),
+            resource.getDescription()
         );
     }
 }

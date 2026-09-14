@@ -1,8 +1,7 @@
 .dashboard-metrics {
     display: grid;
 
-    grid-template-columns:
-        repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 
     gap: 14px;
 
@@ -71,7 +70,6 @@
     font-size: 12px;
 }
 
-
 /* ---------- Charts ---------- */
 
 .dashboard-insights {
@@ -121,7 +119,6 @@
     font-size: 12px;
 }
 
-
 /* ---------- Week bars ---------- */
 
 .week-chart {
@@ -129,8 +126,7 @@
 
     display: grid;
 
-    grid-template-columns:
-        repeat(7, 1fr);
+    grid-template-columns: repeat(7, 1fr);
 
     align-items: end;
 
@@ -162,15 +158,9 @@
 
     min-height: 5px;
 
-    border-radius:
-        8px 8px 3px 3px;
+    border-radius: 8px 8px 3px 3px;
 
-    background:
-        linear-gradient(
-            180deg,
-            #92bbed,
-            #c7dbf5
-        );
+    background: linear-gradient(180deg, #92bbed, #c7dbf5);
 }
 
 .week-chart-day {
@@ -178,7 +168,6 @@
 
     font-size: 11px;
 }
-
 
 /* ---------- Status ---------- */
 
@@ -191,8 +180,7 @@
 .status-row {
     display: grid;
 
-    grid-template-columns:
-        100px 1fr 34px;
+    grid-template-columns: 100px 1fr 34px;
 
     align-items: center;
 
@@ -247,7 +235,6 @@
     text-align: right;
 }
 
-
 /* ---------- Bottom dashboard ---------- */
 
 .dashboard-lower {
@@ -272,8 +259,7 @@
 .today-row {
     display: grid;
 
-    grid-template-columns:
-        68px 1fr auto;
+    grid-template-columns: 68px 1fr auto;
 
     gap: 14px;
 
@@ -281,8 +267,7 @@
 
     min-height: 68px;
 
-    border-bottom:
-        1px solid var(--line);
+    border-bottom: 1px solid var(--line);
 }
 
 .today-row:last-child {
@@ -339,7 +324,6 @@
     background: var(--danger-soft);
 }
 
-
 /* ---------- Team ---------- */
 
 .team-row {
@@ -350,8 +334,7 @@
 
     gap: 11px;
 
-    border-bottom:
-        1px solid var(--line);
+    border-bottom: 1px solid var(--line);
 }
 
 .team-row:last-child {
@@ -389,7 +372,6 @@
 
     font-size: 11px;
 }
-
 
 /* ---------- Right rail ---------- */
 
@@ -445,7 +427,6 @@
     background: var(--sage-soft);
 }
 
-
 /* ---------- Popular ---------- */
 
 .popular-row {
@@ -453,8 +434,7 @@
 
     display: grid;
 
-    grid-template-columns:
-        28px 1fr auto;
+    grid-template-columns: 28px 1fr auto;
 
     align-items: center;
 
@@ -487,7 +467,6 @@
     font-size: 11px;
 }
 
-
 /* ---------- Empty ---------- */
 
 .dashboard-empty {
@@ -498,14 +477,11 @@
     font-size: 13px;
 }
 
-
 /* ---------- Responsive ---------- */
 
 @media (max-width: 1180px) {
-
     .dashboard-lower {
-        grid-template-columns:
-            1fr 1fr;
+        grid-template-columns: 1fr 1fr;
     }
 
     .dashboard-lower > :first-child {
@@ -513,9 +489,7 @@
     }
 }
 
-
 @media (max-width: 800px) {
-
     .dashboard-metrics,
     .dashboard-insights,
     .dashboard-lower {
@@ -527,5 +501,37 @@
     }
 }
 /* Keep growing dashboard lists inside their own panels. */
-.dashboard-lower .today-list,.dashboard-lower .team-list,.dashboard-lower .popular-list{max-height:290px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#becbbb transparent;padding-right:6px}
-.dashboard-lower{align-items:start}.dashboard-lower .dashboard-panel{min-width:0}.dashboard-today-filter{max-width:300px;margin-bottom:12px}.today-row>div:nth-child(2){min-width:0}.today-customer,.today-detail,.team-name,.popular-name{overflow-wrap:anywhere}.team-avatar,.popular-rank{flex-shrink:0}
+.dashboard-lower .today-list,
+.dashboard-lower .team-list,
+.dashboard-lower .popular-list {
+    max-height: 290px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #becbbb transparent;
+    padding-right: 6px;
+}
+.dashboard-lower {
+    align-items: start;
+}
+.dashboard-lower .dashboard-panel {
+    min-width: 0;
+}
+.dashboard-today-filter {
+    max-width: 300px;
+    margin-bottom: 12px;
+}
+.today-row > div:nth-child(2) {
+    min-width: 0;
+}
+.today-customer,
+.today-detail,
+.team-name,
+.popular-name {
+    overflow-wrap: anywhere;
+}
+.team-avatar,
+.popular-rank {
+    flex-shrink: 0;
+}

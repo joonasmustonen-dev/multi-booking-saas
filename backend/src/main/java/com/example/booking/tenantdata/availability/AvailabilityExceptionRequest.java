@@ -5,13 +5,9 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 public record AvailabilityExceptionRequest(
+    @NotNull LocalDateTime startAt,
 
-        @NotNull
-        LocalDateTime startAt,
+    @NotNull LocalDateTime endAt,
 
-        @NotNull
-        LocalDateTime endAt,
-
-        boolean available
-) {
-}
+    boolean available
+) {}

@@ -10,13 +10,12 @@ import javax.sql.DataSource;
 
 @Configuration
 public class TenantDataSourceConfig {
-    
+
     @Bean
     public TenantRoutingDataSource tenantRoutingDataSource(
-            TenantDataSourceManager dataSourceManager,
-            @Qualifier("platformDataSource")
-            DataSource platformDataSource) {
-                
+        TenantDataSourceManager dataSourceManager,
+        @Qualifier("platformDataSource") DataSource platformDataSource
+    ) {
         return new TenantRoutingDataSource(
             dataSourceManager,
             platformDataSource

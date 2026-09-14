@@ -28,26 +28,35 @@ public class Customer {
     @Column(name = "preferred_staff_id")
     private UUID preferredStaffId;
 
-    public UUID getPreferredStaffId() { return preferredStaffId; }
-    public void setPreferredStaffId(UUID id) { preferredStaffId = id; }
+    public UUID getPreferredStaffId() {
+        return preferredStaffId;
+    }
+
+    public void setPreferredStaffId(UUID id) {
+        preferredStaffId = id;
+    }
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
-    protected Customer() {
-    }
+    protected Customer() {}
 
     public Customer(
-            String firstName,
-            String lastName,
-            String email,
-            String phone) {
-
+        String firstName,
+        String lastName,
+        String email,
+        String phone
+    ) {
         this.id = UUID.randomUUID();
+
         this.firstName = firstName;
+
         this.lastName = lastName;
+
         this.email = email;
+
         this.phone = phone;
+
         this.createdAt = OffsetDateTime.now();
     }
 
@@ -79,11 +88,14 @@ public class Customer {
         String firstName,
         String lastName,
         String email,
-        String phone) {
+        String phone
+    ) {
+        this.firstName = firstName;
 
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.email = email;
-    this.phone = phone;
-}
+        this.lastName = lastName;
+
+        this.email = email;
+
+        this.phone = phone;
+    }
 }

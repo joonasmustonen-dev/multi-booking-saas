@@ -5,11 +5,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
 @EnableJpaRepositories(
-        basePackages = "com.example.booking.tenant",
-        entityManagerFactoryRef = "platformEntityManagerFactory",
-        transactionManagerRef = "platformTransactionManager"
+    basePackages = "com.example.booking.tenant",
+    entityManagerFactoryRef = "platformEntityManagerFactory",
+    transactionManagerRef = "platformTransactionManager"
 )
-
-public class PlatformJpaRepositoryConfig {
-    
-}
+public class PlatformJpaRepositoryConfig {}

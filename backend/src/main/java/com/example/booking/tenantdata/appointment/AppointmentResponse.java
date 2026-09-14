@@ -4,64 +4,61 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public record AppointmentResponse(
+    UUID id,
 
-        UUID id,
+    UUID customerId,
+    UUID serviceId,
+    UUID resourceId,
+    UUID staffId,
+    UUID locationId,
 
-        UUID customerId,
-        UUID serviceId,
-        UUID resourceId,
-        UUID staffId,
-        UUID locationId,
+    OffsetDateTime startAt,
+    OffsetDateTime endAt,
 
-        OffsetDateTime startAt,
-        OffsetDateTime endAt,
+    AppointmentStatus status,
 
-        AppointmentStatus status,
+    String staffName,
+    String locationName,
+    String notes,
 
-        String staffName,
-        String locationName,
-        String notes,
-
-        OffsetDateTime createdAt
+    OffsetDateTime createdAt
 ) {
-
-    public static AppointmentResponse from(
-            Appointment appointment) {
-
+    public static AppointmentResponse from(Appointment appointment) {
         return new AppointmentResponse(
-                appointment.getId(),
+            appointment.getId(),
 
-                appointment.getCustomer().getId(),
+            appointment.getCustomer().getId(),
 
-                appointment.getService().getId(),
+            appointment.getService().getId(),
 
-                appointment.getResource() != null ? appointment.getResource().getId() : null,
+            appointment.getResource() != null
+                ? appointment.getResource().getId()
+                : null,
 
-                appointment.getStaff() != null
-                        ?appointment.getStaff().getId()
-                        :null,
+            appointment.getStaff() != null
+                ? appointment.getStaff().getId()
+                : null,
 
-                appointment.getLocation() != null
-                        ?appointment.getLocation().getId()
-                        :null,
+            appointment.getLocation() != null
+                ? appointment.getLocation().getId()
+                : null,
 
-                appointment.getStartAt(),
-                appointment.getEndAt(),
+            appointment.getStartAt(),
+            appointment.getEndAt(),
 
-                appointment.getStatus(),
+            appointment.getStatus(),
 
-                appointment.getStaff() != null
-                        ?appointment.getStaff().getName()
-                        :null,
+            appointment.getStaff() != null
+                ? appointment.getStaff().getName()
+                : null,
 
-                appointment.getLocation() != null
-                        ?appointment.getLocation().getName()
-                        :null,
+            appointment.getLocation() != null
+                ? appointment.getLocation().getName()
+                : null,
 
-                appointment.getNotes(),
+            appointment.getNotes(),
 
-                appointment.getCreatedAt()
+            appointment.getCreatedAt()
         );
     }
-    
 }

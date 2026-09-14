@@ -1,8 +1,7 @@
 import type {
     AppointmentCalendarItem,
-    AppointmentStatus,
+    AppointmentStatus
 } from "../appointments/appointmentTypes";
-
 
 export interface DashboardSummary {
     timeZone: string;
@@ -13,28 +12,21 @@ export interface DashboardSummary {
     customers: number;
     bookingsThisWeek: number;
 
-    dailyBookings:
-        DashboardDailyBooking[];
+    dailyBookings: DashboardDailyBooking[];
 
-    todaysAppointments:
-        AppointmentCalendarItem[];
+    todaysAppointments: AppointmentCalendarItem[];
 
-    team:
-        DashboardTeamMember[];
+    team: DashboardTeamMember[];
 
-    popularServices:
-        DashboardPopularService[];
+    popularServices: DashboardPopularService[];
 
-    statusCounts:
-        DashboardStatusCount[];
+    statusCounts: DashboardStatusCount[];
 }
-
 
 export interface DashboardDailyBooking {
     date: string;
     count: number;
 }
-
 
 export interface DashboardTeamMember {
     staffId: string;
@@ -42,13 +34,11 @@ export interface DashboardTeamMember {
     todaysBookings: number;
 }
 
-
 export interface DashboardPopularService {
     serviceId: string;
     name: string;
     bookings: number;
 }
-
 
 export interface DashboardStatusCount {
     status: AppointmentStatus;

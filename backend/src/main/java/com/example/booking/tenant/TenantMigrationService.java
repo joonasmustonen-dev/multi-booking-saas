@@ -11,27 +11,23 @@ public class TenantMigrationService {
 
     private final TenantDataSourceManager dataSourceManager;
 
-    public TenantMigrationService(
-            TenantDataSourceManager dataSourceManager) {
-
+    public TenantMigrationService(TenantDataSourceManager dataSourceManager) {
         this.dataSourceManager = dataSourceManager;
     }
 
     public void migrate(String tenantSlug) {
-
-        DataSource dataSource =
-                dataSourceManager.getDataSource(tenantSlug);
+        DataSource dataSource = dataSourceManager.getDataSource(tenantSlug);
 
         Flyway.configure()
-                .dataSource(dataSource)
-                .locations("classpath:db/tenant")
+            .dataSource(dataSource)
+            .locations("classpath:db/tenant")
 
-                // Existing development tenant DBs already contain
-                // routing_test_data but were not previously managed by Flyway.
-                .baselineOnMigrate(true)
-                .baselineVersion(MigrationVersion.fromVersion("0"))
+            // Existing development tenant DBs already contain
+            // routing_test_data but were not previously managed by Flyway.
+            .baselineOnMigrate(true)
+            .baselineVersion(MigrationVersion.fromVersion("0"))
 
-                .load()
-                .migrate();
+            .load()
+            .migrate();
     }
 }

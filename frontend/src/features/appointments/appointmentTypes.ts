@@ -1,9 +1,5 @@
 export type AppointmentStatus =
-    | "PENDING"
-    | "CONFIRMED"
-    | "CANCELLED"
-    | "COMPLETED"
-    | "NO_SHOW";
+    "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED" | "NO_SHOW";
 
 export interface AppointmentCalendarItem {
     id: string;
@@ -54,4 +50,9 @@ export interface AvailabilitySlot {
     start: string;
     end: string;
 }
-export interface RescheduleAppointmentRequest { staffId: string | null; locationId: string | null; resourceId: string | null; startAt: string }
+export interface RescheduleAppointmentRequest {
+    staffId: string | null;
+    locationId: string | null;
+    resourceId: string | null;
+    startAt: string;
+}

@@ -15,56 +15,56 @@ import java.io.IOException;
 
 @Component
 public class TenantContextFilter extends OncePerRequestFilter {
-    
+
     private static final String TENANT_CLAIM = "tenant_id";
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return (request.getContextPath() + "/api/health")
-                .equals(request.getRequestURI());
+        return (request.getContextPath() + "/api/health").equals(
+            request.getRequestURI()
+        );
     }
 
     @Override
     protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain) 
-            throws ServletException, IOException {
-        
-            try {
+        HttpServletRequest request,
+        HttpServletResponse response,
+        FilterChain filterChain
+    ) throws ServletException, IOException {
+        try {
             Authentication authentication =
-                    SecurityContextHolder
-                            .getContext()
-                            .getAuthentication();
+                SecurityContextHolder.getContext().getAuthentication();
 
-            if (!(authentication instanceof JwtAuthenticationToken jwtAuthentication)) {
+            if (
+                !(authentication instanceof
+                    JwtAuthenticationToken jwtAuthentication)
+            ) {
                 response.sendError(
-                        HttpServletResponse.SC_UNAUTHORIZED,
-                        "JWT authentication required"
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    "JWT authentication required"
                 );
+
                 return;
             }
 
-            String tenantId =
-                    jwtAuthentication
-                            .getToken()
-                            .getClaimAsString("tenant_id");
+            String tenantId = jwtAuthentication
+                .getToken()
+                .getClaimAsString("tenant_id");
 
             if (tenantId == null || tenantId.isBlank()) {
                 response.sendError(
-                        HttpServletResponse.SC_FORBIDDEN,
-                        "tenant_id claim is required"
+                    HttpServletResponse.SC_FORBIDDEN,
+                    "tenant_id claim is required"
                 );
+
                 return;
             }
 
             TenantContext.setTenantId(tenantId);
 
             filterChain.doFilter(request, response);
-
         } finally {
             TenantContext.clear();
         }
     }
-    
 }

@@ -37,96 +37,101 @@ public class ServiceOffering {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "staff_requirement", nullable = false)
-    private AssignmentRequirement staffRequirement = AssignmentRequirement.FORBIDDEN;
+    private AssignmentRequirement staffRequirement =
+        AssignmentRequirement.FORBIDDEN;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "location_requirement", nullable = false)
-    private AssignmentRequirement locationRequirement = AssignmentRequirement.FORBIDDEN;
+    private AssignmentRequirement locationRequirement =
+        AssignmentRequirement.FORBIDDEN;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "resource_requirement", nullable = false)
-    private AssignmentRequirement resourceRequirement = AssignmentRequirement.REQUIRED;
+    private AssignmentRequirement resourceRequirement =
+        AssignmentRequirement.REQUIRED;
 
-    public AssignmentRequirement getStaffRequirement() { return staffRequirement; }
-    public AssignmentRequirement getLocationRequirement() { return locationRequirement; }
-    public AssignmentRequirement getResourceRequirement() { return resourceRequirement; }
-    public void configureRequirements(AssignmentRequirement staff, AssignmentRequirement location, AssignmentRequirement resource) {
+    public AssignmentRequirement getStaffRequirement() {
+        return staffRequirement;
+    }
+
+    public AssignmentRequirement getLocationRequirement() {
+        return locationRequirement;
+    }
+
+    public AssignmentRequirement getResourceRequirement() {
+        return resourceRequirement;
+    }
+
+    public void configureRequirements(
+        AssignmentRequirement staff,
+        AssignmentRequirement location,
+        AssignmentRequirement resource
+    ) {
         this.staffRequirement = staff;
+
         this.locationRequirement = location;
+
         this.resourceRequirement = resource;
     }
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
-    @ManyToMany
-    @JoinTable(
-            name = "service_staff",
-            joinColumns =
-                    @JoinColumn(
-                            name = "service_id"
-                    ),
-            inverseJoinColumns =
-                    @JoinColumn(
-                            name = "staff_id"
-                    )
-    )
-    private Set<StaffMember> staff =
-            new HashSet<>();
 
     @ManyToMany
     @JoinTable(
-            name = "service_locations",
-            joinColumns =
-                    @JoinColumn(
-                            name = "service_id"
-                    ),
-            inverseJoinColumns =
-                    @JoinColumn(
-                            name = "location_id"
-                    )
+        name = "service_staff",
+        joinColumns = @JoinColumn(name = "service_id"),
+        inverseJoinColumns = @JoinColumn(name = "staff_id")
     )
-    private Set<Location> locations =
-            new HashSet<>();
+    private Set<StaffMember> staff = new HashSet<>();
+
     @ManyToMany
     @JoinTable(
-            name = "service_resources",
-            joinColumns =
-                    @JoinColumn(name = "service_id"),
-            inverseJoinColumns =
-                    @JoinColumn(name = "resource_id")
+        name = "service_locations",
+        joinColumns = @JoinColumn(name = "service_id"),
+        inverseJoinColumns = @JoinColumn(name = "location_id")
     )
-    private Set<BookableResource> resources =
-            new HashSet<>();
+    private Set<Location> locations = new HashSet<>();
 
-    protected ServiceOffering() {
-    }
+    @ManyToMany
+    @JoinTable(
+        name = "service_resources",
+        joinColumns = @JoinColumn(name = "service_id"),
+        inverseJoinColumns = @JoinColumn(name = "resource_id")
+    )
+    private Set<BookableResource> resources = new HashSet<>();
+
+    protected ServiceOffering() {}
 
     public ServiceOffering(
-            String name,
-            String description,
-            int durationMinutes,
-            BigDecimal price,
-            String currency) {
-
+        String name,
+        String description,
+        int durationMinutes,
+        BigDecimal price,
+        String currency
+    ) {
         this.id = UUID.randomUUID();
+
         this.name = name;
+
         this.description = description;
+
         this.durationMinutes = durationMinutes;
+
         this.price = price;
+
         this.currency = currency;
+
         this.active = true;
+
         this.createdAt = OffsetDateTime.now();
     }
 
-    public void addResource(
-            BookableResource resource) {
-
+    public void addResource(BookableResource resource) {
         resources.add(resource);
     }
 
-    public void removeResource(
-            BookableResource resource) {
-
+    public void removeResource(BookableResource resource) {
         resources.remove(resource);
     }
 
@@ -174,17 +179,15 @@ public class ServiceOffering {
         return locations;
     }
 
-    public void replaceStaff(
-            Set<StaffMember> staff) {
-
+    public void replaceStaff(Set<StaffMember> staff) {
         this.staff.clear();
+
         this.staff.addAll(staff);
     }
 
-    public void replaceLocations(
-            Set<Location> locations) {
-
+    public void replaceLocations(Set<Location> locations) {
         this.locations.clear();
+
         this.locations.addAll(locations);
     }
 
@@ -194,18 +197,24 @@ public class ServiceOffering {
         int durationMinutes,
         BigDecimal price,
         String currency,
-        boolean active) {
+        boolean active
+    ) {
+        this.name = name;
 
-    this.name = name;
-    this.description = description;
-    this.durationMinutes = durationMinutes;
-    this.price = price;
-    this.currency = currency;
-    this.active = active;
-}
+        this.description = description;
+
+        this.durationMinutes = durationMinutes;
+
+        this.price = price;
+
+        this.currency = currency;
+
+        this.active = active;
+    }
 
     public void replaceResources(Set<BookableResource> resources) {
         this.resources.clear();
+
         this.resources.addAll(resources);
     }
 }

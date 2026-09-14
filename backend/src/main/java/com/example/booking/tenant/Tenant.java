@@ -12,7 +12,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "tenants")
 public class Tenant {
-    
+
     @Id
     private UUID id;
 
@@ -78,5 +78,4 @@ public class Tenant {
     public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
     }
-    
 }

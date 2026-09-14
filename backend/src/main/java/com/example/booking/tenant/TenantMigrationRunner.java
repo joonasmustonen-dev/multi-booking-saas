@@ -8,24 +8,22 @@ import org.springframework.stereotype.Component;
 public class TenantMigrationRunner implements ApplicationRunner {
 
     private final TenantRepository tenantRepository;
+
     private final TenantMigrationService migrationService;
 
     public TenantMigrationRunner(
-            TenantRepository tenantRepository,
-            TenantMigrationService migrationService) {
-
+        TenantRepository tenantRepository,
+        TenantMigrationService migrationService
+    ) {
         this.tenantRepository = tenantRepository;
+
         this.migrationService = migrationService;
     }
 
     @Override
     public void run(ApplicationArguments args) {
-
-        tenantRepository.findByStatus("ACTIVE")
-                .forEach(tenant ->
-                        migrationService.migrate(
-                                tenant.getSlug()
-                        )
-                );
+        tenantRepository
+            .findByStatus("ACTIVE")
+            .forEach(tenant -> migrationService.migrate(tenant.getSlug()));
     }
 }

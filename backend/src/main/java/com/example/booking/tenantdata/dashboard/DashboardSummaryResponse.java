@@ -8,44 +8,33 @@ import java.util.List;
 import java.util.UUID;
 
 public record DashboardSummaryResponse(
-        String timeZone,
-        LocalDate today,
+    String timeZone,
+    LocalDate today,
 
-        long todaysBookings,
-        long openSlots,
-        long customers,
-        long bookingsThisWeek,
+    long todaysBookings,
+    long openSlots,
+    long customers,
+    long bookingsThisWeek,
 
-        List<DailyBookingCount> dailyBookings,
-        List<AppointmentCalendarResponse> todaysAppointments,
-        List<TeamMemberSummary> team,
-        List<PopularServiceSummary> popularServices,
-        List<StatusCount> statusCounts
+    List<DailyBookingCount> dailyBookings,
+    List<AppointmentCalendarResponse> todaysAppointments,
+    List<TeamMemberSummary> team,
+    List<PopularServiceSummary> popularServices,
+    List<StatusCount> statusCounts
 ) {
-
-    public record DailyBookingCount(
-            LocalDate date,
-            long count
-    ) {
-    }
+    public record DailyBookingCount(LocalDate date, long count) {}
 
     public record TeamMemberSummary(
-            UUID staffId,
-            String name,
-            long todaysBookings
-    ) {
-    }
+        UUID staffId,
+        String name,
+        long todaysBookings
+    ) {}
 
     public record PopularServiceSummary(
-            UUID serviceId,
-            String name,
-            long bookings
-    ) {
-    }
+        UUID serviceId,
+        String name,
+        long bookings
+    ) {}
 
-    public record StatusCount(
-            AppointmentStatus status,
-            long count
-    ) {
-    }
+    public record StatusCount(AppointmentStatus status, long count) {}
 }

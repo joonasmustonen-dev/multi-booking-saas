@@ -1,8 +1,68 @@
 import { entityLabel } from "../assignments/entityLabels";
 import SearchSelect from "../../components/SearchSelect";
-import type { Assignment, AssignmentKind } from "../assignments/assignmentTypes";
+import type {
+    Assignment,
+    AssignmentKind
+} from "../assignments/assignmentTypes";
 import SchedulePanel from "./SchedulePanel";
-export default function OwnerSchedule({ kind, options, selectedId, onSelect, timeZone }: { kind: AssignmentKind; options: Assignment[]; selectedId: string; onSelect: (id: string) => void; timeZone: string }) {
-    const owner = options.find(item => item.id === selectedId) ?? options[0]; if (!owner) return null;
-    return <section id={`${kind}-schedule`} className="owner-schedule"><div className="card management-panel tinted-panel schedule-picker"><div><p className="page-eyebrow">{kind === "locations" ? "Standing opening hours" : "Resource availability"}</p><h2>{kind === "locations" ? "Opening hours and closures" : "Hours and exceptions"}</h2><p className="field-note">{kind === "locations" ? "Locations keep a regular opening schedule. Closures apply to every staff member using this location." : "Set recurring hours, unavailable periods, or extra availability for this resource."}</p></div><SearchSelect value={owner.id} options={options.map(item => ({ value: item.id, label: entityLabel(item, options), description: item.active ? "Active" : "Inactive" }))} onChange={onSelect} ariaLabel={kind === "locations" ? "Location opening hours" : "Resource availability"} /></div><SchedulePanel key={`${kind}:${owner.id}`} kind={kind} ownerId={owner.id} ownerName={owner.name} timeZone={timeZone} allowExtraAvailability={kind !== "locations"} /></section>;
+export default function OwnerSchedule({
+    kind,
+    options,
+    selectedId,
+    onSelect,
+    timeZone
+}: {
+    kind: AssignmentKind;
+    options: Assignment[];
+    selectedId: string;
+    onSelect: (id: string) => void;
+    timeZone: string;
+}) {
+    const owner = options.find(item => item.id === selectedId) ?? options[0];
+    if (!owner) return null;
+    return (
+        <section id={`${kind}-schedule`} className="owner-schedule">
+            <div className="card management-panel tinted-panel schedule-picker">
+                <div>
+                    <p className="page-eyebrow">
+                        {kind === "locations"
+                            ? "Standing opening hours"
+                            : "Resource availability"}
+                    </p>
+                    <h2>
+                        {kind === "locations"
+                            ? "Opening hours and closures"
+                            : "Hours and exceptions"}
+                    </h2>
+                    <p className="field-note">
+                        {kind === "locations"
+                            ? "Locations keep a regular opening schedule. Closures apply to every staff member using this location."
+                            : "Set recurring hours, unavailable periods, or extra availability for this resource."}
+                    </p>
+                </div>
+                <SearchSelect
+                    value={owner.id}
+                    options={options.map(item => ({
+                        value: item.id,
+                        label: entityLabel(item, options),
+                        description: item.active ? "Active" : "Inactive"
+                    }))}
+                    onChange={onSelect}
+                    ariaLabel={
+                        kind === "locations"
+                            ? "Location opening hours"
+                            : "Resource availability"
+                    }
+                />
+            </div>
+            <SchedulePanel
+                key={`${kind}:${owner.id}`}
+                kind={kind}
+                ownerId={owner.id}
+                ownerName={owner.name}
+                timeZone={timeZone}
+                allowExtraAvailability={kind !== "locations"}
+            />
+        </section>
+    );
 }

@@ -15,44 +15,31 @@ class TenantContextTest {
 
     @Test
     void storesTenantId() {
-
         TenantContext.setTenantId("tenant-a");
 
-        assertEquals(
-                "tenant-a",
-                TenantContext.getTenantId()
-        );
+        assertEquals("tenant-a", TenantContext.getTenantId());
     }
 
     @Test
     void clearRemovesTenantId() {
-
         TenantContext.setTenantId("tenant-a");
 
         TenantContext.clear();
 
-        assertNull(
-                TenantContext.getTenantId()
-        );
+        assertNull(TenantContext.getTenantId());
     }
 
     @Test
     void tenantContextDoesNotLeakBetweenRequests() {
-
         // Simulate request A
         TenantContext.setTenantId("tenant-a");
 
-        assertEquals(
-                "tenant-a",
-                TenantContext.getTenantId()
-        );
+        assertEquals("tenant-a", TenantContext.getTenantId());
 
         // Simulate request completion
         TenantContext.clear();
 
         // Simulate request B reusing the same thread
-        assertNull(
-                TenantContext.getTenantId()
-        );
+        assertNull(TenantContext.getTenantId());
     }
 }

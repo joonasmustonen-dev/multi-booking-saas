@@ -1,9 +1,9 @@
 package com.example.booking.tenant;
 
-
 public final class TenantContext {
-    
-    private static final ThreadLocal<String> CURRENT_TENANT = new ThreadLocal<>();
+
+    private static final ThreadLocal<String> CURRENT_TENANT =
+        new ThreadLocal<>();
 
     private TenantContext() {
         // Private constructor to prevent instantiation

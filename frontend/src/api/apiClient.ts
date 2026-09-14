@@ -6,7 +6,6 @@ export async function apiFetch<T>(
     path: string,
     options: RequestInit = {}
 ): Promise<T> {
-
     try {
         await keycloak.updateToken(30);
     } catch {
@@ -16,25 +15,16 @@ export async function apiFetch<T>(
 
     const headers = new Headers(options.headers);
 
-    headers.set(
-        "Authorization",
-        `Bearer ${keycloak.token}`
-    );
+    headers.set("Authorization", `Bearer ${keycloak.token}`);
 
     if (options.body) {
-        headers.set(
-            "Content-Type",
-            "application/json"
-        );
+        headers.set("Content-Type", "application/json");
     }
 
-    const response = await fetch(
-        `${API_URL}${path}`,
-        {
-            ...options,
-            headers,
-        }
-    );
+    const response = await fetch(`${API_URL}${path}`, {
+        ...options,
+        headers
+    });
 
     if (response.status === 401) {
         await keycloak.login();
@@ -42,15 +32,11 @@ export async function apiFetch<T>(
     }
 
     if (response.status === 403) {
-        throw new Error(
-            "You do not have permission to perform this action"
-        );
+        throw new Error("You do not have permission to perform this action");
     }
 
     if (!response.ok) {
-        throw new Error(
-            `API request failed with status ${response.status}`
-        );
+        throw new Error(`API request failed with status ${response.status}`);
     }
 
     if (response.status === 204) {

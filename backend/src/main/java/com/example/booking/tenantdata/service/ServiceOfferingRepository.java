@@ -10,31 +10,19 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ServiceOfferingRepository
-        extends JpaRepository<ServiceOffering, UUID> {
-
-    @EntityGraph(
-        attributePaths = {
-                "resources",
-                "staff",
-                "locations"
-        }
-)
+    extends JpaRepository<ServiceOffering, UUID>
+{
+    @EntityGraph(attributePaths = { "resources", "staff", "locations" })
     @Query("select distinct s from ServiceOffering s")
     List<ServiceOffering> findAllWithResources();
 
-    @EntityGraph(
-            attributePaths = {
-                        "resources",
-                        "staff",
-                        "locations"
-                }
-        )
-    @Query("""
+    @EntityGraph(attributePaths = { "resources", "staff", "locations" })
+    @Query(
+        """
         select s
         from ServiceOffering s
         where s.id = :id
-        """)
-    Optional<ServiceOffering> findByIdWithResources(
-            @Param("id") UUID id
-        );
+        """
+    )
+    Optional<ServiceOffering> findByIdWithResources(@Param("id") UUID id);
 }

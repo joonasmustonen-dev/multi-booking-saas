@@ -6,71 +6,70 @@ import java.util.UUID;
 import com.example.booking.tenantdata.resource.ResourceType;
 
 public record AppointmentCalendarResponse(
+    UUID id,
 
-        UUID id,
+    UUID customerId,
+    String customerName,
 
-        UUID customerId,
-        String customerName,
+    UUID serviceId,
+    String serviceName,
 
-        UUID serviceId,
-        String serviceName,
+    UUID resourceId,
+    String resourceName,
 
-        UUID resourceId,
-        String resourceName,
+    OffsetDateTime startAt,
+    OffsetDateTime endAt,
 
-        OffsetDateTime startAt,
-        OffsetDateTime endAt,
+    AppointmentStatus status,
 
-        AppointmentStatus status,
+    String staffName,
+    UUID staffId,
 
-        String staffName,
-        UUID staffId,
-
-        String locationName,
-        UUID locationId
-
+    String locationName,
+    UUID locationId
 ) {
-
-    public static AppointmentCalendarResponse from(
-            Appointment appointment) {
-
+    public static AppointmentCalendarResponse from(Appointment appointment) {
         String customerName =
-                appointment.getCustomer().getFirstName()
-                        + " "
-                        + appointment.getCustomer().getLastName();
+            appointment.getCustomer().getFirstName() +
+            " " +
+            appointment.getCustomer().getLastName();
 
         return new AppointmentCalendarResponse(
-                appointment.getId(),
+            appointment.getId(),
 
-                appointment.getCustomer().getId(),
-                customerName,
+            appointment.getCustomer().getId(),
+            customerName,
 
-                appointment.getService().getId(),
-                appointment.getService().getName(),
+            appointment.getService().getId(),
+            appointment.getService().getName(),
 
-                appointment.getResource() != null ? appointment.getResource().getId() : null,
-                appointment.getResource() != null ? appointment.getResource().getName() : null,
+            appointment.getResource() != null
+                ? appointment.getResource().getId()
+                : null,
+            appointment.getResource() != null
+                ? appointment.getResource().getName()
+                : null,
 
-                appointment.getStartAt(),
-                appointment.getEndAt(),
+            appointment.getStartAt(),
+            appointment.getEndAt(),
 
-                appointment.getStatus(),
+            appointment.getStatus(),
 
-                appointment.getStaff() != null
-                                ?appointment.getStaff().getName()
-                                :null,
+            appointment.getStaff() != null
+                ? appointment.getStaff().getName()
+                : null,
 
-                appointment.getStaff() != null
-                                ?appointment.getStaff().getId()
-                                :null,
+            appointment.getStaff() != null
+                ? appointment.getStaff().getId()
+                : null,
 
-                appointment.getLocation() != null
-                                ?appointment.getLocation().getName()
-                                :null,
+            appointment.getLocation() != null
+                ? appointment.getLocation().getName()
+                : null,
 
-                appointment.getLocation() != null
-                                ?appointment.getLocation().getId()
-                                :null
+            appointment.getLocation() != null
+                ? appointment.getLocation().getId()
+                : null
         );
     }
 }

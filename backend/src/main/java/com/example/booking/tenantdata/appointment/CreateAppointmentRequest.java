@@ -6,22 +6,17 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public record CreateAppointmentRequest(
+    @NotNull UUID customerId,
 
-        @NotNull
-        UUID customerId,
+    @NotNull UUID serviceId,
 
-        @NotNull
-        UUID serviceId,
+    UUID staffId,
 
-        UUID staffId,
+    UUID locationId,
 
-        UUID locationId,
+    UUID resourceId,
 
-        UUID resourceId,
+    @NotNull OffsetDateTime startAt,
 
-        @NotNull
-        OffsetDateTime startAt,
-
-        String notes
-) {
-}
+    String notes
+) {}

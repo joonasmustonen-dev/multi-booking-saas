@@ -48,7 +48,6 @@ public class Appointment {
     @JoinColumn(name = "staff_id")
     private StaffMember staff;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id")
     private Location location;
@@ -58,55 +57,76 @@ public class Appointment {
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
-    protected Appointment() {
-    }
+    protected Appointment() {}
 
     public Appointment(
-            Customer customer,
-            ServiceOffering service,
-            StaffMember staff,
-            Location location,
-            BookableResource resource,
-            OffsetDateTime startAt,
-            OffsetDateTime endAt,
-            String notes) {
-
+        Customer customer,
+        ServiceOffering service,
+        StaffMember staff,
+        Location location,
+        BookableResource resource,
+        OffsetDateTime startAt,
+        OffsetDateTime endAt,
+        String notes
+    ) {
         this.id = UUID.randomUUID();
 
         this.customer = customer;
+
         this.service = service;
+
         this.staff = staff;
+
         this.location = location;
+
         this.resource = resource;
 
         this.startAt = startAt;
+
         this.endAt = endAt;
 
         this.status = AppointmentStatus.CONFIRMED;
+
         this.notes = notes;
 
         this.createdAt = OffsetDateTime.now();
     }
 
-    public Appointment(Customer customer, ServiceOffering service, StaffMember staff,
-            Location location, BookableResource resource, OffsetDateTime startAt,
-            OffsetDateTime endAt, String notes, AppointmentStatus initialStatus) {
-        this(customer, service, staff, location, resource, startAt, endAt, notes);
-        if (initialStatus != AppointmentStatus.PENDING && initialStatus != AppointmentStatus.CONFIRMED)
-            throw new IllegalArgumentException("Invalid initial booking status");
+    public Appointment(
+        Customer customer,
+        ServiceOffering service,
+        StaffMember staff,
+        Location location,
+        BookableResource resource,
+        OffsetDateTime startAt,
+        OffsetDateTime endAt,
+        String notes,
+        AppointmentStatus initialStatus
+    ) {
+        this(
+            customer,
+            service,
+            staff,
+            location,
+            resource,
+            startAt,
+            endAt,
+            notes
+        );
+        if (
+            initialStatus != AppointmentStatus.PENDING &&
+            initialStatus != AppointmentStatus.CONFIRMED
+        ) throw new IllegalArgumentException("Invalid initial booking status");
         this.status = initialStatus;
     }
 
-    public void changeStatus(
-            AppointmentStatus newStatus) {
-
+    public void changeStatus(AppointmentStatus newStatus) {
         if (!status.canTransitionTo(newStatus)) {
-
             throw new IllegalStateException(
-                    "Cannot transition appointment from "
-                            + status
-                            + " to "
-                            + newStatus
+                "Cannot transition appointment from " +
+                    status +
+                    " to " +
+                    newStatus
             );
         }
 
@@ -150,24 +170,24 @@ public class Appointment {
     }
 
     public StaffMember getStaff() {
-    return staff;
-}
-
+        return staff;
+    }
 
     public Location getLocation() {
         return location;
     }
-
 
     public void reschedule(
         StaffMember staff,
         Location location,
         BookableResource resource,
         OffsetDateTime startAt,
-        OffsetDateTime endAt) {
-
+        OffsetDateTime endAt
+    ) {
         this.resource = resource;
+
         this.startAt = startAt;
+
         this.endAt = endAt;
-}
+    }
 }

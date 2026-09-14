@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface BookableResourceRepository
-        extends JpaRepository<BookableResource, UUID> {
-
+    extends JpaRepository<BookableResource, UUID>
+{
     List<BookableResource> findByActiveTrue();
 }

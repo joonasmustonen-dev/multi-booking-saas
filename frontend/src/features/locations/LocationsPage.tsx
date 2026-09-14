@@ -8,29 +8,339 @@ import { useSearchParams } from "react-router-dom";
 import { useTenantSettings } from "../settings/useTenantSettings";
 import OwnerSchedule from "../availability/OwnerSchedule";
 import LocationStaffPanel from "./LocationStaffPanel";
-import { getLocations, saveLocation, type LocationDetails, type LocationValues } from "./locationApi";
+import {
+    getLocations,
+    saveLocation,
+    type LocationDetails,
+    type LocationValues
+} from "./locationApi";
 import { setAssignmentActive } from "../assignments/assignmentApi";
 import { invalidateBookingData } from "../assignments/invalidateBookingData";
 
-function LocationForm({ location, onSave, onCancel }: { location?: LocationDetails; onSave: (values: LocationValues) => Promise<void>; onCancel: () => void }) {
-    const [values, setValues] = useState<LocationValues>({ name: location?.name ?? "", description: location?.description ?? "", addressLine: location?.addressLine ?? "", city: location?.city ?? "", postalCode: location?.postalCode ?? "", countryCode: (location?.countryCode ?? "").trim().toUpperCase(), phone: location?.phone ?? "", active: location?.active ?? true });
-    const [pending, setPending] = useState(false); const [error, setError] = useState("");
-    async function submit(event: FormEvent) { event.preventDefault(); setPending(true); setError(""); try { await onSave({ ...values, name: values.name.trim() }); } catch (e) { setError(e instanceof Error ? e.message : "Could not save location."); } finally { setPending(false); } }
-    const textField = (label: string, key: "name" | "addressLine" | "city" | "postalCode" | "countryCode" | "phone", maxLength: number) => <label className="form-field">{label}<input className="input" required={key === "name"} maxLength={maxLength} type={key === "phone" ? "tel" : "text"} pattern={key === "countryCode" ? "[A-Z]{2}|^$" : undefined} value={values[key]} onChange={e => setValues({ ...values, [key]: key === "countryCode" ? e.target.value.toUpperCase() : e.target.value })} /></label>;
-    return <form className="card management-form tinted-panel" onSubmit={submit}><div className="section-heading"><h2>{location ? "Edit location" : "Add location"}</h2><Building2 size={24} /></div><fieldset disabled={pending} className="editor-fields"><div className="form-grid">{textField("Location name", "name", 150)}{textField("Address", "addressLine", 200)}{textField("City", "city", 100)}{textField("Postal code", "postalCode", 30)}{textField("Country code (e.g. FI)", "countryCode", 2)}{textField("Phone", "phone", 40)}</div><label className="form-field">Description<textarea className="textarea" maxLength={1000} value={values.description} onChange={e => setValues({ ...values, description: e.target.value })} /></label><label className="check-row"><input type="checkbox" checked={values.active} onChange={e => setValues({ ...values, active: e.target.checked })} />Location active</label></fieldset>{error && <p className="form-error" role="alert">{error}</p>}<div className="form-actions"><button className="button button-secondary" type="button" disabled={pending} onClick={onCancel}>Cancel</button><button className="button button-primary" disabled={pending}>{pending ? "Saving…" : "Save location"}</button></div></form>;
+function LocationForm({
+    location,
+    onSave,
+    onCancel
+}: {
+    location?: LocationDetails;
+    onSave: (values: LocationValues) => Promise<void>;
+    onCancel: () => void;
+}) {
+    const [values, setValues] = useState<LocationValues>({
+        name: location?.name ?? "",
+        description: location?.description ?? "",
+        addressLine: location?.addressLine ?? "",
+        city: location?.city ?? "",
+        postalCode: location?.postalCode ?? "",
+        countryCode: (location?.countryCode ?? "").trim().toUpperCase(),
+        phone: location?.phone ?? "",
+        active: location?.active ?? true
+    });
+    const [pending, setPending] = useState(false);
+    const [error, setError] = useState("");
+    async function submit(event: FormEvent) {
+        event.preventDefault();
+        setPending(true);
+        setError("");
+        try {
+            await onSave({ ...values, name: values.name.trim() });
+        } catch (e) {
+            setError(
+                e instanceof Error ? e.message : "Could not save location."
+            );
+        } finally {
+            setPending(false);
+        }
+    }
+    const textField = (
+        label: string,
+        key:
+            | "name"
+            | "addressLine"
+            | "city"
+            | "postalCode"
+            | "countryCode"
+            | "phone",
+        maxLength: number
+    ) => (
+        <label className="form-field">
+            {label}
+            <input
+                className="input"
+                required={key === "name"}
+                maxLength={maxLength}
+                type={key === "phone" ? "tel" : "text"}
+                pattern={key === "countryCode" ? "[A-Z]{2}|^$" : undefined}
+                value={values[key]}
+                onChange={e =>
+                    setValues({
+                        ...values,
+                        [key]:
+                            key === "countryCode"
+                                ? e.target.value.toUpperCase()
+                                : e.target.value
+                    })
+                }
+            />
+        </label>
+    );
+    return (
+        <form className="card management-form tinted-panel" onSubmit={submit}>
+            <div className="section-heading">
+                <h2>{location ? "Edit location" : "Add location"}</h2>
+                <Building2 size={24} />
+            </div>
+            <fieldset disabled={pending} className="editor-fields">
+                <div className="form-grid">
+                    {textField("Location name", "name", 150)}
+                    {textField("Address", "addressLine", 200)}
+                    {textField("City", "city", 100)}
+                    {textField("Postal code", "postalCode", 30)}
+                    {textField("Country code (e.g. FI)", "countryCode", 2)}
+                    {textField("Phone", "phone", 40)}
+                </div>
+                <label className="form-field">
+                    Description
+                    <textarea
+                        className="textarea"
+                        maxLength={1000}
+                        value={values.description}
+                        onChange={e =>
+                            setValues({
+                                ...values,
+                                description: e.target.value
+                            })
+                        }
+                    />
+                </label>
+                <label className="check-row">
+                    <input
+                        type="checkbox"
+                        checked={values.active}
+                        onChange={e =>
+                            setValues({ ...values, active: e.target.checked })
+                        }
+                    />
+                    Location active
+                </label>
+            </fieldset>
+            {error && (
+                <p className="form-error" role="alert">
+                    {error}
+                </p>
+            )}
+            <div className="form-actions">
+                <button
+                    className="button button-secondary"
+                    type="button"
+                    disabled={pending}
+                    onClick={onCancel}
+                >
+                    Cancel
+                </button>
+                <button className="button button-primary" disabled={pending}>
+                    {pending ? "Saving…" : "Save location"}
+                </button>
+            </div>
+        </form>
+    );
 }
 export default function LocationsPage() {
-    const [params] = useSearchParams(); const [scheduleId, setScheduleId] = useState(params.get("ownerId") ?? ""); const settings = useTenantSettings();
-    const client = useQueryClient(); const query = useQuery({ queryKey: ["locations"], queryFn: getLocations });
-    const [editing, setEditing] = useState<LocationDetails | "new" | null>(null); const [pending, setPending] = useState(false); const [error, setError] = useState("");
-    async function save(values: LocationValues) { await saveLocation(values, editing && editing !== "new" ? editing.id : undefined); await invalidateBookingData(client); setEditing(null); }
-    async function toggle(location: LocationDetails) { setPending(true); setError(""); try { await setAssignmentActive("locations", location.id, !location.active); await invalidateBookingData(client); } catch (e) { setError(e instanceof Error ? e.message : "Could not update location."); } finally { setPending(false); } }
-    if (query.isPending || settings.isPending) return <p>Loading locations…</p>; if (query.error || settings.error) return <p className="form-error" role="alert">{(query.error ?? settings.error)?.message}</p>;
-    const scheduleOwner = query.data.find(location => location.id === scheduleId) ?? query.data[0];
-    return <div className="management-page"><div className="page-header"><div><p className="page-eyebrow">Places to meet</p><h1 className="page-title">Locations</h1><p className="page-description">Manage your rooms, studios, and booking locations.</p></div><button className="button button-primary" onClick={() => setEditing("new")}><Plus size={17} />Add location</button></div>
-        {editing && <LocationEditorDialog key={`location-editor:${editing === "new" ? "new" : editing.id}`} onClose={() => setEditing(null)}><LocationForm location={editing === "new" ? undefined : editing} onSave={save} onCancel={() => setEditing(null)} /></LocationEditorDialog>}{error && <p className="form-error" role="alert">{error}</p>}
-        {query.data.length === 0 ? <div className="card empty-state"><Building2 size={30} /><h3>No locations yet</h3><p>Add your first location and configure its opening hours here.</p></div> : <CatalogBrowser items={query.data} label="Locations" searchText={item => `${item.description ?? ""} ${item.city ?? ""} ${item.addressLine ?? ""}`}>{visible => <div className="service-grid">{visible.map(location => <article className="card service-card location-card" key={location.id}><div className="section-heading"><h3><Building2 size={20} />{entityLabel(location, query.data)}</h3><span className={`requirement-pill ${location.active ? "sage" : "muted"}`}>{location.active ? "Active" : "Inactive"}</span></div>{location.description && <p className="field-note">{location.description}</p>}<p className="detail-line"><MapPin size={16} />{[location.addressLine, location.postalCode, location.city, location.countryCode].filter(Boolean).join(", ") || "No address added"}</p>{location.phone && <p className="detail-line"><Phone size={16} />{location.phone}</p>}<div className="form-actions"><button className="button button-secondary" onClick={() => { setScheduleId(location.id); document.getElementById("locations-schedule")?.scrollIntoView({ behavior: "smooth" }); }}>Opening hours & staff</button><button className="button button-secondary" onClick={() => setEditing(location)}><Pencil size={15} />Edit</button><button className="button button-secondary" disabled={pending} onClick={() => toggle(location)}>{location.active ? "Deactivate" : "Activate"}</button></div></article>)}</div>}</CatalogBrowser>}
-        {settings.data && <OwnerSchedule kind="locations" options={query.data} selectedId={scheduleId} onSelect={setScheduleId} timeZone={settings.data.timeZone} />}
-        {scheduleOwner && <LocationStaffPanel key={`location-staff:${scheduleOwner.id}`} locationId={scheduleOwner.id} locationName={scheduleOwner.name} />}
-    </div>;
+    const [params] = useSearchParams();
+    const [scheduleId, setScheduleId] = useState(params.get("ownerId") ?? "");
+    const settings = useTenantSettings();
+    const client = useQueryClient();
+    const query = useQuery({ queryKey: ["locations"], queryFn: getLocations });
+    const [editing, setEditing] = useState<LocationDetails | "new" | null>(
+        null
+    );
+    const [pending, setPending] = useState(false);
+    const [error, setError] = useState("");
+    async function save(values: LocationValues) {
+        await saveLocation(
+            values,
+            editing && editing !== "new" ? editing.id : undefined
+        );
+        await invalidateBookingData(client);
+        setEditing(null);
+    }
+    async function toggle(location: LocationDetails) {
+        setPending(true);
+        setError("");
+        try {
+            await setAssignmentActive(
+                "locations",
+                location.id,
+                !location.active
+            );
+            await invalidateBookingData(client);
+        } catch (e) {
+            setError(
+                e instanceof Error ? e.message : "Could not update location."
+            );
+        } finally {
+            setPending(false);
+        }
+    }
+    if (query.isPending || settings.isPending) return <p>Loading locations…</p>;
+    if (query.error || settings.error)
+        return (
+            <p className="form-error" role="alert">
+                {(query.error ?? settings.error)?.message}
+            </p>
+        );
+    const scheduleOwner =
+        query.data.find(location => location.id === scheduleId) ??
+        query.data[0];
+    return (
+        <div className="management-page">
+            <div className="page-header">
+                <div>
+                    <p className="page-eyebrow">Places to meet</p>
+                    <h1 className="page-title">Locations</h1>
+                    <p className="page-description">
+                        Manage your rooms, studios, and booking locations.
+                    </p>
+                </div>
+                <button
+                    className="button button-primary"
+                    onClick={() => setEditing("new")}
+                >
+                    <Plus size={17} />
+                    Add location
+                </button>
+            </div>
+            {editing && (
+                <LocationEditorDialog
+                    key={`location-editor:${editing === "new" ? "new" : editing.id}`}
+                    onClose={() => setEditing(null)}
+                >
+                    <LocationForm
+                        location={editing === "new" ? undefined : editing}
+                        onSave={save}
+                        onCancel={() => setEditing(null)}
+                    />
+                </LocationEditorDialog>
+            )}
+            {error && (
+                <p className="form-error" role="alert">
+                    {error}
+                </p>
+            )}
+            {query.data.length === 0 ? (
+                <div className="card empty-state">
+                    <Building2 size={30} />
+                    <h3>No locations yet</h3>
+                    <p>
+                        Add your first location and configure its opening hours
+                        here.
+                    </p>
+                </div>
+            ) : (
+                <CatalogBrowser
+                    items={query.data}
+                    label="Locations"
+                    searchText={item =>
+                        `${item.description ?? ""} ${item.city ?? ""} ${item.addressLine ?? ""}`
+                    }
+                >
+                    {visible => (
+                        <div className="service-grid">
+                            {visible.map(location => (
+                                <article
+                                    className="card service-card location-card"
+                                    key={location.id}
+                                >
+                                    <div className="section-heading">
+                                        <h3>
+                                            <Building2 size={20} />
+                                            {entityLabel(location, query.data)}
+                                        </h3>
+                                        <span
+                                            className={`requirement-pill ${location.active ? "sage" : "muted"}`}
+                                        >
+                                            {location.active
+                                                ? "Active"
+                                                : "Inactive"}
+                                        </span>
+                                    </div>
+                                    {location.description && (
+                                        <p className="field-note">
+                                            {location.description}
+                                        </p>
+                                    )}
+                                    <p className="detail-line">
+                                        <MapPin size={16} />
+                                        {[
+                                            location.addressLine,
+                                            location.postalCode,
+                                            location.city,
+                                            location.countryCode
+                                        ]
+                                            .filter(Boolean)
+                                            .join(", ") || "No address added"}
+                                    </p>
+                                    {location.phone && (
+                                        <p className="detail-line">
+                                            <Phone size={16} />
+                                            {location.phone}
+                                        </p>
+                                    )}
+                                    <div className="form-actions">
+                                        <button
+                                            className="button button-secondary"
+                                            onClick={() => {
+                                                setScheduleId(location.id);
+                                                document
+                                                    .getElementById(
+                                                        "locations-schedule"
+                                                    )
+                                                    ?.scrollIntoView({
+                                                        behavior: "smooth"
+                                                    });
+                                            }}
+                                        >
+                                            Opening hours & staff
+                                        </button>
+                                        <button
+                                            className="button button-secondary"
+                                            onClick={() => setEditing(location)}
+                                        >
+                                            <Pencil size={15} />
+                                            Edit
+                                        </button>
+                                        <button
+                                            className="button button-secondary"
+                                            disabled={pending}
+                                            onClick={() => toggle(location)}
+                                        >
+                                            {location.active
+                                                ? "Deactivate"
+                                                : "Activate"}
+                                        </button>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    )}
+                </CatalogBrowser>
+            )}
+            {settings.data && (
+                <OwnerSchedule
+                    kind="locations"
+                    options={query.data}
+                    selectedId={scheduleId}
+                    onSelect={setScheduleId}
+                    timeZone={settings.data.timeZone}
+                />
+            )}
+            {scheduleOwner && (
+                <LocationStaffPanel
+                    key={`location-staff:${scheduleOwner.id}`}
+                    locationId={scheduleOwner.id}
+                    locationName={scheduleOwner.name}
+                />
+            )}
+        </div>
+    );
 }

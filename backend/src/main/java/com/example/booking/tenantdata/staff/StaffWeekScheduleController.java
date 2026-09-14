@@ -1,4 +1,5 @@
 package com.example.booking.tenantdata.staff;
+
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
@@ -10,15 +11,43 @@ import java.util.UUID;
 @RequestMapping("/api/v1/staff/{id}/schedule")
 @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'STAFF')")
 public class StaffWeekScheduleController {
+
     private final StaffWeekScheduleService service;
-    public StaffWeekScheduleController(StaffWeekScheduleService service) { this.service = service; }
+
+    public StaffWeekScheduleController(StaffWeekScheduleService service) {
+        this.service = service;
+    }
+
     @GetMapping
-    public StaffWeekScheduleResponse find(@PathVariable UUID id, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekStart) { return service.find(id, weekStart); }
+    public StaffWeekScheduleResponse find(
+        @PathVariable UUID id,
+        @RequestParam @DateTimeFormat(
+            iso = DateTimeFormat.ISO.DATE
+        ) LocalDate weekStart
+    ) {
+        return service.find(id, weekStart);
+    }
+
     @PutMapping
-    public StaffWeekScheduleResponse save(@PathVariable UUID id, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekStart,
-            @Valid @RequestBody StaffWeekScheduleRequest request) { return service.save(id, weekStart, request); }
+    public StaffWeekScheduleResponse save(
+        @PathVariable UUID id,
+        @RequestParam @DateTimeFormat(
+            iso = DateTimeFormat.ISO.DATE
+        ) LocalDate weekStart,
+        @Valid @RequestBody StaffWeekScheduleRequest request
+    ) {
+        return service.save(id, weekStart, request);
+    }
+
     @DeleteMapping
-    public ResponseEntity<Void> reset(@PathVariable UUID id, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate weekStart) {
-        service.reset(id, weekStart); return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> reset(
+        @PathVariable UUID id,
+        @RequestParam @DateTimeFormat(
+            iso = DateTimeFormat.ISO.DATE
+        ) LocalDate weekStart
+    ) {
+        service.reset(id, weekStart);
+
+        return ResponseEntity.noContent().build();
     }
 }
