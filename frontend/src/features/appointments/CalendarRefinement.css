@@ -39,3 +39,11 @@
 .refined-calendar .single-day .calendar-appointment{padding:10px 16px}.refined-calendar .single-day .booking-card-customer{font-size:14px}.refined-calendar .single-day .booking-card-service{font-size:12px}
 .grouped-bookings-dialog .overlap-list-item{background:#faf7f0;border-radius:14px}.overlap-list-item p{margin:6px 0;font-size:13px;color:#536c60}.overlap-list-item small{color:#839087}.overlap-list-item>span{display:flex;align-items:center;gap:8px;font-size:12px}
 @media(max-width:750px){.calendar-view-bar>.field-note{display:none}.refined-calendar .calendar-day-name{font-size:10px}.refined-calendar .calendar-day-count{font-size:8px}.refined-calendar .calendar-appointment{padding:5px 4px}.booking-card-top{font-size:8px}.refined-calendar .booking-card-customer{font-size:10px}.agenda-booking{flex-wrap:wrap;gap:10px}.agenda-booking>div{min-width:150px}.refined-calendar .calendar-booking-group small{display:none}}
+
+/* One subtle timeline grid; remove inherited gutter stripes and doubled edges. */
+.refined-calendar .calendar-time-column{background:transparent!important;border:0}.refined-calendar .calendar-hour-label{background:transparent!important;border:0;padding:0}
+.refined-calendar .calendar-time-header,.refined-calendar .calendar-day-header{border-bottom:0}.refined-calendar .calendar-day-column{border-left-color:#eee9e1}
+.refined-calendar .calendar-hour-line{background:#eae6de;opacity:.45;box-shadow:none}
+
+.refined-calendar .calendar-appointment{line-height:1.2}.refined-calendar .calendar-appointment .booking-card-top{line-height:1.1}.refined-calendar .calendar-appointment .booking-card-customer{line-height:1.15;flex-shrink:0}.refined-calendar .compact-booking{padding:4px 6px;gap:1px}.refined-calendar .compact-booking .booking-card-top{font-size:9px}.refined-calendar .compact-booking .booking-card-customer{font-size:11px}
+.calendar-modal{width:min(680px,100%);max-height:calc(100dvh - 48px);background:#fffdf9;border:1px solid #e4dcd3}.booking-form .form-grid{align-items:start}.booking-form .form-field{min-width:0;align-content:start}.booking-form .textarea{background:#faf7f0}.booking-form .input{background:#fffdf9}

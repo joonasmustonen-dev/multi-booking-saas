@@ -445,7 +445,6 @@ public class DashboardService {
                                 comparingByValue()
                                 .reversed()
                 )
-                .limit(3)
                 .map(
                         entry ->
                                 new PopularServiceSummary(

@@ -526,3 +526,6 @@
         grid-column: auto;
     }
 }
+/* Keep growing dashboard lists inside their own panels. */
+.dashboard-lower .today-list,.dashboard-lower .team-list,.dashboard-lower .popular-list{max-height:290px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#becbbb transparent;padding-right:6px}
+.dashboard-lower{align-items:start}.dashboard-lower .dashboard-panel{min-width:0}.dashboard-today-filter{max-width:300px;margin-bottom:12px}.today-row>div:nth-child(2){min-width:0}.today-customer,.today-detail,.team-name,.popular-name{overflow-wrap:anywhere}.team-avatar,.popular-rank{flex-shrink:0}
