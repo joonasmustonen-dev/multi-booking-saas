@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -97,19 +98,21 @@ public List<AppointmentCalendarResponse> findCalendar(
 
         @RequestParam
         @DateTimeFormat(
-                iso = DateTimeFormat.ISO.DATE_TIME
+                iso = DateTimeFormat.ISO.DATE
         )
-        OffsetDateTime from,
+        LocalDate from,
 
         @RequestParam
         @DateTimeFormat(
-                iso = DateTimeFormat.ISO.DATE_TIME
+                iso = DateTimeFormat.ISO.DATE
         )
-        OffsetDateTime to,
+        LocalDate to,
 
         @RequestParam(required = false)
         UUID resourceId,
 
+        @RequestParam(required = false) UUID staffId,
+        @RequestParam(required = false) UUID locationId,
         @RequestParam(required = false)
         UUID customerId,
 
@@ -123,10 +126,22 @@ public List<AppointmentCalendarResponse> findCalendar(
             from,
             to,
             resourceId,
+            staffId,
+            locationId,
             customerId,
             serviceId,
             status
         );
         }
 
+    @GetMapping("/{id}/availability")
+    public List<com.example.booking.tenantdata.availability.AvailabilitySlotResponse> findRescheduleAvailability(
+            @PathVariable UUID id,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(required = false) UUID staffId,
+            @RequestParam(required = false) UUID locationId,
+            @RequestParam(required = false) UUID resourceId) {
+        return service.findRescheduleAvailability(id, from, to, staffId, locationId, resourceId);
+    }
 }

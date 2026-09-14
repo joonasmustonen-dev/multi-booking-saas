@@ -7,11 +7,13 @@ import java.util.UUID;
 
 public record RescheduleAppointmentRequest(
 
-        @NotNull
+        UUID staffId,
+
+        UUID locationId,
+
         UUID resourceId,
 
         @NotNull
         OffsetDateTime startAt
-
 ) {
 }

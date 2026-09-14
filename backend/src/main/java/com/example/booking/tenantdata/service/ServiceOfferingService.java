@@ -1,7 +1,16 @@
 package com.example.booking.tenantdata.service;
 
+import com.example.booking.tenantdata.location.LocationRepository;
 import com.example.booking.tenantdata.resource.BookableResource;
 import com.example.booking.tenantdata.resource.BookableResourceRepository;
+import com.example.booking.tenantdata.staff.StaffMemberRepository;
+import com.example.booking.tenantdata.location.Location;
+import com.example.booking.tenantdata.location.LocationRepository;
+
+import com.example.booking.tenantdata.staff.StaffMember;
+import com.example.booking.tenantdata.staff.StaffMemberRepository;
+
+import com.example.booking.tenantdata.resource.ResourceType;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,13 +27,19 @@ public class ServiceOfferingService {
 
     private final ServiceOfferingRepository serviceRepository;
     private final BookableResourceRepository resourceRepository;
+    private final StaffMemberRepository staffRepository;
+    private final LocationRepository locationRepository;
 
     public ServiceOfferingService(
             ServiceOfferingRepository serviceRepository,
-            BookableResourceRepository resourceRepository) {
+            BookableResourceRepository resourceRepository,
+            StaffMemberRepository staffRepository,
+            LocationRepository locationRepository) {
 
         this.serviceRepository = serviceRepository;
         this.resourceRepository = resourceRepository;
+        this.staffRepository = staffRepository;
+        this.locationRepository = locationRepository;
     }
 
     @Transactional("tenantTransactionManager")
@@ -39,9 +54,26 @@ public class ServiceOfferingService {
                         request.currency()
                 );
 
-        service.replaceResources(
-                resolveResources(request.resourceIds())
+        service.replaceStaff(
+                resolveStaff(
+                        request.staffIds()
+                )
         );
+
+        service.replaceLocations(
+                resolveLocations(
+                        request.locationIds()
+                )
+        );
+
+        service.replaceResources(
+                resolveResources(
+                        request.resourceIds()
+                )
+        );
+
+        service.configureRequirements(request.staffRequirement(), request.locationRequirement(), request.resourceRequirement());
+        AssignmentPolicy.validateDefinition(service);
 
         return ServiceResponse.from(
                 serviceRepository.save(service)
@@ -88,10 +120,26 @@ public class ServiceOfferingService {
                 request.active()
         );
 
-        service.replaceResources(
-                resolveResources(request.resourceIds())
+        service.replaceStaff(
+                resolveStaff(
+                        request.staffIds()
+                )
         );
 
+        service.replaceLocations(
+                resolveLocations(
+                        request.locationIds()
+                )
+        );
+
+        service.replaceResources(
+                resolveResources(
+                        request.resourceIds()
+                )
+        );
+
+        service.configureRequirements(request.staffRequirement(), request.locationRequirement(), request.resourceRequirement());
+        AssignmentPolicy.validateDefinition(service);
         return ServiceResponse.from(service);
     }
 
@@ -115,23 +163,140 @@ public class ServiceOfferingService {
                 );
     }
 
-    private Set<BookableResource> resolveResources(
-            Set<UUID> resourceIds) {
+        private Set<BookableResource> resolveResources(
+                Set<UUID> ids) {
 
-        if (resourceIds == null || resourceIds.isEmpty()) {
-            return new HashSet<>();
+        if (
+                ids == null
+                || ids.isEmpty()
+        ) {
+                return Set.of();
         }
 
-        List<BookableResource> resources =
-                resourceRepository.findAllById(resourceIds);
+        Set<BookableResource> result =
+                new HashSet<>(
+                        resourceRepository
+                                .findAllById(ids)
+                );
 
-        if (resources.size() != resourceIds.size()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "One or more resources do not exist"
-            );
+        if (
+                result.size()
+                != ids.size()
+        ) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "One or more resources do not exist"
+                );
         }
 
-        return new HashSet<>(resources);
-    }
+        for (
+                BookableResource resource :
+                result
+        ) {
+
+                if (
+                        resource.getType()
+                                == ResourceType.STAFF
+                        ||
+                        resource.getType()
+                                == ResourceType.ROOM
+                ) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Staff and locations must use their dedicated fields"
+                );
+                }
+
+                if (!resource.isActive()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Inactive resources cannot be assigned to a service"
+                );
+                }
+        }
+
+        return result;
+        }
+
+        private Set<StaffMember> resolveStaff(
+                Set<UUID> ids) {
+
+        if (
+                ids == null
+                || ids.isEmpty()
+        ) {
+                return Set.of();
+        }
+
+        Set<StaffMember> result =
+                new HashSet<>(
+                        staffRepository
+                                .findAllById(ids)
+                );
+
+        if (
+                result.size()
+                != ids.size()
+        ) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "One or more staff members do not exist"
+                );
+        }
+
+        for (
+                StaffMember staff :
+                result
+        ) {
+                if (!staff.isActive()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Inactive staff cannot be assigned to a service"
+                );
+                }
+        }
+
+        return result;
+        }
+
+                private Set<Location> resolveLocations(
+                Set<UUID> ids) {
+
+        if (
+                ids == null
+                || ids.isEmpty()
+        ) {
+                return Set.of();
+        }
+
+        Set<Location> result =
+                new HashSet<>(
+                        locationRepository
+                                .findAllById(ids)
+                );
+
+        if (
+                result.size()
+                != ids.size()
+        ) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "One or more locations do not exist"
+                );
+        }
+
+        for (
+                Location location :
+                result
+        ) {
+                if (!location.isActive()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Inactive locations cannot be assigned to a service"
+                );
+                }
+        }
+
+        return result;
+        }
 }

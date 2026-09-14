@@ -2,15 +2,15 @@ package com.example.booking.tenantdata.availability;
 
 import jakarta.validation.constraints.NotNull;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 public record AvailabilityExceptionRequest(
 
         @NotNull
-        OffsetDateTime startAt,
+        LocalDateTime startAt,
 
         @NotNull
-        OffsetDateTime endAt,
+        LocalDateTime endAt,
 
         boolean available
 ) {

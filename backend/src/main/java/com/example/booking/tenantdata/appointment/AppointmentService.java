@@ -1,12 +1,18 @@
 package com.example.booking.tenantdata.appointment;
 
 import com.example.booking.tenantdata.Customer;
+import com.example.booking.tenantdata.settings.TenantSettingsService;
+import com.example.booking.tenantdata.staff.StaffMember;
+import com.example.booking.tenantdata.staff.StaffMemberRepository;
 import com.example.booking.tenantdata.CustomerRepository;
 import com.example.booking.tenantdata.resource.BookableResource;
+import com.example.booking.tenantdata.resource.ResourceType;
 import com.example.booking.tenantdata.resource.BookableResourceRepository;
 import com.example.booking.tenantdata.service.ServiceOffering;
 import com.example.booking.tenantdata.service.ServiceOfferingRepository;
 import com.example.booking.tenantdata.availability.AvailabilityService;
+import com.example.booking.tenantdata.location.LocationRepository;
+import com.example.booking.tenantdata.location.Location;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -15,9 +21,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
+import java.time.LocalDate;
+
 
 @Service
 public class AppointmentService {
@@ -27,21 +36,29 @@ public class AppointmentService {
     private final CustomerRepository customerRepository;
     private final ServiceOfferingRepository serviceRepository;
     private final BookableResourceRepository resourceRepository;
-
+    private final TenantSettingsService tenantSettingsService;
     private final AvailabilityService availabilityService;
+    private final StaffMemberRepository staffRepository;
+    private final LocationRepository locationRepository;
 
     public AppointmentService(
         AppointmentRepository appointmentRepository,
         CustomerRepository customerRepository,
         ServiceOfferingRepository serviceRepository,
         BookableResourceRepository resourceRepository,
-        AvailabilityService availabilityService) {
+        AvailabilityService availabilityService,
+        TenantSettingsService tenantSettingsService,
+        StaffMemberRepository staffRepository,
+        LocationRepository locationRepository) {
 
         this.appointmentRepository = appointmentRepository;
         this.customerRepository = customerRepository;
         this.serviceRepository = serviceRepository;
         this.resourceRepository = resourceRepository;
         this.availabilityService = availabilityService;
+        this.tenantSettingsService = tenantSettingsService;
+        this.staffRepository = staffRepository;
+        this.locationRepository = locationRepository;
         }
 
     @Transactional("tenantTransactionManager")
@@ -67,36 +84,11 @@ public class AppointmentService {
                                 )
                         );
 
-        BookableResource resource =
-                resourceRepository.findById(request.resourceId())
-                        .orElseThrow(() ->
-                                new ResponseStatusException(
-                                        HttpStatus.NOT_FOUND,
-                                        "Resource not found"
-                                )
-                        );
+        com.example.booking.tenantdata.service.AssignmentPolicy.validatePresence(service.getStaffRequirement(), request.staffId(), "Staff");
+        com.example.booking.tenantdata.service.AssignmentPolicy.validatePresence(service.getLocationRequirement(), request.locationId(), "Location");
+        com.example.booking.tenantdata.service.AssignmentPolicy.validatePresence(service.getResourceRequirement(), request.resourceId(), "Resource");
 
-        if (!resource.isActive()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Resource is inactive"
-            );
-        }
-
-        boolean eligible =
-                service.getResources()
-                        .stream()
-                        .anyMatch(r ->
-                                r.getId()
-                                        .equals(resource.getId())
-                        );
-
-        if (!eligible) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Resource cannot perform this service"
-            );
-        }
+        BookableResource resource = resolveResource(request.resourceId());
 
         OffsetDateTime startAt =
                 request.startAt();
@@ -106,6 +98,7 @@ public class AppointmentService {
                         service.getDurationMinutes()
                 );
 
+        tenantSettingsService.validateBookingStart(startAt);
         if (!startAt.isAfter(OffsetDateTime.now())) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -113,11 +106,26 @@ public class AppointmentService {
             );
         }
 
-        boolean available =
-        availabilityService.isAvailable(
+        StaffMember staff =
+                resolveStaff(request.staffId());
+
+        Location location =
+                resolveLocation(request.locationId());
+
+
+        validateAssignments(
                 service,
-                resource,
-                startAt
+                staff,
+                location,
+                resource
+        );
+
+
+
+
+
+        boolean available = availabilityService.isAvailable(
+                service, staff, location, resource, startAt
         );
 
         if (!available) {
@@ -131,10 +139,13 @@ public class AppointmentService {
                 new Appointment(
                         customer,
                         service,
+                        staff,
+                        location,
                         resource,
                         startAt,
                         endAt,
-                        request.notes()
+                        request.notes(),
+                        AppointmentStatus.valueOf(tenantSettingsService.getSettings().defaultAppointmentStatus())
                 );
 
         try {
@@ -259,41 +270,31 @@ public class AppointmentService {
         ServiceOffering service =
                 appointment.getService();
 
-        BookableResource resource =
-                resourceRepository
-                        .findById(request.resourceId())
-                        .orElseThrow(() ->
-                                new ResponseStatusException(
-                                        HttpStatus.NOT_FOUND,
-                                        "Resource not found"
-                                )
-                        );
+        com.example.booking.tenantdata.service.AssignmentPolicy.validatePresence(service.getStaffRequirement(), request.staffId(), "Staff");
+        com.example.booking.tenantdata.service.AssignmentPolicy.validatePresence(service.getLocationRequirement(), request.locationId(), "Location");
+        com.example.booking.tenantdata.service.AssignmentPolicy.validatePresence(service.getResourceRequirement(), request.resourceId(), "Resource");
 
-        if (!resource.isActive()) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Resource is inactive"
-                );
-        }
+        BookableResource resource = resolveResource(request.resourceId());
 
-        boolean eligible =
-                service.getResources()
-                        .stream()
-                        .anyMatch(candidate ->
-                                candidate.getId()
-                                        .equals(resource.getId())
-                        );
+        StaffMember staff =
+                resolveStaff(request.staffId());
 
-        if (!eligible) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Resource cannot perform this service"
-                );
-        }
+        Location location =
+                resolveLocation(request.locationId());
+
+
+        validateAssignments(
+                appointment.getService(),
+                staff,
+                location,
+                resource
+        );
+
 
         OffsetDateTime startAt =
                 request.startAt();
 
+        tenantSettingsService.validateBookingStart(startAt);
         if (!startAt.isAfter(OffsetDateTime.now())) {
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
@@ -309,10 +310,14 @@ public class AppointmentService {
         boolean available =
                 availabilityService.isAvailable(
                         service,
+                        staff,
+                        location,
                         resource,
                         startAt,
                         appointment.getId()
                 );
+
+
 
         if (!available) {
                 throw new ResponseStatusException(
@@ -322,27 +327,12 @@ public class AppointmentService {
         }
 
         appointment.reschedule(
+                staff,
+                location,
                 resource,
                 startAt,
                 endAt
         );
-
-        try {
-
-                /*
-                * Force PostgreSQL's exclusion constraint
-                * to execute before returning.
-                */
-                appointmentRepository.flush();
-
-        } catch (DataIntegrityViolationException e) {
-
-                throw new ResponseStatusException(
-                        HttpStatus.CONFLICT,
-                        "The selected time is no longer available",
-                        e
-                );
-        }
 
         return flushMutation(appointment);
         }
@@ -449,19 +439,27 @@ public class AppointmentService {
         value = "tenantTransactionManager",
         readOnly = true
 )
+        public List<AppointmentCalendarResponse> findCalendar(LocalDate from, LocalDate to, UUID resourceId,
+                UUID customerId, UUID serviceId, AppointmentStatus status) {
+            return findCalendar(from, to, resourceId, null, null, customerId, serviceId, status);
+        }
+
+    @Transactional(value = "tenantTransactionManager", readOnly = true)
         public List<AppointmentCalendarResponse> findCalendar(
-                OffsetDateTime from,
-                OffsetDateTime to,
+                LocalDate from,
+                LocalDate to,
                 UUID resourceId,
+                UUID staffId,
+                UUID locationId,
                 UUID customerId,
                 UUID serviceId,
                 AppointmentStatus status) {
 
-        if (!to.isAfter(from)) {
+        if (to.isBefore(from)) {
 
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
-                        "to must be after from"
+                        "to must not be before from"
                 );
         }
 
@@ -476,12 +474,24 @@ public class AppointmentService {
                         "Calendar range cannot exceed 90 days"
                 );
         }
+        ZoneId zone = tenantSettingsService.getZoneId();
+
+        OffsetDateTime rangeStart =
+        from.atStartOfDay(zone)
+                .toOffsetDateTime();
+
+        OffsetDateTime rangeEnd =
+        to.plusDays(1)
+                .atStartOfDay(zone)
+                .toOffsetDateTime();
 
         return appointmentRepository
                 .findCalendar(
-                        from,
-                        to,
+                        rangeStart,
+                        rangeEnd,
                         resourceId,
+                        staffId,
+                        locationId,
                         customerId,
                         serviceId,
                         status
@@ -491,4 +501,113 @@ public class AppointmentService {
                 .toList();
         }
 
+
+        private StaffMember resolveStaff(
+                UUID staffId) {
+
+                if (staffId == null) {
+                        return null;
+                }
+
+                StaffMember staff =
+                        staffRepository
+                                .findById(staffId)
+                                .orElseThrow(() ->
+                                        new ResponseStatusException(
+                                                HttpStatus.NOT_FOUND,
+                                                "Staff member not found"
+                                        )
+                                );
+
+                if (!staff.isActive()) {
+                        throw new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST,
+                                "Staff member is inactive"
+                        );
+                }
+
+                return staff;
+                }
+
+
+        private Location resolveLocation(
+                UUID locationId) {
+
+        if (locationId == null) {
+                return null;
+        }
+
+        Location location =
+                locationRepository
+                        .findById(locationId)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                        "Location not found"
+                                )
+                        );
+
+        if (!location.isActive()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Location is inactive"
+                );
+        }
+
+        return location;
+        }
+
+        private BookableResource resolveResource(
+                UUID resourceId) {
+
+        if (resourceId == null) {
+                return null;
+        }
+
+        BookableResource resource =
+                resourceRepository
+                        .findById(resourceId)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                        "Resource not found"
+                                )
+                        );
+
+        if (
+                resource.getType()
+                        == ResourceType.STAFF
+                ||
+                resource.getType()
+                        == ResourceType.ROOM
+        ) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Staff and locations must use their dedicated fields"
+                );
+        }
+
+        if (!resource.isActive()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Resource is inactive"
+                );
+        }
+
+        return resource;
+        }
+
+
+    private void validateAssignments(ServiceOffering service, StaffMember staff, Location location, BookableResource resource) {
+        com.example.booking.tenantdata.service.AssignmentPolicy.validateAssignments(service, staff, location, resource);
+    }
+    @Transactional(value = "tenantTransactionManager", readOnly = true)
+    public List<com.example.booking.tenantdata.availability.AvailabilitySlotResponse> findRescheduleAvailability(
+            UUID appointmentId, LocalDate from, LocalDate to, UUID staffId, UUID locationId, UUID resourceId) {
+        Appointment appointment = getAppointment(appointmentId);
+        if (appointment.getStatus() != AppointmentStatus.PENDING && appointment.getStatus() != AppointmentStatus.CONFIRMED)
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Only pending or confirmed appointments can be rescheduled");
+        return availabilityService.findAvailability(appointment.getService().getId(), from, to,
+                staffId, locationId, resourceId, appointmentId);
+    }
 }

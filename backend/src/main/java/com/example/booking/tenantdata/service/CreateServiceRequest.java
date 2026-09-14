@@ -1,6 +1,8 @@
 package com.example.booking.tenantdata.service;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.util.Set;
@@ -9,20 +11,25 @@ import java.util.UUID;
 public record CreateServiceRequest(
 
         @NotBlank
-        @Size(max = 200)
         String name,
 
         String description,
 
+        @NotNull
         @Min(1)
-        int durationMinutes,
+        Integer durationMinutes,
 
-        @DecimalMin("0.00")
         BigDecimal price,
 
-        @Size(min = 3, max = 3)
         String currency,
 
-        Set<UUID> resourceIds
+        Set<UUID> staffIds,
+
+        Set<UUID> locationIds,
+
+        Set<UUID> resourceIds,
+        @NotNull AssignmentRequirement staffRequirement,
+        @NotNull AssignmentRequirement locationRequirement,
+        @NotNull AssignmentRequirement resourceRequirement
 ) {
 }

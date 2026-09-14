@@ -13,6 +13,8 @@ public record ResourceRequest(
         @NotNull
         ResourceType type,
 
-        boolean active
+        boolean active,
+        @Size(max = 1000) String description
 ) {
+    public ResourceRequest(String name, ResourceType type, boolean active) { this(name, type, active, null); }
 }

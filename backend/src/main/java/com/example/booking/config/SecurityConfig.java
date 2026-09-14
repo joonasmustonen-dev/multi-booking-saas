@@ -2,6 +2,12 @@ package com.example.booking.config;
 
 import com.example.booking.tenant.TenantContextFilter;
 
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,36 +25,83 @@ public class SecurityConfig {
     @Value("${app.security.jwt-enabled:false}")
     private boolean jwtEnabled;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity http,
-            TenantContextFilter tenantContextFilter,
-            KeycloakJwtAuthenticationConverter jwtAuthenticationConverter)
-            throws Exception {
+@Bean
+public SecurityFilterChain securityFilterChain(
+        HttpSecurity http,
+        TenantContextFilter tenantContextFilter,
+        KeycloakJwtAuthenticationConverter jwtAuthenticationConverter,
+        CorsConfigurationSource corsConfigurationSource)
+        throws Exception {
+
+    http
+        .cors(cors ->
+            cors.configurationSource(corsConfigurationSource)
+        )
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/api/health").permitAll()
+            .anyRequest().authenticated()
+        );
+
+    if (jwtEnabled) {
 
         http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/health").permitAll()
-                .anyRequest().authenticated()
-            );
-
-        if (jwtEnabled) {
-
-            http
-                .oauth2ResourceServer(oauth2 ->
-                    oauth2.jwt(jwt ->
-                        jwt.jwtAuthenticationConverter(
-                            jwtAuthenticationConverter
-                        )
+            .oauth2ResourceServer(oauth2 ->
+                oauth2.jwt(jwt ->
+                    jwt.jwtAuthenticationConverter(
+                        jwtAuthenticationConverter
                     )
                 )
-                .addFilterAfter(
-                    tenantContextFilter,
-                    BearerTokenAuthenticationFilter.class
-                );
-        }
+            )
+            .addFilterAfter(
+                tenantContextFilter,
+                BearerTokenAuthenticationFilter.class
+            );
+    }
 
-        return http.build();
+    return http.build();
+}
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+
+        CorsConfiguration configuration =
+                new CorsConfiguration();
+
+        configuration.setAllowedOrigins(
+                List.of(
+                        "http://localhost:5173"
+                )
+        );
+
+        configuration.setAllowedMethods(
+                List.of(
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "PATCH",
+                        "DELETE",
+                        "OPTIONS"
+                )
+        );
+
+        configuration.setAllowedHeaders(
+                List.of(
+                        "Authorization",
+                        "Content-Type"
+                )
+        );
+
+        configuration.setAllowCredentials(false);
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration(
+                "/api/**",
+                configuration
+        );
+
+        return source;
     }
 }

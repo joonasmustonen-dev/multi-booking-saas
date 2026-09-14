@@ -3,6 +3,8 @@ package com.example.booking.tenantdata.appointment;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.example.booking.tenantdata.resource.ResourceType;
+
 public record AppointmentCalendarResponse(
 
         UUID id,
@@ -19,7 +21,13 @@ public record AppointmentCalendarResponse(
         OffsetDateTime startAt,
         OffsetDateTime endAt,
 
-        AppointmentStatus status
+        AppointmentStatus status,
+
+        String staffName,
+        UUID staffId,
+
+        String locationName,
+        UUID locationId
 
 ) {
 
@@ -40,13 +48,29 @@ public record AppointmentCalendarResponse(
                 appointment.getService().getId(),
                 appointment.getService().getName(),
 
-                appointment.getResource().getId(),
-                appointment.getResource().getName(),
+                appointment.getResource() != null ? appointment.getResource().getId() : null,
+                appointment.getResource() != null ? appointment.getResource().getName() : null,
 
                 appointment.getStartAt(),
                 appointment.getEndAt(),
 
-                appointment.getStatus()
+                appointment.getStatus(),
+
+                appointment.getStaff() != null
+                                ?appointment.getStaff().getName()
+                                :null,
+
+                appointment.getStaff() != null
+                                ?appointment.getStaff().getId()
+                                :null,
+
+                appointment.getLocation() != null
+                                ?appointment.getLocation().getName()
+                                :null,
+
+                appointment.getLocation() != null
+                                ?appointment.getLocation().getId()
+                                :null
         );
     }
 }

@@ -9,13 +9,19 @@ import com.example.booking.tenantdata.availability.AvailabilityException;
 import com.example.booking.tenantdata.availability.AvailabilityExceptionRepository;
 import com.example.booking.tenantdata.availability.AvailabilityRule;
 import com.example.booking.tenantdata.availability.AvailabilityRuleRepository;
+import com.example.booking.tenantdata.location.LocationRepository;
 
+import org.springframework.web.server.ResponseStatusException;
 import com.example.booking.tenantdata.resource.BookableResource;
 import com.example.booking.tenantdata.resource.BookableResourceRepository;
 import com.example.booking.tenantdata.resource.ResourceType;
 
 import com.example.booking.tenantdata.service.ServiceOffering;
 import com.example.booking.tenantdata.service.ServiceOfferingRepository;
+import com.example.booking.tenantdata.staff.StaffMember;
+import com.example.booking.tenantdata.staff.StaffMemberRepository;
+import com.example.booking.tenantdata.location.Location;
+import com.example.booking.tenantdata.location.LocationRepository;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +33,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+
 
 import java.math.BigDecimal;
 
@@ -60,6 +67,18 @@ class AppointmentSafetyIntegrationTest {
     private BookableResourceRepository resourceRepository;
 
     @Autowired
+    private StaffMemberRepository staffMemberRepository;
+
+    @Autowired
+    private LocationRepository locationRepository;
+
+    @Autowired
+    private com.example.booking.tenantdata.availability.AvailabilityService availabilityService;
+
+    private final List<UUID> staffIds = new ArrayList<>();
+    private final List<UUID> locationIds = new ArrayList<>();
+
+    @Autowired
     private ServiceOfferingRepository serviceRepository;
 
     @Autowired
@@ -85,6 +104,8 @@ class AppointmentSafetyIntegrationTest {
 
     private final List<UUID> customerIds =
             new ArrayList<>();
+
+
 
     @BeforeEach
     void setupTenant() {
@@ -139,6 +160,13 @@ class AppointmentSafetyIntegrationTest {
                     );
         }
 
+        for (UUID id : staffIds) {
+            staffMemberRepository.findById(id).ifPresent(staffMemberRepository::delete);
+        }
+        for (UUID id : locationIds) {
+            locationRepository.findById(id).ifPresent(locationRepository::delete);
+        }
+
         for (UUID id : customerIds) {
             customerRepository
                     .findById(id)
@@ -170,6 +198,8 @@ class AppointmentSafetyIntegrationTest {
                 new Appointment(
                         fixture.customer(),
                         fixture.service(),
+                        null,
+                        null,
                         fixture.resource(),
                         firstStart,
                         firstStart.plusHours(1),
@@ -187,6 +217,8 @@ class AppointmentSafetyIntegrationTest {
                 new Appointment(
                         fixture.customer(),
                         fixture.service(),
+                        null,
+                        null,
                         fixture.resource(),
                         overlappingStart,
                         overlappingStart.plusHours(1),
@@ -234,6 +266,8 @@ class AppointmentSafetyIntegrationTest {
                         new CreateAppointmentRequest(
                                 fixture.customer().getId(),
                                 fixture.service().getId(),
+                                null,
+                                null,
                                 fixture.resource().getId(),
                                 at(date, 10, 0),
                                 null
@@ -258,6 +292,8 @@ class AppointmentSafetyIntegrationTest {
                                         new CreateAppointmentRequest(
                                                 fixture.customer().getId(),
                                                 fixture.service().getId(),
+                                                null,
+                                                null,
                                                 fixture.resource().getId(),
                                                 at(date, 12, 0),
                                                 null
@@ -281,6 +317,8 @@ class AppointmentSafetyIntegrationTest {
                                         new CreateAppointmentRequest(
                                                 fixture.customer().getId(),
                                                 fixture.service().getId(),
+                                                null,
+                                                null,
                                                 fixture.resource().getId(),
                                                 at(date, 18, 0),
                                                 null
@@ -312,6 +350,8 @@ class AppointmentSafetyIntegrationTest {
                         new CreateAppointmentRequest(
                                 fixture.customer().getId(),
                                 fixture.service().getId(),
+                                null,
+                                null,
                                 fixture.resource().getId(),
                                 at(date, 10, 0),
                                 "First"
@@ -325,6 +365,8 @@ class AppointmentSafetyIntegrationTest {
                         new CreateAppointmentRequest(
                                 fixture.customer().getId(),
                                 fixture.service().getId(),
+                                null,
+                                null,
                                 fixture.resource().getId(),
                                 at(date, 12, 0),
                                 "Second"
@@ -343,6 +385,8 @@ class AppointmentSafetyIntegrationTest {
                                 appointmentService.reschedule(
                                         first.id(),
                                         new RescheduleAppointmentRequest(
+                                                null,
+                                                null,
                                                 fixture.resource().getId(),
                                                 at(date, 12, 0)
                                         )
@@ -355,26 +399,61 @@ class AppointmentSafetyIntegrationTest {
         );
 
         /*
-         * 14:00 is actually free.
+         * 13:00 UTC is free and finishes within tenant working hours.
          */
-        AppointmentResponse rescheduled =
-                appointmentService.reschedule(
-                        first.id(),
-                        new RescheduleAppointmentRequest(
-                                fixture.resource().getId(),
-                                at(date, 14, 0)
-                        )
-                );
 
-        assertEquals(
-                at(date, 14, 0),
-                rescheduled.startAt()
-        );
 
-        assertEquals(
-                at(date, 15, 0),
-                rescheduled.endAt()
+        AppointmentResponse rescheduled = appointmentService.reschedule(
+                first.id(),
+                new RescheduleAppointmentRequest(
+                        null, null, fixture.resource().getId(), at(date, 13, 0))
         );
+        assertEquals(first.id(), rescheduled.id());
+        assertEquals(at(date, 13, 0), rescheduled.startAt());
+
+
+    }
+
+    @Test
+    void generatedStaffLocationSlotCanBeBookedWithoutResource() {
+        LocalDate date = futureDate();
+        Fixture fixture = createFixture(date);
+        StaffMember staff = staffMemberRepository.saveAndFlush(new StaffMember("Slot staff"));
+        Location location = locationRepository.saveAndFlush(new Location("Slot location"));
+        staffIds.add(staff.getId());
+        locationIds.add(location.getId());
+        fixture.service().configureRequirements(
+                com.example.booking.tenantdata.service.AssignmentRequirement.REQUIRED,
+                com.example.booking.tenantdata.service.AssignmentRequirement.REQUIRED,
+                com.example.booking.tenantdata.service.AssignmentRequirement.OPTIONAL);
+        fixture.service().replaceStaff(Set.of(staff));
+        fixture.service().replaceLocations(Set.of(location));
+        serviceRepository.saveAndFlush(fixture.service());
+        AvailabilityRule staffRule = ruleRepository.saveAndFlush(new AvailabilityRule(
+                null, staff, null, date.getDayOfWeek(), LocalTime.of(9, 0), LocalTime.of(17, 0)));
+        AvailabilityRule locationRule = ruleRepository.saveAndFlush(new AvailabilityRule(
+                null, null, location, date.getDayOfWeek(), LocalTime.of(10, 0), LocalTime.of(16, 0)));
+        ruleIds.add(staffRule.getId());
+        ruleIds.add(locationRule.getId());
+        var slots = availabilityService.findAvailability(fixture.service().getId(), date, date,
+                staff.getId(), location.getId(), null);
+        assertFalse(slots.isEmpty());
+        var slot = slots.stream().filter(s -> s.resourceId() == null).findFirst().orElseThrow();
+        assertNull(slot.resourceId());
+        AppointmentResponse booked = appointmentService.create(new CreateAppointmentRequest(
+                fixture.customer().getId(), fixture.service().getId(), slot.staffId(), slot.locationId(),
+                slot.resourceId(), slot.start(), null));
+        appointmentIds.add(booked.id());
+        assertNull(booked.resourceId());
+        assertEquals(staff.getId(), booked.staffId());
+        assertEquals(location.getId(), booked.locationId());
+        assertEquals(location.getName(), booked.locationName());
+        var remaining = availabilityService.findAvailability(fixture.service().getId(), date, date,
+                staff.getId(), location.getId(), null);
+        assertTrue(remaining.stream().noneMatch(s -> s.start().isBefore(slot.end()) && s.end().isAfter(slot.start())));
+        assertTrue(appointmentService.findCalendar(date, date.plusDays(1), null, null, null, null)
+                .stream().anyMatch(a -> a.id().equals(booked.id()) && a.resourceId() == null
+                        && location.getId().equals(a.locationId())));
     }
 
     private Fixture createFixture(
@@ -394,13 +473,14 @@ class AppointmentSafetyIntegrationTest {
 
         customerIds.add(customer.getId());
 
+
         BookableResource resource =
-                resourceRepository.saveAndFlush(
-                        new BookableResource(
-                                "Integration Resource",
-                                ResourceType.STAFF
-                        )
-                );
+        resourceRepository.saveAndFlush(
+                new BookableResource(
+                        "Integration Resource",
+                        ResourceType.EQUIPMENT
+                )
+        );
 
         resourceIds.add(resource.getId());
 

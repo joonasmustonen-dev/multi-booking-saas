@@ -3,6 +3,8 @@ package com.example.booking.tenantdata.appointment;
 import com.example.booking.tenantdata.Customer;
 import com.example.booking.tenantdata.resource.BookableResource;
 import com.example.booking.tenantdata.service.ServiceOffering;
+import com.example.booking.tenantdata.location.Location;
+import com.example.booking.tenantdata.staff.StaffMember;
 
 import jakarta.persistence.*;
 
@@ -28,8 +30,8 @@ public class Appointment {
     @JoinColumn(name = "service_id", nullable = false)
     private ServiceOffering service;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "resource_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "resource_id")
     private BookableResource resource;
 
     @Column(name = "start_at", nullable = false)
@@ -42,6 +44,15 @@ public class Appointment {
     @Column(nullable = false)
     private AppointmentStatus status;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "staff_id")
+    private StaffMember staff;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id")
+    private Location location;
+
     private String notes;
 
     @Column(name = "created_at", nullable = false)
@@ -53,6 +64,8 @@ public class Appointment {
     public Appointment(
             Customer customer,
             ServiceOffering service,
+            StaffMember staff,
+            Location location,
             BookableResource resource,
             OffsetDateTime startAt,
             OffsetDateTime endAt,
@@ -62,6 +75,8 @@ public class Appointment {
 
         this.customer = customer;
         this.service = service;
+        this.staff = staff;
+        this.location = location;
         this.resource = resource;
 
         this.startAt = startAt;
@@ -71,6 +86,15 @@ public class Appointment {
         this.notes = notes;
 
         this.createdAt = OffsetDateTime.now();
+    }
+
+    public Appointment(Customer customer, ServiceOffering service, StaffMember staff,
+            Location location, BookableResource resource, OffsetDateTime startAt,
+            OffsetDateTime endAt, String notes, AppointmentStatus initialStatus) {
+        this(customer, service, staff, location, resource, startAt, endAt, notes);
+        if (initialStatus != AppointmentStatus.PENDING && initialStatus != AppointmentStatus.CONFIRMED)
+            throw new IllegalArgumentException("Invalid initial booking status");
+        this.status = initialStatus;
     }
 
     public void changeStatus(
@@ -125,7 +149,19 @@ public class Appointment {
         return createdAt;
     }
 
+    public StaffMember getStaff() {
+    return staff;
+}
+
+
+    public Location getLocation() {
+        return location;
+    }
+
+
     public void reschedule(
+        StaffMember staff,
+        Location location,
         BookableResource resource,
         OffsetDateTime startAt,
         OffsetDateTime endAt) {

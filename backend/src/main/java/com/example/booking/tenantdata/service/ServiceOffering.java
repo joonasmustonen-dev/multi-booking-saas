@@ -2,6 +2,9 @@ package com.example.booking.tenantdata.service;
 
 import com.example.booking.tenantdata.resource.BookableResource;
 
+import com.example.booking.tenantdata.staff.StaffMember;
+import com.example.booking.tenantdata.location.Location;
+
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -32,9 +35,58 @@ public class ServiceOffering {
     @Column(nullable = false)
     private boolean active;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "staff_requirement", nullable = false)
+    private AssignmentRequirement staffRequirement = AssignmentRequirement.FORBIDDEN;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "location_requirement", nullable = false)
+    private AssignmentRequirement locationRequirement = AssignmentRequirement.FORBIDDEN;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "resource_requirement", nullable = false)
+    private AssignmentRequirement resourceRequirement = AssignmentRequirement.REQUIRED;
+
+    public AssignmentRequirement getStaffRequirement() { return staffRequirement; }
+    public AssignmentRequirement getLocationRequirement() { return locationRequirement; }
+    public AssignmentRequirement getResourceRequirement() { return resourceRequirement; }
+    public void configureRequirements(AssignmentRequirement staff, AssignmentRequirement location, AssignmentRequirement resource) {
+        this.staffRequirement = staff;
+        this.locationRequirement = location;
+        this.resourceRequirement = resource;
+    }
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
+    @ManyToMany
+    @JoinTable(
+            name = "service_staff",
+            joinColumns =
+                    @JoinColumn(
+                            name = "service_id"
+                    ),
+            inverseJoinColumns =
+                    @JoinColumn(
+                            name = "staff_id"
+                    )
+    )
+    private Set<StaffMember> staff =
+            new HashSet<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "service_locations",
+            joinColumns =
+                    @JoinColumn(
+                            name = "service_id"
+                    ),
+            inverseJoinColumns =
+                    @JoinColumn(
+                            name = "location_id"
+                    )
+    )
+    private Set<Location> locations =
+            new HashSet<>();
     @ManyToMany
     @JoinTable(
             name = "service_resources",
@@ -112,6 +164,28 @@ public class ServiceOffering {
 
     public Set<BookableResource> getResources() {
         return resources;
+    }
+
+    public Set<StaffMember> getStaff() {
+        return staff;
+    }
+
+    public Set<Location> getLocations() {
+        return locations;
+    }
+
+    public void replaceStaff(
+            Set<StaffMember> staff) {
+
+        this.staff.clear();
+        this.staff.addAll(staff);
+    }
+
+    public void replaceLocations(
+            Set<Location> locations) {
+
+        this.locations.clear();
+        this.locations.addAll(locations);
     }
 
     public void update(

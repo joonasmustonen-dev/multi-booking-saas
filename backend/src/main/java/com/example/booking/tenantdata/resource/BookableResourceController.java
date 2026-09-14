@@ -78,4 +78,9 @@ public class BookableResourceController {
 
         return ResponseEntity.noContent().build();
     }
+    @PatchMapping("/{id}/active")
+    public ResourceResponse setActive(@PathVariable UUID id,
+            @Valid @RequestBody com.example.booking.tenantdata.management.AssignmentActiveRequest request) {
+        return ResourceResponse.from(service.setActive(id, request.active()));
+    }
 }

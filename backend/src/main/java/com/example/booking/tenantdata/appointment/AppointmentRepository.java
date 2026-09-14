@@ -9,16 +9,29 @@ import com.example.booking.tenantdata.appointment.AppointmentStatus;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface AppointmentRepository
         extends JpaRepository<Appointment, UUID> {
 
+    @EntityGraph(attributePaths = {"staff", "location", "resource"})
+    @Query("""
+        select a from Appointment a
+        where a.status in :statuses
+          and a.startAt < :rangeEnd
+          and a.endAt > :rangeStart
+        """)
+    List<Appointment> findAssignmentBookingsInRange(
+            @Param("rangeStart") OffsetDateTime rangeStart,
+            @Param("rangeEnd") OffsetDateTime rangeEnd,
+            @Param("statuses") Collection<AppointmentStatus> statuses);
+
     @EntityGraph(attributePaths = {
             "customer",
             "service",
-            "resource"
+            "resource", "staff", "location"
     })
     @Query("""
         SELECT a
@@ -32,7 +45,7 @@ public interface AppointmentRepository
     @EntityGraph(attributePaths = {
             "customer",
             "service",
-            "resource"
+            "resource", "staff", "location"
     })
     List<Appointment> findAllByOrderByStartAtAsc();
 
@@ -58,10 +71,14 @@ public interface AppointmentRepository
     FROM Appointment a
     JOIN FETCH a.customer
     JOIN FETCH a.service
-    JOIN FETCH a.resource
+    LEFT JOIN FETCH a.resource
+    LEFT JOIN FETCH a.staff
+    LEFT JOIN FETCH a.location
     WHERE a.startAt < :to
       AND a.endAt > :from
       AND (:resourceId IS NULL OR a.resource.id = :resourceId)
+      AND (:staffId IS NULL OR a.staff.id = :staffId)
+      AND (:locationId IS NULL OR a.location.id = :locationId)
       AND (:customerId IS NULL OR a.customer.id = :customerId)
       AND (:serviceId IS NULL OR a.service.id = :serviceId)
       AND (:status IS NULL OR a.status = :status)
@@ -71,8 +88,68 @@ public interface AppointmentRepository
         @Param("from") OffsetDateTime from,
         @Param("to") OffsetDateTime to,
         @Param("resourceId") UUID resourceId,
+        @Param("staffId") UUID staffId,
+        @Param("locationId") UUID locationId,
         @Param("customerId") UUID customerId,
         @Param("serviceId") UUID serviceId,
         @Param("status") AppointmentStatus status
+        );
+
+
+        @Query("""
+        select
+            case
+                when count(a) > 0 then true
+                else false
+            end
+        from Appointment a
+        where a.status in :statuses
+
+          and a.startAt < :endAt
+          and a.endAt > :startAt
+
+          and (
+              :ignoredAppointmentId is null
+              or a.id <> :ignoredAppointmentId
+          )
+
+          and (
+              (
+                  :staffId is not null
+                  and a.staff.id = :staffId
+              )
+              or
+              (
+                  :locationId is not null
+                  and a.location.id = :locationId
+              )
+              or
+              (
+                  :resourceId is not null
+                  and a.resource.id = :resourceId
+              )
+          )
+        """)
+        boolean hasAssignmentConflict(
+                @Param("staffId")
+                UUID staffId,
+
+                @Param("locationId")
+                UUID locationId,
+
+                @Param("resourceId")
+                UUID resourceId,
+
+                @Param("startAt")
+                OffsetDateTime startAt,
+
+                @Param("endAt")
+                OffsetDateTime endAt,
+
+                @Param("ignoredAppointmentId")
+                UUID ignoredAppointmentId,
+
+                @Param("statuses")
+                Set<AppointmentStatus> statuses
         );
 }

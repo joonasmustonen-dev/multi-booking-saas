@@ -1,0 +1,36 @@
+# Build output and installed dependencies
+**/target/
+**/node_modules/
+**/dist/
+**/dist-ssr/
+*.tsbuildinfo
+*.class
+
+# Local environment and credentials; examples may be committed
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.local
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+credentials.json
+
+# Logs, database exports and backups
+*.log
+*.dump
+*.dumpstream
+*.sql.gz
+*.bak
+backups/
+
+# IDE and operating system files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

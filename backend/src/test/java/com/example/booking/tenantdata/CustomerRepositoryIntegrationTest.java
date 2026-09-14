@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(
@@ -18,8 +20,33 @@ class CustomerRepositoryIntegrationTest {
     @Autowired
     private CustomerRepository customerRepository;
 
+    private UUID tenantACustomerId;
+    private UUID tenantBCustomerId;
+
     @AfterEach
     void cleanup() {
+
+        if (tenantACustomerId != null) {
+
+            TenantContext.setTenantId("tenant-a");
+
+            customerRepository
+                    .findById(tenantACustomerId)
+                    .ifPresent(
+                            customerRepository::delete
+                    );
+        }
+
+        if (tenantBCustomerId != null) {
+
+            TenantContext.setTenantId("tenant-b");
+
+            customerRepository
+                    .findById(tenantBCustomerId)
+                    .ifPresent(
+                            customerRepository::delete
+                    );
+        }
 
         TenantContext.clear();
     }
@@ -27,25 +54,36 @@ class CustomerRepositoryIntegrationTest {
     @Test
     void customerDataIsIsolatedBetweenTenantDatabases() {
 
+        String unique =
+                UUID.randomUUID().toString();
+
+        String aliceEmail =
+                "alice-" + unique + "@tenant-a.test";
+
+        String bobEmail =
+                "bob-" + unique + "@tenant-b.test";
+
         /*
          * TENANT A
          */
         TenantContext.setTenantId("tenant-a");
 
-        customerRepository.deleteAll();
-
-        Customer alice = new Customer(
-                "Alice",
-                "TenantA",
-                "alice@tenant-a.test",
-                null
-        );
+        Customer alice =
+                new Customer(
+                        "Alice",
+                        "TenantA",
+                        aliceEmail,
+                        null
+                );
 
         customerRepository.saveAndFlush(alice);
 
-        assertEquals(
-                1,
-                customerRepository.count()
+        tenantACustomerId = alice.getId();
+
+        assertTrue(
+                customerRepository
+                        .findByEmail(aliceEmail)
+                        .isPresent()
         );
 
         /*
@@ -53,26 +91,29 @@ class CustomerRepositoryIntegrationTest {
          */
         TenantContext.setTenantId("tenant-b");
 
-        customerRepository.deleteAll();
-
-        assertEquals(
-                0,
-                customerRepository.count(),
+        assertTrue(
+                customerRepository
+                        .findByEmail(aliceEmail)
+                        .isEmpty(),
                 "Tenant B must not see Tenant A's customer"
         );
 
-        Customer bob = new Customer(
-                "Bob",
-                "TenantB",
-                "bob@tenant-b.test",
-                null
-        );
+        Customer bob =
+                new Customer(
+                        "Bob",
+                        "TenantB",
+                        bobEmail,
+                        null
+                );
 
         customerRepository.saveAndFlush(bob);
 
-        assertEquals(
-                1,
-                customerRepository.count()
+        tenantBCustomerId = bob.getId();
+
+        assertTrue(
+                customerRepository
+                        .findByEmail(bobEmail)
+                        .isPresent()
         );
 
         /*
@@ -80,14 +121,9 @@ class CustomerRepositoryIntegrationTest {
          */
         TenantContext.setTenantId("tenant-a");
 
-        assertEquals(
-                1,
-                customerRepository.count()
-        );
-
         Customer stored =
                 customerRepository
-                        .findByEmail("alice@tenant-a.test")
+                        .findByEmail(aliceEmail)
                         .orElseThrow();
 
         assertEquals(
@@ -97,7 +133,7 @@ class CustomerRepositoryIntegrationTest {
 
         assertTrue(
                 customerRepository
-                        .findByEmail("bob@tenant-b.test")
+                        .findByEmail(bobEmail)
                         .isEmpty(),
                 "Tenant A must not see Tenant B's customer"
         );

@@ -36,13 +36,16 @@ public class AvailabilityController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate to,
 
-            @RequestParam(required = false)
-            UUID resourceId) {
+            @RequestParam(required = false) UUID staffId,
+            @RequestParam(required = false) UUID locationId,
+            @RequestParam(required = false) UUID resourceId) {
 
         return service.findAvailability(
                 serviceId,
                 from,
                 to,
+                staffId,
+                locationId,
                 resourceId
         );
     }

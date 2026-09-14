@@ -25,6 +25,11 @@ public class BookableResource {
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
+    @Column(nullable = false, length = 1000)
+    private String description = "";
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
     protected BookableResource() {
     }
 
@@ -60,6 +65,8 @@ public class BookableResource {
     public ResourceType getType() {
         return type;
     }
+
+
 
     public boolean isActive() {
         return active;

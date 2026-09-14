@@ -8,7 +8,8 @@ public record ResourceResponse(
         String name,
         ResourceType type,
         boolean active,
-        OffsetDateTime createdAt
+        OffsetDateTime createdAt,
+        String description
 ) {
 
     public static ResourceResponse from(
@@ -19,7 +20,8 @@ public record ResourceResponse(
                 resource.getName(),
                 resource.getType(),
                 resource.isActive(),
-                resource.getCreatedAt()
+                resource.getCreatedAt(),
+                resource.getDescription()
         );
     }
 }

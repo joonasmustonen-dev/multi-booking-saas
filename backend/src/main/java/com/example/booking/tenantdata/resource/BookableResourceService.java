@@ -23,12 +23,11 @@ public class BookableResourceService {
     public BookableResource create(
             ResourceRequest request) {
 
-        return repository.save(
-                new BookableResource(
-                        request.name(),
-                        request.type()
-                )
-        );
+        validateType(request.type());
+        var resource = new BookableResource(request.name().trim(), request.type());
+        resource.update(resource.getName(), request.type(), request.active());
+        if (request.description() != null) resource.setDescription(request.description().trim());
+        return repository.save(resource);
     }
 
     @Transactional(
@@ -36,7 +35,7 @@ public class BookableResourceService {
             readOnly = true
     )
     public List<BookableResource> findAll() {
-        return repository.findAll();
+        return repository.findAll().stream().filter(this::isGeneric).toList();
     }
 
     @Transactional(
@@ -45,7 +44,7 @@ public class BookableResourceService {
     )
     public BookableResource findById(UUID id) {
 
-        return repository.findById(id)
+        return repository.findById(id).filter(this::isGeneric)
                 .orElseThrow(() ->
                         new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
@@ -59,6 +58,7 @@ public class BookableResourceService {
             UUID id,
             ResourceRequest request) {
 
+        validateType(request.type());
         BookableResource resource = findById(id);
 
         resource.update(
@@ -67,6 +67,7 @@ public class BookableResourceService {
                 request.active()
         );
 
+        if (request.description() != null) resource.setDescription(request.description().trim());
         return resource;
     }
 
@@ -76,5 +77,18 @@ public class BookableResourceService {
         BookableResource resource = findById(id);
 
         repository.delete(resource);
+    }
+    @Transactional("tenantTransactionManager")
+    public BookableResource setActive(UUID id, boolean active) {
+        var resource = findById(id);
+        resource.update(resource.getName(), resource.getType(), active);
+        return resource;
+    }
+    private boolean isGeneric(BookableResource resource) {
+        return resource.getType() != ResourceType.STAFF && resource.getType() != ResourceType.ROOM;
+    }
+    private void validateType(ResourceType type) {
+        if (type == ResourceType.STAFF || type == ResourceType.ROOM)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Use native staff and location management");
     }
 }

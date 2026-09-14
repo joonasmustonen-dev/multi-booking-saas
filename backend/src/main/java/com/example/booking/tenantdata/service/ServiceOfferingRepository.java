@@ -12,13 +12,29 @@ import java.util.UUID;
 public interface ServiceOfferingRepository
         extends JpaRepository<ServiceOffering, UUID> {
 
-    @EntityGraph(attributePaths = "resources")
-    @Query("SELECT s FROM ServiceOffering s")
+    @EntityGraph(
+        attributePaths = {
+                "resources",
+                "staff",
+                "locations"
+        }
+)
+    @Query("select distinct s from ServiceOffering s")
     List<ServiceOffering> findAllWithResources();
 
-    @EntityGraph(attributePaths = "resources")
-    @Query("SELECT s FROM ServiceOffering s WHERE s.id = :id")
+    @EntityGraph(
+            attributePaths = {
+                        "resources",
+                        "staff",
+                        "locations"
+                }
+        )
+    @Query("""
+        select s
+        from ServiceOffering s
+        where s.id = :id
+        """)
     Optional<ServiceOffering> findByIdWithResources(
             @Param("id") UUID id
-    );
+        );
 }
