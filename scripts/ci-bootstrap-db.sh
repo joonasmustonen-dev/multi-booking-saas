@@ -36,13 +36,16 @@ cleanup() {
 trap cleanup EXIT
 
 ready=false
+last_http_status=unreachable
 for ((attempt = 0; attempt < 60; attempt++)); do
   if ! kill -0 "$bootstrap_pid" 2>/dev/null; then
     echo 'Bootstrap application exited before becoming ready.' >&2
     cat ci-bootstrap.log
     exit 1
   fi
-  if curl --fail --silent --max-time 2 http://127.0.0.1:18080/api/health >/dev/null; then
+  last_http_status=$(curl --silent --output /dev/null --write-out '%{http_code}' \
+    --max-time 2 http://127.0.0.1:18080/api/health) || last_http_status=unreachable
+  if [[ "$last_http_status" == 200 ]]; then
     ready=true
     break
   fi
@@ -50,6 +53,7 @@ for ((attempt = 0; attempt < 60; attempt++)); do
 done
 if [[ "$ready" != true ]]; then
   echo 'Bootstrap application did not become ready within 120 seconds.' >&2
+  echo "Last health HTTP status: $last_http_status" >&2
   cat ci-bootstrap.log
   exit 1
 fi

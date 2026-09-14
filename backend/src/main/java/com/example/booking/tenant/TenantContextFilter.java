@@ -19,6 +19,12 @@ public class TenantContextFilter extends OncePerRequestFilter {
     private static final String TENANT_CLAIM = "tenant_id";
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return (request.getContextPath() + "/api/health")
+                .equals(request.getRequestURI());
+    }
+
+    @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,

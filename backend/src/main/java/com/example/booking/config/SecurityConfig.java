@@ -11,6 +11,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,6 +25,16 @@ public class SecurityConfig {
 
     @Value("${app.security.jwt-enabled:false}")
     private boolean jwtEnabled;
+
+    @Bean
+    public FilterRegistrationBean<TenantContextFilter> tenantFilterRegistration(
+            TenantContextFilter tenantContextFilter) {
+        FilterRegistrationBean<TenantContextFilter> registration =
+                new FilterRegistrationBean<>(tenantContextFilter);
+        // Run only in the security chain, after bearer-token authentication.
+        registration.setEnabled(false);
+        return registration;
+    }
 
 @Bean
 public SecurityFilterChain securityFilterChain(

@@ -29,6 +29,11 @@ public class TenantJwtIntegrationTest {
     @Autowired 
     private MockMvc mockMvc;
 
+    @Test
+    void healthDoesNotRequireJwtOrTenantClaim() throws Exception {
+        mockMvc.perform(get("/api/health")).andExpect(status().isOk());
+    }
+
     @AfterEach 
     void cleanup(){
         TenantContext.clear();
