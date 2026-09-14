@@ -11,6 +11,7 @@ public record CustomerResponse(
         String lastName,
         String email,
         String phone,
+        UUID preferredStaffId,
         OffsetDateTime createdAt
 ) {
 
@@ -22,6 +23,7 @@ public record CustomerResponse(
                 customer.getLastName(),
                 customer.getEmail(),
                 customer.getPhone(),
+                customer.getPreferredStaffId(),
                 customer.getCreatedAt()
         );
     }

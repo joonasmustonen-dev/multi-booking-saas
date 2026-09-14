@@ -25,6 +25,12 @@ public class Customer {
 
     private String phone;
 
+    @Column(name = "preferred_staff_id")
+    private UUID preferredStaffId;
+
+    public UUID getPreferredStaffId() { return preferredStaffId; }
+    public void setPreferredStaffId(UUID id) { preferredStaffId = id; }
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 

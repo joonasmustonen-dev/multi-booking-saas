@@ -15,11 +15,17 @@ import java.util.UUID;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final com.example.booking.tenantdata.appointment.AppointmentRepository appointments;
+    private final com.example.booking.tenantdata.staff.StaffMemberRepository staffRepository;
 
     public CustomerService(
-            CustomerRepository customerRepository) {
+            CustomerRepository customerRepository,
+            com.example.booking.tenantdata.staff.StaffMemberRepository staffRepository,
+            com.example.booking.tenantdata.appointment.AppointmentRepository appointments) {
 
         this.customerRepository = customerRepository;
+        this.staffRepository = staffRepository;
+        this.appointments = appointments;
     }
 
     @Transactional("tenantTransactionManager")
@@ -32,6 +38,7 @@ public class CustomerService {
                 request.phone()
         );
 
+        applyPreferredStaff(customer, request.preferredStaffId());
         return customerRepository.save(customer);
     }
 
@@ -79,7 +86,17 @@ public class CustomerService {
                 request.phone()
         );
 
+        applyPreferredStaff(customer, request.preferredStaffId());
         return customer;
+    }
+
+    private void applyPreferredStaff(Customer customer, UUID id) {
+        if (id != null && !id.equals(customer.getPreferredStaffId())) {
+            staffRepository.findById(id).filter(staff -> staff.isActive() && !staff.isRemoved())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Preferred staff member must be active in this workspace"));
+        }
+        customer.setPreferredStaffId(id);
     }
 
     @Transactional("tenantTransactionManager")
@@ -93,6 +110,13 @@ public class CustomerService {
                         )
                 );
 
-        customerRepository.delete(customer);
+        if (appointments.existsByCustomer_Id(id))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Customer has booking history and cannot be deleted here");
+        try {
+            customerRepository.delete(customer);
+            customerRepository.flush();
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Customer is referenced by a booking");
+        }
     }
 }

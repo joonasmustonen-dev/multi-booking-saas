@@ -216,5 +216,39 @@ try {
         assert(searchableHtml.includes('<input')); assert(searchableHtml.includes('aria-autocomplete="list"'));
         assert(!fixedHtml.includes('<input')); assert(fixedHtml.includes('<button'));
     });
+    const customerApi = await server.ssrLoadModule('/src/features/customers/customerApi.ts');
+    await customerApi.searchCustomers('+358 40', 25);
+    check('Customer search sends bounded encoded phone queries to the native endpoint', () => {
+        const url = new URL(requests.at(-1).url); assert.equal(url.pathname, '/api/v1/customers/search');
+        assert.equal(url.searchParams.get('q'), '+358 40'); assert.equal(url.searchParams.get('limit'), '25');
+    });
+    await customerApi.updateCustomer('emma', { firstName: 'Emma', lastName: 'Wilson', email: null, phone: '+358 456', preferredStaffId: 'staff-a' });
+    check('Customer edits persist preferred staff independently of appointment assignments', () => assert.equal(requests.at(-1).body.preferredStaffId, 'staff-a'));
+    const activity = { customer: { id: 'emma', firstName: 'Emma', lastName: 'Wilson', email: 'emma@example.com', phone: '+358 456', preferredStaffId: 'staff-a', createdAt: base.start },
+        preferredStaffName: 'Sofia', totalBookings: 4, completedBookings: 2, cancelledBookings: 1, noShows: 1, lastVisit: base.start,
+        mostBookedServices: [{ serviceId: 'haircut', name: 'Haircut', visits: 2 }],
+        bookings: [{ ...item, status: 'NO_SHOW' }], page: 0, size: 20, totalElements: 4, totalPages: 1 };
+    client.setQueryData(['customer-activity', 'emma', 0, 20], activity);
+    client.setQueryData(['customer-activity', 'emma', 0, 1], activity);
+    client.setQueryData(['customer-search', '', 50], [activity.customer]);
+    client.setQueryData(['customer-search', ''], [activity.customer]);
+    const customerDetail = (await server.ssrLoadModule('/src/features/customers/CustomerDetail.tsx')).default;
+    const customerDetailHtml = wrap(React.createElement(customerDetail, { id: 'emma', timeZone: 'Europe/Helsinki', onEdit() {}, onClose() {} }));
+    check('Customer details show factual attendance, history, and preferred staff', () => {
+        assert(customerDetailHtml.includes('Booking history')); assert(customerDetailHtml.includes('No-shows'));
+        assert(customerDetailHtml.includes('Sofia')); assert(customerDetailHtml.includes('NO SHOW')); assert(customerDetailHtml.includes('2 visits'));
+    });
+    const context = (await server.ssrLoadModule('/src/features/customers/CustomerContext.tsx')).default;
+    const contextHtml = wrap(React.createElement(context, { customerId: 'emma', timeZone: 'Europe/Helsinki' }));
+    check('Booking context surfaces preferences and attendance with a customer link', () => {
+        assert(contextHtml.includes('2 completed')); assert(contextHtml.includes('1 no-shows'));
+        assert(contextHtml.includes('Sofia')); assert(contextHtml.includes('/customers?customerId=emma'));
+    });
+    const directory = (await server.ssrLoadModule('/src/features/customers/CustomersPage.tsx')).default;
+    const directoryHtml = wrap(React.createElement(directory));
+    check('Customer directory renders searchable contact cards in the shared design', () => {
+        assert(directoryHtml.includes('aria-label="Search customers"')); assert(directoryHtml.includes('customer-card'));
+        assert(directoryHtml.includes('emma@example.com')); assert(directoryHtml.includes('+358 456'));
+    });
     console.log(`Passed ${results.length} frontend API, identity, timezone, and render checks.`);
 } finally { await server.close(); }

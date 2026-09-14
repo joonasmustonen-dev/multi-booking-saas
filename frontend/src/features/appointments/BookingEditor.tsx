@@ -1,7 +1,8 @@
 import SearchSelect from "../../components/SearchSelect";
 import { useState, type FormEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getCustomers } from "../customers/customerApi";
+import CustomerPicker from "../customers/CustomerPicker";
+import CustomerContext from "../customers/CustomerContext";
 import { getServices } from "../services/serviceApi";
 import { useAssignmentCatalogs } from "../assignments/useAssignmentCatalogs";
 import AssignmentFilters, { type AssignmentFilterValues } from "../assignments/AssignmentFilters";
@@ -17,7 +18,6 @@ const emptyFilters: AssignmentFilterValues = { staffId: "", locationId: "", reso
 export default function BookingEditor({ appointment, onSubmit, onCancel }: Props) {
     const catalogs = useAssignmentCatalogs(); const settings = useTenantSettings();
     const services = useQuery({ queryKey: ["services"], queryFn: getServices });
-    const customers = useQuery({ queryKey: ["customers"], queryFn: getCustomers });
     const [customerId, setCustomerId] = useState(appointment?.customerId ?? "");
     const [serviceId, setServiceId] = useState(appointment?.serviceId ?? "");
     const [filters, setFilters] = useState<AssignmentFilterValues>({ staffId: appointment?.staffId ?? "", locationId: appointment?.locationId ?? "", resourceId: appointment?.resourceId ?? "" });
@@ -46,19 +46,20 @@ export default function BookingEditor({ appointment, onSubmit, onCancel }: Props
         catch (e) { setError(e instanceof Error ? e.message : "Could not save appointment."); setSelectedKey(""); await availability.refetch(); }
         finally { setSubmitting(false); }
     }
-    if (catalogs.isPending || settings.isPending || services.isPending || customers.isPending) return <p>Loading booking options…</p>;
-    const loadError = catalogs.error ?? settings.error ?? services.error ?? customers.error;
+    if (catalogs.isPending || settings.isPending || services.isPending) return <p>Loading booking options…</p>;
+    const loadError = catalogs.error ?? settings.error ?? services.error;
     if (loadError) return <div><p role="alert" className="form-error">{loadError.message}</p><button className="button button-secondary" onClick={onCancel}>Close</button></div>;
-    if (!settings.data || !services.data || !customers.data) return <p>Loading booking options…</p>;
+    if (!settings.data || !services.data) return <p>Loading booking options…</p>;
     const zone = settings.data.timeZone;
     const today = dateKeyInTimeZone(new Date().toISOString(), zone);
     return <form className="booking-form" onSubmit={submit}>
         <h3>{appointment ? "Reschedule appointment" : "New appointment"}</h3>
         <p className="field-note">All times are shown in {zone}.</p>
         {appointment ? <div className="booking-summary">{appointment.customerName} · {appointment.serviceName}<br />Current: {formatTime(appointment.startAt, zone)} · {appointmentAssignmentLabel(appointment)}</div> : <div className="form-grid">
-            <div className="form-field">Customer<SearchSelect required value={customerId} onChange={setCustomerId} ariaLabel="Booking customer" placeholder="Type to find a customer…" options={customers.data.map(customer => ({ value: customer.id, label: `${customer.firstName} ${customer.lastName}`, description: customer.email ?? undefined }))} /></div>
+            <div className="form-field">Customer<CustomerPicker value={customerId} onChange={setCustomerId} /></div>
             <div className="form-field">Service<SearchSelect required value={serviceId} onChange={value => { setServiceId(value); setFilters(emptyFilters); setSelectedKey(""); setError(""); }} ariaLabel="Booking service" placeholder="Type to find a service…" options={services.data.filter(service => service.active).map(service => ({ value: service.id, label: service.name, description: `${service.durationMinutes} minutes` }))} /></div>
         </div>}
+        {customerId && <CustomerContext customerId={customerId} timeZone={zone} />}
         {service && <AssignmentFilters service={service} catalogs={catalogs.data} values={requested} onChange={value => { setFilters(value); setSelectedKey(""); setError(""); }} />}
         {appointment && !service && <p role="alert" className="form-error">This service is no longer available.</p>}
         {service && !service.active && <p role="alert" className="form-error">This service is inactive. Activate it before rescheduling.</p>}

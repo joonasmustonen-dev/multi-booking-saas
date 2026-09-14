@@ -51,3 +51,10 @@ export function deleteCustomer(id: string) {
         }
     );
 }
+export function searchCustomers(query = '', limit = 25) {
+    const params = new URLSearchParams({ q: query.trim(), limit: String(limit) });
+    return apiFetch<Customer[]>(`/api/v1/customers/search?${params}`);
+}
+export function getCustomerActivity(id: string, page = 0, size = 20) {
+    return apiFetch<import('./customerTypes').CustomerActivity>(`/api/v1/customers/${id}/activity?page=${page}&size=${size}`);
+}

@@ -22,11 +22,13 @@ import java.util.UUID;
 public class CustomerController {
 
     private final CustomerService customerService;
+    private final CustomerOperationsService operations;
 
     public CustomerController(
-            CustomerService customerService) {
+            CustomerService customerService, CustomerOperationsService operations) {
 
         this.customerService = customerService;
+        this.operations = operations;
     }
 
     @PostMapping
@@ -56,6 +58,18 @@ public class CustomerController {
                 .stream()
                 .map(CustomerResponse::from)
                 .toList();
+    }
+
+    @GetMapping("/search")
+    public List<CustomerResponse> search(@RequestParam(defaultValue = "") String q,
+            @RequestParam(defaultValue = "25") int limit) {
+        return operations.search(q, limit);
+    }
+
+    @GetMapping("/{id}/activity")
+    public CustomerActivityResponse activity(@PathVariable UUID id,
+            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+        return operations.activity(id, page, size);
     }
 
     @GetMapping("/{id}")

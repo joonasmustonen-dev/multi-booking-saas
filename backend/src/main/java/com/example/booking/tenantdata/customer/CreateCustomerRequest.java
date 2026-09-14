@@ -19,6 +19,10 @@ public record CreateCustomerRequest(
         String email,
 
         @Size(max = 50)
-        String phone
+        String phone,
+        java.util.UUID preferredStaffId
 ) {
+    public CreateCustomerRequest(String firstName, String lastName, String email, String phone) {
+        this(firstName, lastName, email, phone, null);
+    }
 }

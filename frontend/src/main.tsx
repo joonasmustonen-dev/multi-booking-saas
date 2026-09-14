@@ -9,6 +9,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import keycloak from "./auth/keycloak";
 import "./index.css";
+import "./features/customers/CustomerStyles.css";
 import "./components/InteractionStyles.css";
 import "./features/assignments/AssignmentStyles.css";
 

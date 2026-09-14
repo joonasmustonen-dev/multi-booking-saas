@@ -6,6 +6,8 @@ This repository is under active development. The included Docker Compose configu
 
 ## Features
 
+- **Customers:** bounded name/email/phone search, preferred staff, paginated booking history, completed-visit summaries, and attendance context in booking and calendar details. [Customer guide](docs/customer-operations.md)
+
 - **Services:** duration, pricing, description, independent eligible staff/location/resource lists, and required/optional/forbidden assignment rules.
 - **Staff:** contact information, activation, archiving, location assignments, free agents, recurring hours, time off, and dated weekly rotas with split shifts and copying from another week.
 - **Locations:** contact/address details, opening hours, closures, and staff assignments.
@@ -213,7 +215,7 @@ npm run lint
 npm run build
 ```
 
-The frontend checks cover API contracts, assignment identity, date helpers, filtering helpers, and server-rendered components. They are not browser end-to-end tests. Recent development verification passed 78 backend tests and 37 frontend checks; rerun these commands on your own checkout before merging or deploying.
+The frontend checks cover API contracts, assignment identity, date helpers, filtering helpers, and server-rendered components. They are not browser end-to-end tests. Recent development verification passed 86 backend tests and 42 frontend checks; rerun these commands on your own checkout before merging or deploying.
 
 Build output is `backend/target/booking-backend-0.0.1-SNAPSHOT.jar` and `frontend/dist/`. Serve the frontend through a web server with SPA fallback for client routes. `vite preview` is useful for local build inspection and is not the production hosting setup.
 

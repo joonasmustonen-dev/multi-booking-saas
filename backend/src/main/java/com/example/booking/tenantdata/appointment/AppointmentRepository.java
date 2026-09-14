@@ -16,6 +16,36 @@ import java.util.UUID;
 public interface AppointmentRepository
         extends JpaRepository<Appointment, UUID> {
 
+    boolean existsByCustomer_Id(UUID customerId);
+
+    @EntityGraph(attributePaths = {"customer", "service", "staff", "location", "resource"})
+    org.springframework.data.domain.Page<Appointment> findByCustomer_Id(UUID customerId,
+            org.springframework.data.domain.Pageable pageable);
+
+    interface CustomerStats {
+        Long getTotal(); Long getCompleted(); Long getCancelled(); Long getNoShows();
+        java.time.Instant getLastVisit();
+    }
+    @Query(value = """
+        SELECT count(*) AS total,
+          count(*) FILTER (WHERE status = 'COMPLETED') AS completed,
+          count(*) FILTER (WHERE status = 'CANCELLED') AS cancelled,
+          count(*) FILTER (WHERE status = 'NO_SHOW') AS "noShows",
+          max(end_at) FILTER (WHERE status = 'COMPLETED' AND end_at <= :now) AS "lastVisit"
+        FROM appointments WHERE customer_id = :customerId
+        """, nativeQuery = true)
+    CustomerStats customerStats(@Param("customerId") UUID customerId, @Param("now") OffsetDateTime now);
+
+    interface FrequentService { UUID getServiceId(); String getName(); Long getVisits(); }
+    @Query(value = """
+        SELECT s.id AS "serviceId", s.name AS name, count(*) AS visits
+        FROM appointments a JOIN services s ON s.id = a.service_id
+        WHERE a.customer_id = :customerId AND a.status = 'COMPLETED' AND a.end_at <= :now
+        GROUP BY s.id, s.name ORDER BY count(*) DESC, s.name, s.id
+        """, nativeQuery = true)
+    List<FrequentService> frequentServices(@Param("customerId") UUID customerId,
+            @Param("now") OffsetDateTime now, org.springframework.data.domain.Pageable pageable);
+
     @EntityGraph(attributePaths = {"staff", "location", "resource"})
     @Query("""
         select a from Appointment a

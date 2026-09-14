@@ -3,13 +3,13 @@ import { createPortal } from "react-dom";
 import { Check, ChevronDown, Search, X } from "lucide-react";
 import { filterSelectOptions, nextEnabledOption } from "./selectOptions";
 export interface SelectOption { value: string; label: string; description?: string; disabled?: boolean }
-interface Props { value: string; options: SelectOption[]; onChange: (value: string) => void; placeholder?: string; ariaLabel: string; searchable?: boolean; disabled?: boolean; required?: boolean; className?: string }
-export default function SearchSelect({ value, options, onChange, placeholder = "Select…", ariaLabel, searchable = true, disabled = false, required = false, className = "" }: Props) {
+interface Props { value: string; options: SelectOption[]; onChange: (value: string) => void; placeholder?: string; ariaLabel: string; searchable?: boolean; disabled?: boolean; required?: boolean; className?: string; onSearchChange?: (query: string) => void; filterLocally?: boolean; loading?: boolean; selectedLabel?: string }
+export default function SearchSelect({ value, options, onChange, placeholder = "Select…", ariaLabel, searchable = true, disabled = false, required = false, className = "", onSearchChange, filterLocally = true, loading = false, selectedLabel }: Props) {
     const id = useId(); const anchor = useRef<HTMLDivElement>(null); const menu = useRef<HTMLDivElement>(null);
     const [open, setOpen] = useState(false); const [query, setQuery] = useState(""); const [highlight, setHighlight] = useState(0);
     const [position, setPosition] = useState({ left: 0, top: 0, width: 240, maxHeight: 280 });
     const selected = options.find(option => option.value === value);
-    const filtered = filterSelectOptions(options, query);
+    const filtered = filterLocally ? filterSelectOptions(options, query) : options;
     const place = useCallback(() => {
         const rect = anchor.current?.getBoundingClientRect(); if (!rect) return;
         const width = Math.min(Math.max(rect.width, 220), window.innerWidth - 16);
@@ -19,7 +19,7 @@ export default function SearchSelect({ value, options, onChange, placeholder = "
         const top = below < 160 && above > below ? Math.max(8, rect.top - visibleHeight - 8) : rect.bottom + 8;
         setPosition({ left: Math.max(8, Math.min(rect.left, window.innerWidth - width - 8)), top, width, maxHeight });
     }, [filtered.length, searchable]);
-    function show() { if (disabled) return; place(); setOpen(true); setQuery(""); setHighlight(Math.max(0, options.findIndex(option => option.value === value))); }
+    function show() { if (disabled) return; place(); setOpen(true); setQuery(""); onSearchChange?.(""); setHighlight(Math.max(0, options.findIndex(option => option.value === value))); }
     function choose(option: SelectOption) { if (disabled || option.disabled) return; onChange(option.value); setOpen(false); setQuery(""); }
     useEffect(() => {
         if (!open) return;
@@ -37,15 +37,15 @@ export default function SearchSelect({ value, options, onChange, placeholder = "
             const next = nextEnabledOption(filtered, highlight, direction);
             setHighlight(next); document.getElementById(`${id}-${next}`)?.scrollIntoView({ block: "nearest" });
         }
-        if (event.key === "Enter") { event.preventDefault(); if (!open) show(); else if (filtered[highlight]) choose(filtered[highlight]); }
+        if (event.key === "Enter") { event.preventDefault(); if (!open) show(); else if (!loading && filtered[highlight]) choose(filtered[highlight]); }
     }
     const common = { role: "combobox", "aria-label": ariaLabel, "aria-expanded": open, "aria-controls": `${id}-menu`, "aria-activedescendant": open && filtered[highlight] ? `${id}-${highlight}` : undefined, disabled, onKeyDown: keyboard };
     return <div ref={anchor} className={`search-select ${open ? "is-open" : ""} ${className}`}>
-        {searchable ? <><Search size={16} className="search-select-icon" /><input {...common} aria-autocomplete="list" required={required} value={open ? query : selected?.label ?? ""} placeholder={selected?.label ?? placeholder} onFocus={show} onClick={() => { if (!open) show(); }} onBlur={() => { setOpen(false); setQuery(""); }} onChange={e => { setQuery(e.target.value); setHighlight(0); }} /></> : <button {...common} type="button" onClick={() => open ? setOpen(false) : show()}><span>{selected?.label ?? placeholder}</span></button>}
+        {searchable ? <><Search size={16} className="search-select-icon" /><input {...common} aria-autocomplete="list" required={required} value={open ? query : selected?.label ?? selectedLabel ?? ""} placeholder={selected?.label ?? selectedLabel ?? placeholder} onFocus={show} onClick={() => { if (!open) show(); }} onBlur={() => { setOpen(false); setQuery(""); }} onChange={e => { setQuery(e.target.value); onSearchChange?.(e.target.value); setHighlight(0); }} /></> : <button {...common} type="button" onClick={() => open ? setOpen(false) : show()}><span>{selected?.label ?? selectedLabel ?? placeholder}</span></button>}
         <ChevronDown size={16} className="search-select-chevron" />
         {open && typeof document !== "undefined" && createPortal(<div ref={menu} id={`${id}-menu`} role="listbox" aria-label={ariaLabel} className="select-popover" style={position}>
-            {searchable && <div className="select-popover-hint">Type to filter {options.length} options · Enter to choose</div>}
-            {filtered.length === 0 ? <p className="select-empty">No matching options</p> : filtered.map((option, index) => <button type="button" tabIndex={-1} id={`${id}-${index}`} role="option" aria-selected={value === option.value} disabled={disabled || option.disabled} key={option.value} className={`select-option ${highlight === index ? "highlighted" : ""}`} onMouseDown={e => e.preventDefault()} onMouseEnter={() => setHighlight(index)} onClick={() => choose(option)}><span><strong>{option.label}</strong>{option.description && <small>{option.description}</small>}</span>{value === option.value && <Check size={16} />}</button>)}
+            {searchable && <div className="select-popover-hint">{loading ? "Searching…" : "Type to search · Enter to choose"}</div>}
+            {filtered.length === 0 ? <p className="select-empty">No matching options</p> : filtered.map((option, index) => <button type="button" tabIndex={-1} id={`${id}-${index}`} role="option" aria-selected={value === option.value} disabled={disabled || loading || option.disabled} key={option.value} className={`select-option ${highlight === index ? "highlighted" : ""}`} onMouseDown={e => e.preventDefault()} onMouseEnter={() => setHighlight(index)} onClick={() => choose(option)}><span><strong>{option.label}</strong>{option.description && <small>{option.description}</small>}</span>{value === option.value && <Check size={16} />}</button>)}
         </div>, document.body)}
     </div>;
 }
