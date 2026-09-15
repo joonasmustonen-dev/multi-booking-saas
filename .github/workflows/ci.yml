@@ -33,7 +33,7 @@ jobs:
           --health-retries 12
     steps:
       - name: Check out source
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
       - name: Set up Java 21
@@ -81,7 +81,7 @@ jobs:
         working-directory: frontend
     steps:
       - name: Check out source
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
       - name: Set up Node 24
@@ -113,7 +113,7 @@ jobs:
     if: github.event_name == 'pull_request' && (github.event.repository.private == false || vars.DEPENDENCY_REVIEW_ENABLED == 'true')
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - uses: actions/dependency-review-action@v5
@@ -124,7 +124,7 @@ jobs:
     name: Scan committed secrets
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: false
