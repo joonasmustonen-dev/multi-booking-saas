@@ -265,7 +265,7 @@ export default function SearchSelect({
                                     onClick={() => choose(option)}
                                 >
                                     <span>
-                                        <strong>
+                                        <strong data-tooltip={option.label}>
                                             {option.tone && (
                                                 <i
                                                     className={`status-dot status-${option.tone}`}
@@ -274,7 +274,13 @@ export default function SearchSelect({
                                             {option.label}
                                         </strong>
                                         {option.description && (
-                                            <small>{option.description}</small>
+                                            <small
+                                                data-tooltip={
+                                                    option.description
+                                                }
+                                            >
+                                                {option.description}
+                                            </small>
                                         )}
                                     </span>
                                     {value === option.value && (
@@ -307,8 +313,16 @@ export function SearchMultiSelect({
             <div className="selected-tags">
                 {values.map(value => (
                     <span className="selected-tag" key={value}>
-                        {options.find(option => option.value === value)
-                            ?.label ?? "Unavailable location"}
+                        <span
+                            className="selected-tag-label"
+                            data-tooltip={
+                                options.find(option => option.value === value)
+                                    ?.label
+                            }
+                        >
+                            {options.find(option => option.value === value)
+                                ?.label ?? "Unavailable location"}
+                        </span>
                         <button
                             type="button"
                             disabled={disabled}

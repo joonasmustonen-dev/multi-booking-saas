@@ -12,8 +12,8 @@ for a managed PostgreSQL connection with verified TLS.
 Create two DNS `A` records pointing to the VM public IPv4 address:
 
 ```text
-api.example.com   -> VM_IP
-auth.example.com  -> VM_IP
+api.multibooking.org   -> VM_IP
+auth.multibooking.org  -> VM_IP
 ```
 
 The Civo firewall should allow inbound TCP 22, 80 and 443, and UDP 443. Do not
@@ -79,8 +79,8 @@ Caddy requests public certificates, so DNS must already resolve to this VM.
 Check both endpoints:
 
 ```bash
-curl -fsS https://api.example.com/api/health
-curl -fsS https://auth.example.com/realms/booking/.well-known/openid-configuration >/dev/null
+curl -fsS https://api.multibooking.org/api/health
+curl -fsS https://auth.multibooking.org/realms/booking/.well-known/openid-configuration >/dev/null
 ```
 
 The first backend start creates the platform schema. Provision the initial
@@ -94,30 +94,31 @@ docker compose logs --tail=100 backend
 
 ## 5. Create the first login
 
-Open `https://auth.example.com/admin/`, sign in with the bootstrap administrator
+Open `https://auth.multibooking.org/admin/`, sign in with the bootstrap administrator
 from `.env`, select the `booking` realm, and create a user. Set a permanent
 password and assign the `TENANT_ADMIN` realm role. The imported frontend client
 already uses PKCE, the `booking-backend` audience, tenant `demo`, and the
-Netlify redirect origin.
+Cloudflare frontend origin.
 
 Configure SMTP under **Realm settings -> Email** before relying on password
 reset. After creating a separate permanent platform administrator, remove or
 rotate the bootstrap administrator credentials.
 
-## 6. Connect Netlify
+## 6. Connect Cloudflare Pages
 
-Set these Netlify build environment variables:
+Set these Cloudflare Pages build environment variables:
 
 ```text
-VITE_API_URL=https://api.example.com
-VITE_KEYCLOAK_URL=https://auth.example.com
+VITE_API_URL=https://api.multibooking.org
+VITE_KEYCLOAK_URL=https://auth.multibooking.org
 VITE_KEYCLOAK_REALM=booking
 VITE_KEYCLOAK_CLIENT_ID=booking-frontend
 ```
 
-Use build command `npm run build`, base directory `frontend`, and publish
-directory `dist`. Clear the build cache and deploy again. The backend's
-`FRONTEND_ORIGIN` in `.env` must exactly match the Netlify origin.
+Use build command `npm run build`, root directory `frontend`, and build output
+directory `dist`. Trigger a new deployment after changing variables. The
+backend's `FRONTEND_ORIGIN` in `.env` must exactly match the Cloudflare custom
+domain, including whether it uses `www`.
 
 ## 7. Back up and update
 

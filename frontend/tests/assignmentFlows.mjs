@@ -1190,6 +1190,13 @@ try {
         assert(calendarHtml.includes("1 appointment</span>"));
         assert(!calendarHtml.includes("1 appointments</span>"));
     });
+    check("Service inputs enforce the backend size and numeric limits", () => {
+        assert.match(formHtml, /maxLength="200"/i);
+        assert.match(formHtml, /maxLength="2000"/i);
+        assert.match(formHtml, /max="1440"/);
+        assert.match(formHtml, /max="9999999999.99"/);
+        assert.match(formHtml, /pattern="\[A-Z\]\{3\}"/);
+    });
     console.log(
         `Passed ${results.length} frontend API, identity, timezone, and render checks.`
     );

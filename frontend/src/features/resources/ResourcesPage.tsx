@@ -111,7 +111,7 @@ export default function ResourcesPage() {
                                     key={resource.id}
                                 >
                                     <div className="section-heading">
-                                        <h3>
+                                        <h3 data-tooltip={resource.name}>
                                             <Package size={20} />
                                             {resource.name}
                                         </h3>

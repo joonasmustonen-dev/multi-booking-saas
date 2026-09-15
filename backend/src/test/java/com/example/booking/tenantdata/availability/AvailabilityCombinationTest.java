@@ -482,6 +482,107 @@ class AvailabilityCombinationTest {
         );
     }
 
+    @Test
+    void todaysTeamRequiresWorkingHoursAndFullDayBlocksRemoveStaff() {
+        UUID id = staff.getId();
+
+        assertFalse(service.isStaffScheduledToday(id, date, ZoneOffset.UTC));
+
+        when(
+            rules.findAllByStaff_IdAndDayOfWeekAndActiveTrue(
+                id,
+                date.getDayOfWeek()
+            )
+        ).thenReturn(
+            List.of(
+                new AvailabilityRule(
+                    null,
+                    staff,
+                    null,
+                    date.getDayOfWeek(),
+                    LocalTime.of(9, 0),
+                    LocalTime.of(17, 0)
+                )
+            )
+        );
+
+        assertTrue(service.isStaffScheduledToday(id, date, ZoneOffset.UTC));
+
+        when(exceptions.findStaffExceptions(eq(id), any(), any())).thenReturn(
+            List.of(
+                new AvailabilityException(
+                    null,
+                    staff,
+                    null,
+                    at(0, 0),
+                    at(0, 0).plusDays(1),
+                    false
+                )
+            )
+        );
+
+        assertFalse(service.isStaffScheduledToday(id, date, ZoneOffset.UTC));
+    }
+
+    @Test
+    void todaysTeamIncludesExtraShiftsAndPartiallyBlockedWorkingDays() {
+        UUID id = staff.getId();
+
+        when(exceptions.findStaffExceptions(eq(id), any(), any())).thenReturn(
+            List.of(
+                new AvailabilityException(
+                    null,
+                    staff,
+                    null,
+                    at(9, 0),
+                    at(17, 0),
+                    true
+                ),
+                new AvailabilityException(
+                    null,
+                    staff,
+                    null,
+                    at(9, 0),
+                    at(12, 0),
+                    false
+                )
+            )
+        );
+
+        assertTrue(service.isStaffScheduledToday(id, date, ZoneOffset.UTC));
+
+        when(exceptions.findStaffExceptions(eq(id), any(), any())).thenReturn(
+            List.of(
+                new AvailabilityException(
+                    null,
+                    staff,
+                    null,
+                    at(9, 0),
+                    at(17, 0),
+                    true
+                ),
+                new AvailabilityException(
+                    null,
+                    staff,
+                    null,
+                    at(9, 0),
+                    at(12, 0),
+                    false
+                ),
+                new AvailabilityException(
+                    null,
+                    staff,
+                    null,
+                    at(12, 0),
+                    at(17, 0),
+                    false
+                )
+            )
+        );
+
+        assertFalse(service.isStaffScheduledToday(id, date, ZoneOffset.UTC));
+    }
+
     private OffsetDateTime at(int hour, int minute) {
         return date.atTime(hour, minute).atOffset(ZoneOffset.UTC);
     }

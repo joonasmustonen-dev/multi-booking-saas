@@ -20,8 +20,8 @@
       "publicClient": true,
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,
-      "redirectUris": ["https://bookingsaas.netlify.app/*"],
-      "webOrigins": ["https://bookingsaas.netlify.app"],
+      "redirectUris": ["https://multibooking.org/*"],
+      "webOrigins": ["https://multibooking.org"],
       "protocol": "openid-connect",
       "attributes": {
         "pkce.code.challenge.method": "S256"

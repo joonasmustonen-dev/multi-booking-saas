@@ -66,6 +66,10 @@ export default function ServiceForm({
     async function submit(event: FormEvent) {
         event.preventDefault();
         setError("");
+        if (!values.name.trim()) {
+            setError("Enter a service name.");
+            return;
+        }
         if (!categories.some(c => values[c.requirement] === "REQUIRED")) {
             setError("Require at least one assignment category.");
             return;
@@ -126,6 +130,7 @@ export default function ServiceForm({
                     <input
                         className="input"
                         required
+                        maxLength={200}
                         value={values.name}
                         onChange={e =>
                             setValues({ ...values, name: e.target.value })
@@ -139,6 +144,7 @@ export default function ServiceForm({
                         required
                         type="number"
                         min="1"
+                        max="1440"
                         value={values.durationMinutes}
                         onChange={e =>
                             setValues({
@@ -154,6 +160,7 @@ export default function ServiceForm({
                         className="input"
                         type="number"
                         min="0"
+                        max="9999999999.99"
                         step="0.01"
                         value={values.price ?? ""}
                         onChange={e =>
@@ -172,9 +179,13 @@ export default function ServiceForm({
                     <input
                         className="input"
                         maxLength={3}
+                        pattern="[A-Z]{3}"
                         value={values.currency ?? ""}
                         onChange={e =>
-                            setValues({ ...values, currency: e.target.value })
+                            setValues({
+                                ...values,
+                                currency: e.target.value.toUpperCase()
+                            })
                         }
                     />
                 </label>
@@ -183,6 +194,7 @@ export default function ServiceForm({
                 Description
                 <textarea
                     className="textarea"
+                    maxLength={2000}
                     value={values.description ?? ""}
                     onChange={e =>
                         setValues({ ...values, description: e.target.value })

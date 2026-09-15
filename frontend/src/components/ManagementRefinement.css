@@ -929,3 +929,41 @@ input[type="checkbox"]:disabled {
         grid-template-columns: minmax(0, 1fr);
     }
 }
+
+/* Keep oversized text inside its own column, including unbroken strings. */
+.management-page .form-field,
+.management-page .form-grid > *,
+.catalog-items > *,
+.assignment-panel {
+    min-width: 0;
+}
+.catalog-items h3,
+.management-page .field-note,
+.management-page .form-error,
+.sidebar-business span,
+.customer-detail h2,
+.customer-detail p {
+    overflow-wrap: anywhere;
+}
+.management-page textarea {
+    max-width: 100%;
+    resize: vertical;
+    overflow-wrap: anywhere;
+}
+
+.catalog-items .section-heading {
+    align-items: flex-start;
+}
+.catalog-items .section-heading > h3 {
+    flex: 1;
+    min-width: 0;
+}
+.catalog-items h3 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+.catalog-items .requirement-pill {
+    flex-shrink: 0;
+}

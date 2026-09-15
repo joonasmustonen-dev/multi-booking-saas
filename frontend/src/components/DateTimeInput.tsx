@@ -73,7 +73,12 @@ export default function DateTimeInput(
     }, [open]);
 
     function show() {
-        if (!input.current || input.current.matches(":disabled")) return;
+        if (
+            !input.current ||
+            input.current.matches(":disabled") ||
+            props.readOnly
+        )
+            return;
         const bounds = input.current.getBoundingClientRect();
         const height = hasDate ? (hasTime ? 450 : 365) : 235;
         setPosition({
@@ -93,7 +98,7 @@ export default function DateTimeInput(
 
     function choose(next: string, close = true) {
         const element = input.current;
-        if (!element || element.matches(":disabled")) return;
+        if (!element || element.matches(":disabled") || props.readOnly) return;
         // Use the native value setter so React receives an ordinary input event.
         Object.getOwnPropertyDescriptor(
             HTMLInputElement.prototype,
@@ -131,7 +136,7 @@ export default function DateTimeInput(
                 className="date-time-trigger"
                 aria-label={hasDate ? "Choose date" : "Choose time"}
                 aria-expanded={open}
-                disabled={props.disabled}
+                disabled={props.disabled || props.readOnly}
                 onClick={event => {
                     event.preventDefault();
                     if (open) setOpen(false);
@@ -320,6 +325,22 @@ export default function DateTimeInput(
                             {hasDate && (
                                 <button
                                     type="button"
+                                    disabled={
+                                        !!(
+                                            (props.min &&
+                                                localDate(new Date()) <
+                                                    String(props.min).slice(
+                                                        0,
+                                                        10
+                                                    )) ||
+                                            (props.max &&
+                                                localDate(new Date()) >
+                                                    String(props.max).slice(
+                                                        0,
+                                                        10
+                                                    ))
+                                        )
+                                    }
                                     onClick={() =>
                                         choose(
                                             hasTime

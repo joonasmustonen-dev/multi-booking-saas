@@ -167,7 +167,11 @@ public class DashboardService {
             zone
         );
 
-        List<TeamMemberSummary> team = buildTeamSummary(activeToday);
+        List<TeamMemberSummary> team = buildTeamSummary(
+            activeToday,
+            today,
+            zone
+        );
 
         List<PopularServiceSummary> popularServices = buildPopularServices(
             activeWeek
@@ -274,7 +278,9 @@ public class DashboardService {
     }
 
     private List<TeamMemberSummary> buildTeamSummary(
-        List<Appointment> todayAppointments
+        List<Appointment> todayAppointments,
+        LocalDate today,
+        ZoneId zone
     ) {
         Map<UUID, Long> appointmentCounts = todayAppointments
             .stream()
@@ -294,6 +300,13 @@ public class DashboardService {
             .findAll()
             .stream()
             .filter(StaffMember::isActive)
+            .filter(staff ->
+                availabilityService.isStaffScheduledToday(
+                    staff.getId(),
+                    today,
+                    zone
+                )
+            )
             .map(staff ->
                 new TeamMemberSummary(
                     staff.getId(),

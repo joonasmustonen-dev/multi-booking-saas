@@ -108,7 +108,9 @@ export default function ServicesPage() {
                                     key={service.id}
                                 >
                                     <div className="section-heading">
-                                        <h3>{service.name}</h3>
+                                        <h3 data-tooltip={service.name}>
+                                            {service.name}
+                                        </h3>
                                         <span
                                             className={`requirement-pill ${service.active ? "sage" : "muted"}`}
                                         >

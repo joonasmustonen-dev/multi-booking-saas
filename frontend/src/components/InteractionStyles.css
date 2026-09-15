@@ -10,7 +10,8 @@
     background: #fcfaf6;
     box-shadow: 0 2px 5px #28202004;
     transition:
-        border-color .15s, box-shadow .15s;
+        border-color 0.15s,
+        box-shadow 0.15s;
 }
 .search-select:focus-within,
 .search-select.is-open {
@@ -45,7 +46,7 @@
 .search-select input:disabled,
 .search-select > button:disabled {
     cursor: not-allowed;
-    opacity: .55;
+    opacity: 0.55;
 }
 .search-select-icon {
     position: absolute;
@@ -58,7 +59,7 @@
     right: 13px;
     color: #6c786f;
     pointer-events: none;
-    transition: transform .15s;
+    transition: transform 0.15s;
 }
 .search-select.is-open .search-select-chevron {
     transform: rotate(180deg);
@@ -74,13 +75,13 @@
     box-shadow:
         0 16px 40px #29212324,
         0 4px 10px #2921230a;
-    animation: popover-in .12s ease-out;
+    animation: popover-in 0.12s ease-out;
 }
 .select-popover-hint {
     padding: 7px 10px 9px;
     color: #8a8178;
     font-size: 10px;
-    letter-spacing: .02em;
+    letter-spacing: 0.02em;
     border-bottom: 1px solid #ebe2d8;
     margin-bottom: 4px;
 }
@@ -120,7 +121,7 @@
     background: #e4eee0;
 }
 .select-option:disabled {
-    opacity: .45;
+    opacity: 0.45;
     cursor: not-allowed;
 }
 .select-empty {
@@ -421,7 +422,7 @@
 .appointment-customer-heading h2 {
     margin: 0;
     font-size: 24px;
-    letter-spacing: -.025em;
+    letter-spacing: -0.025em;
 }
 .appointment-customer-heading p {
     margin: 6px 0 0;
@@ -573,4 +574,34 @@
 .resource-description {
     white-space: pre-line;
     overflow-wrap: anywhere;
+}
+
+/* Long labels must share space with their selection and removal controls. */
+.select-option > span {
+    min-width: 0;
+    flex: 1;
+}
+.select-option > svg,
+.selected-tag button {
+    flex-shrink: 0;
+}
+.select-option small {
+    overflow-wrap: anywhere;
+}
+.selected-tag {
+    min-width: 0;
+    max-width: 100%;
+}
+.selected-tag-label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.select-option strong,
+.select-option small,
+.selected-tag-label {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
 }

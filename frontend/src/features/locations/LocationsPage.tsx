@@ -261,7 +261,12 @@ export default function LocationsPage() {
                                     key={location.id}
                                 >
                                     <div className="section-heading">
-                                        <h3>
+                                        <h3
+                                            data-tooltip={entityLabel(
+                                                location,
+                                                query.data
+                                            )}
+                                        >
                                             <Building2 size={20} />
                                             {entityLabel(location, query.data)}
                                         </h3>

@@ -218,6 +218,59 @@ public class AvailabilityService {
         return targetIntervalAvailable(startAt, endAt, rules, exceptions, zone);
     }
 
+    @Transactional(value = "tenantTransactionManager", readOnly = true)
+    public boolean isStaffScheduledToday(
+        UUID staffId,
+        LocalDate date,
+        ZoneId zone
+    ) {
+        var dayStart = date.atStartOfDay(zone);
+
+        var dayEnd = date.plusDays(1).atStartOfDay(zone);
+
+        var rules = ruleRepository.findAllByStaff_IdAndDayOfWeekAndActiveTrue(
+            staffId,
+            date.getDayOfWeek()
+        );
+
+        var exceptions = exceptionRepository.findStaffExceptions(
+            staffId,
+            dayStart.toOffsetDateTime(),
+            dayEnd.toOffsetDateTime()
+        );
+
+        var blocked = exceptions
+            .stream()
+            .filter(exception -> !exception.isAvailable())
+            .sorted(Comparator.comparing(AvailabilityException::getStartAt))
+            .toList();
+
+        for (TimeWindow window : buildAvailableWindows(
+            date,
+            rules,
+            exceptions,
+            zone
+        )) {
+            ZonedDateTime cursor = window.start();
+
+            for (var exception : blocked) {
+                var start = exception.getStartAt().atZoneSameInstant(zone);
+
+                var end = exception.getEndAt().atZoneSameInstant(zone);
+
+                if (
+                    !end.isAfter(cursor) || !start.isBefore(window.end())
+                ) continue;
+                if (start.isAfter(cursor)) return true;
+                if (end.isAfter(cursor)) cursor = end;
+
+                if (!cursor.isBefore(window.end())) break;
+            }
+            if (cursor.isBefore(window.end())) return true;
+        }
+        return false;
+    }
+
     /*
      * =====================================================
      * LOCATION
