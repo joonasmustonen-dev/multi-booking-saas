@@ -259,10 +259,23 @@ Prepare a dedicated production deployment rather than exposing the development C
 - Configure frontend SPA hosting, API HTTPS, structured logs and health monitoring.
 - Review customer data handling and retention requirements, and select a license before distributing the project for reuse.
 
-The current repository does not provide a production Compose stack, automated Keycloak realm provisioning, or deployment automation. GitHub Actions CI is included; see the CI section above. GitHub source hosting does not deploy the application or transfer existing Docker/database data.
+The repository includes a single-VM staging bundle, but does not yet provide a
+high-availability production stack or automated deployment. GitHub Actions CI
+validates the project but does not deploy it, and GitHub source hosting does not
+transfer existing Docker/database data.
+
+For the first single-VM Civo staging deployment, use the checked-in
+[`infrastructure/civo`](infrastructure/civo/README.md) bundle. It provides the
+backend image, private PostgreSQL network, Keycloak realm import, Caddy HTTPS,
+initial tenant provisioning and backup commands. Promote to the `prod` Spring
+profile only after moving PostgreSQL to a verified-TLS production service.
 
 ## Calendar and management refinements
 
 The calendar offers Week, Day and Agenda views, adaptive time labels and selectable groups for dense bookings. Booking details keep their header and actions visible, and customer details can open a prefilled appointment. Management pages offer searchable, paginated lists and optional cards. Recurring hours use day buttons and whole-week saving across staff, locations and resources. See [visual refinements](docs/visual-refinements.md) for the API contract and verification details.
 
 Booking availability includes explicit loading, empty/error and retry states, and the dashboard appointment shortcut opens the editor directly. Duplicate staff/location names receive identifying labels. See [functional report follow-up](docs/functional-report-followup.md) for validation and remaining browser checks.
+# Security and privacy
+
+See [the security and privacy operations guide](docs/security.md) for role changes,
+Keycloak audience setup, customer export/erasure, retention and production settings.

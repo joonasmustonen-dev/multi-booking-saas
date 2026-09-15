@@ -1,0 +1,58 @@
+{
+  "realm": "booking",
+  "enabled": true,
+  "registrationAllowed": false,
+  "resetPasswordAllowed": true,
+  "verifyEmail": false,
+  "bruteForceProtected": true,
+  "roles": {
+    "realm": [
+      { "name": "TENANT_ADMIN" },
+      { "name": "STAFF" },
+      { "name": "PLATFORM_ADMIN" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "booking-frontend",
+      "name": "Booking frontend",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["https://bookingsaas.netlify.app/*"],
+      "webOrigins": ["https://bookingsaas.netlify.app"],
+      "protocol": "openid-connect",
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "protocolMappers": [
+        {
+          "name": "booking-backend-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "booking-backend",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        },
+        {
+          "name": "demo-tenant",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hardcoded-claim-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "tenant_id",
+            "claim.value": "demo",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ]
+}

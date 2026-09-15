@@ -1,0 +1,90 @@
+name: booking-staging
+
+services:
+  postgres:
+    image: postgres:16.10-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:?required}
+      POSTGRES_DB: postgres
+      DATABASE_RUNTIME_PASSWORD: ${DATABASE_RUNTIME_PASSWORD:?required}
+      DATABASE_MIGRATION_PASSWORD: ${DATABASE_MIGRATION_PASSWORD:?required}
+      KEYCLOAK_DATABASE_PASSWORD: ${KEYCLOAK_DATABASE_PASSWORD:?required}
+    volumes:
+      - ${POSTGRES_DATA_PATH:?required}:/var/lib/postgresql/data
+      - ./postgres-init.sh:/docker-entrypoint-initdb.d/10-booking.sh:ro
+    networks: [data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.7.3
+    restart: unless-stopped
+    command: start --import-realm --proxy-headers=xforwarded --http-enabled=true --health-enabled=true
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DATABASE_PASSWORD:?required}
+      KC_HOSTNAME: https://${AUTH_HOST:?required}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME:?required}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?required}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [data, edge]
+    volumes:
+      - ./realm-booking.json:/opt/keycloak/data/import/realm-booking.json:ro
+
+  backend:
+    build:
+      context: ../../backend
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: staging
+      PLATFORM_DATABASE_URL: jdbc:postgresql://postgres:5432/platform_db
+      DATABASE_RUNTIME_USER: booking_runtime
+      DATABASE_RUNTIME_PASSWORD: ${DATABASE_RUNTIME_PASSWORD:?required}
+      DATABASE_MIGRATION_USER: booking_migration
+      DATABASE_MIGRATION_PASSWORD: ${DATABASE_MIGRATION_PASSWORD:?required}
+      KEYCLOAK_ISSUER_URI: https://${AUTH_HOST:?required}/realms/booking
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/booking/protocol/openid-connect/certs
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:?required}
+      BACKEND_AUDIENCE: ${BACKEND_AUDIENCE:-booking-backend}
+      API_REQUESTS_PER_MINUTE: ${API_REQUESTS_PER_MINUTE:-240}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    networks: [data, edge]
+
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    environment:
+      API_HOST: ${API_HOST:?required}
+      AUTH_HOST: ${AUTH_HOST:?required}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [backend, keycloak]
+    networks: [edge]
+
+networks:
+  edge:
+  data:
+    internal: true
+
+volumes:
+  caddy_data:
+  caddy_config:
