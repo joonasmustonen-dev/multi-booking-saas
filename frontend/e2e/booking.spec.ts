@@ -20,8 +20,12 @@ async function login(page: Page) {
     await expect(page).toHaveURL(/localhost:8081\/realms\/booking/);
     await page.locator("#username").fill("e2e-admin");
     await page.locator("#password").fill("playwright-only-password");
+    const dashboardResponse = page.waitForResponse(response =>
+        response.url().endsWith("/api/v1/dashboard/summary")
+    );
     await page.locator("#kc-login").click();
     await expect(page).toHaveURL(/^http:\/\/localhost:5173\/?(?:#.*)?$/);
+    expect((await dashboardResponse).status()).toBe(200);
     await expect(page.getByRole("heading", { name: /Good (morning|afternoon|evening)/ })).toBeVisible();
 }
 

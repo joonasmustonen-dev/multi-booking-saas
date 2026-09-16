@@ -18,6 +18,7 @@
       "name": "Booking frontend E2E",
       "enabled": true,
       "publicClient": true,
+      "protocol": "openid-connect",
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,
       "redirectUris": ["http://localhost:5173/*"],
@@ -28,6 +29,17 @@
         "post.logout.redirect.uris": "http://localhost:5173/*"
       },
       "protocolMappers": [
+        {
+          "name": "booking-backend-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "booking-backend",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        },
         {
           "name": "tenant-id",
           "protocol": "openid-connect",
