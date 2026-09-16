@@ -2,7 +2,9 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -110,6 +112,7 @@ jobs:
 
   browser-e2e:
     name: Keycloak browser end-to-end tests
+    if: github.event_name != 'pull_request' || github.actor != 'dependabot[bot]'
     needs: [backend, frontend]
     runs-on: ubuntu-24.04
     timeout-minutes: 30
