@@ -31,6 +31,7 @@ services:
 
     volumes:
       - keycloak_data:/opt/keycloak/data
+      - ../keycloak/themes/multibooking:/opt/keycloak/themes/multibooking:ro
 
 volumes:
   postgres_data:

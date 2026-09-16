@@ -5,6 +5,7 @@
   "resetPasswordAllowed": true,
   "verifyEmail": false,
   "bruteForceProtected": true,
+  "loginTheme": "multibooking",
   "roles": {
     "realm": [
       { "name": "TENANT_ADMIN" },

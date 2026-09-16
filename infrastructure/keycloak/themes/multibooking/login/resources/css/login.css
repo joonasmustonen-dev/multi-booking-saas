@@ -1,0 +1,291 @@
+:root {
+    --mb-page: #faf8f5;
+    --mb-card: #ffffff;
+    --mb-ink: #181820;
+    --mb-muted: #6b6b76;
+    --mb-line: #e8e2db;
+    --mb-sage: #3fae91;
+    --mb-sage-dark: #2f8f77;
+    --mb-sage-soft: #e1f4ef;
+    --mb-coral: #f27b61;
+    --mb-coral-hover: #df6851;
+    --mb-danger: #c84f5a;
+    --mb-danger-soft: #fbe2e5;
+}
+
+html,
+body,
+.login-pf,
+.login-pf body {
+    min-height: 100%;
+}
+
+body,
+.login-pf body {
+    margin: 0;
+    color: var(--mb-ink);
+    background:
+        radial-gradient(circle at 12% 12%, rgba(63, 174, 145, 0.16), transparent 31rem),
+        radial-gradient(circle at 88% 85%, rgba(242, 123, 97, 0.13), transparent 28rem),
+        var(--mb-page);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.login-pf-page,
+.pf-v5-c-login,
+.pf-c-login {
+    min-height: 100vh;
+    background: transparent;
+}
+
+.login-pf-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+#kc-header {
+    margin: 0 auto 24px;
+    width: min(100%, 440px);
+    color: var(--mb-ink);
+    text-align: left;
+}
+
+#kc-header-wrapper {
+    min-height: 52px;
+    padding: 3px 0 0 66px;
+    color: transparent;
+    background: url("../img/brand-mark.svg") left center / 52px 52px no-repeat;
+    font-size: 0;
+    line-height: 1.15;
+    letter-spacing: 0;
+    text-transform: none;
+    white-space: normal;
+}
+
+#kc-header-wrapper::before {
+    content: "Multi Booking";
+    display: block;
+    color: var(--mb-ink);
+    font-size: 25px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+}
+
+#kc-header-wrapper::after {
+    content: "Secure workspace access";
+    display: block;
+    margin-top: 5px;
+    color: var(--mb-muted);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.card-pf,
+.pf-v5-c-login__main,
+.pf-c-login__main {
+    width: min(100%, 440px);
+    margin: 0 auto;
+    padding: 34px;
+    overflow: hidden;
+    border: 1px solid var(--mb-line);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 24px 70px rgba(35, 30, 27, 0.11);
+}
+
+.pf-v5-c-login__main-header,
+.pf-c-login__main-header {
+    padding-block-end: 24px;
+}
+
+#kc-page-title,
+.pf-v5-c-title,
+.pf-c-title {
+    color: var(--mb-ink);
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+}
+
+#kc-form-login,
+#kc-reset-password-form {
+    color: var(--mb-ink);
+}
+
+label,
+.pf-v5-c-form__label-text,
+.pf-c-form__label-text {
+    color: var(--mb-ink);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.pf-v5-c-form-control,
+.pf-c-form-control,
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    min-height: 48px;
+    border: 1px solid #d9d2ca;
+    border-radius: 12px;
+    background: #fffdfb;
+    color: var(--mb-ink);
+    box-shadow: none;
+    font-size: 15px;
+    transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.pf-v5-c-form-control:focus-within,
+.pf-c-form-control:focus-within,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: var(--mb-sage);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(63, 174, 145, 0.15);
+    outline: none;
+}
+
+.pf-v5-c-input-group,
+.pf-c-input-group {
+    border-radius: 12px;
+}
+
+.pf-v5-c-input-group .pf-v5-c-button,
+.pf-c-input-group .pf-c-button {
+    border-color: #d9d2ca;
+    border-radius: 0 12px 12px 0;
+    color: var(--mb-muted);
+    background: #fffdfb;
+}
+
+#kc-form-buttons {
+    margin-top: 24px;
+}
+
+#kc-login,
+.pf-v5-c-button.pf-m-primary,
+.pf-c-button.pf-m-primary {
+    min-height: 48px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--mb-coral);
+    color: #ffffff;
+    box-shadow: 0 8px 18px rgba(242, 123, 97, 0.22);
+    font-weight: 750;
+    transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease;
+}
+
+#kc-login:hover,
+.pf-v5-c-button.pf-m-primary:hover,
+.pf-c-button.pf-m-primary:hover {
+    background: var(--mb-coral-hover);
+    box-shadow: 0 10px 22px rgba(242, 123, 97, 0.28);
+    transform: translateY(-1px);
+}
+
+#kc-login:active,
+.pf-v5-c-button.pf-m-primary:active,
+.pf-c-button.pf-m-primary:active {
+    transform: translateY(0);
+}
+
+a {
+    color: var(--mb-sage-dark);
+    font-weight: 650;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #24715f;
+    text-decoration: underline;
+}
+
+.pf-v5-c-check__input,
+.pf-c-check__input,
+input[type="checkbox"] {
+    accent-color: var(--mb-sage);
+}
+
+.alert,
+.pf-v5-c-alert,
+.pf-c-alert {
+    border: 1px solid #efc9cf;
+    border-radius: 12px;
+    background: var(--mb-danger-soft);
+    color: #7f3039;
+    box-shadow: none;
+}
+
+.pf-v5-c-alert.pf-m-success,
+.pf-c-alert.pf-m-success {
+    border-color: #bfdfd6;
+    background: var(--mb-sage-soft);
+    color: #1f6857;
+}
+
+#kc-info-wrapper,
+.pf-v5-c-login__main-footer-band,
+.pf-c-login__main-footer-band {
+    border: 0;
+    background: #f7f3ee;
+    color: var(--mb-muted);
+}
+
+#kc-info-wrapper {
+    margin: 30px -34px -34px;
+    padding: 20px 34px;
+}
+
+#kc-content-wrapper p,
+.instruction,
+.subtitle {
+    color: var(--mb-muted);
+    line-height: 1.55;
+}
+
+@media (max-width: 540px) {
+    .login-pf-page {
+        justify-content: flex-start;
+        padding: 24px 14px;
+    }
+
+    #kc-header {
+        margin-bottom: 18px;
+    }
+
+    #kc-header-wrapper {
+        min-height: 46px;
+        padding-left: 58px;
+        background-size: 46px 46px;
+    }
+
+    #kc-header-wrapper::before {
+        font-size: 22px;
+    }
+
+    .card-pf,
+    .pf-v5-c-login__main,
+    .pf-c-login__main {
+        padding: 26px 22px;
+        border-radius: 18px;
+    }
+
+    #kc-info-wrapper {
+        margin: 26px -22px -26px;
+        padding: 18px 22px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+

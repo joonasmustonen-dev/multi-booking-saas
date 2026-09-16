@@ -39,6 +39,7 @@ services:
     networks: [data, edge]
     volumes:
       - ./realm-booking.json:/opt/keycloak/data/import/realm-booking.json:ro
+      - ../keycloak/themes/multibooking:/opt/keycloak/themes/multibooking:ro
 
   backend:
     build:

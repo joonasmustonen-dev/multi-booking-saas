@@ -104,6 +104,22 @@ Configure SMTP under **Realm settings -> Email** before relying on password
 reset. After creating a separate permanent platform administrator, remove or
 rotate the bootstrap administrator credentials.
 
+The deployment mounts the branded `multibooking` login theme. New realm imports
+select it automatically. For an existing realm, restart Keycloak after pulling
+the deployment change, then open **Realm settings -> Themes**, choose
+`multibooking` under **Login theme**, and save. Do not select the custom theme
+for the administrator console; it is intentionally limited to customer-facing
+authentication screens.
+
+If Cloudflare places a **Suspected Phishing** interstitial in front of the
+authentication hostname, changing the Keycloak theme will not remove it. That
+page is served at Cloudflare's edge before the request reaches Keycloak. Open
+the Cloudflare dashboard's **Abuse reports** page, locate the mitigation for
+`auth.multibooking.org`, and request review. Explain that the hostname is the
+first-party OpenID Connect provider for `multibooking.org`, uses Authorization
+Code with PKCE, and does not relay credentials to another service. Do not work
+around the mitigation by exposing the origin or disabling TLS.
+
 ## 6. Connect Cloudflare Pages
 
 Set these Cloudflare Pages build environment variables:
