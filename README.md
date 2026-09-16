@@ -134,6 +134,8 @@ npm run dev -- --host localhost --port 5173 --strictPort
 
 Open `http://localhost:5173` for the public development-preview homepage. Open `http://localhost:5173/app` or use its **Open development app** button to sign in through Keycloak. Authenticated routes attach a refreshed access token to API requests. Use `localhost` consistently: `127.0.0.1` is a different origin for redirects and CORS.
 
+Cloudflare Pages deployments use `frontend/public/_redirects` to rewrite client-side routes such as `/app` to `index.html`. Keep that file in the published build so direct navigation, browser refreshes, and Keycloak redirects work instead of returning a static-host 404.
+
 To create a usable first booking, add staff/locations/resources, configure their hours, define a service's assignment requirements and eligible owners, then create a customer and appointment.
 
 ## Configuration
