@@ -1,0 +1,28 @@
+name: booking-e2e
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: booking
+      POSTGRES_PASSWORD: booking
+      POSTGRES_DB: platform_db
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U booking -d platform_db"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.7.3
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: e2e-admin-console
+      KC_BOOTSTRAP_ADMIN_PASSWORD: e2e-admin-console-password
+    ports:
+      - "127.0.0.1:8081:8080"
+    volumes:
+      - ./booking-e2e-realm.json:/opt/keycloak/data/import/booking-e2e-realm.json:ro
+

@@ -49,8 +49,10 @@ frontend/
   src/api/                  Authenticated API client
   src/components/           Shared controls and interaction styles
   src/features/             Services, staff, locations, resources, bookings, settings
+  e2e/                      Playwright browser booking lifecycle tests
   tests/assignmentFlows.mjs  API, helper and server-render checks
 infrastructure/compose/     Development PostgreSQL and Keycloak
+infrastructure/e2e/         Disposable PostgreSQL and Keycloak browser-test stack
 scripts/                    Local setup helpers
 docs/                       Project documentation
 ```
@@ -215,15 +217,27 @@ npm run lint
 npm run build
 ```
 
-The frontend checks cover API contracts, assignment identity, date helpers, filtering helpers, and server-rendered components. They are not browser end-to-end tests. Recent development verification passed 88 backend tests and 58 frontend checks; rerun these commands on your own checkout before merging or deploying.
+The frontend checks cover API contracts, assignment identity, date helpers, filtering helpers, and server-rendered components.
+
+Authenticated browser tests use disposable PostgreSQL and Keycloak containers. They verify the real authorization-code login and a complete create, reschedule, and cancel booking lifecycle through Chromium. The runner deletes its isolated Docker volumes on exit; it never uses the development or production databases.
+
+```bash
+cd frontend
+npm ci
+npx playwright install --with-deps chromium
+cd ..
+bash scripts/run-e2e.sh
+```
+
+The browser suite uses deliberately public test-only credentials from `infrastructure/e2e/booking-e2e-realm.json`. Do not replace them with deployment credentials. See [CI setup and browser-test troubleshooting](docs/ci.md).
 
 Build output is `backend/target/booking-backend-0.0.1-SNAPSHOT.jar` and `frontend/dist/`. Serve the frontend through a web server with SPA fallback for client routes. `vite preview` is useful for local build inspection and is not the production hosting setup.
 
 ## GitHub Actions CI
 
-The workflow in .github/workflows/ci.yml runs on pushes, pull requests, and manual dispatch. It runs Java 21 backend tests/builds against disposable PostgreSQL 16 databases and Node 24 frontend checks, lint and build. It automatically initializes the platform registry and both test tenants; your local services do not need to be running. No custom GitHub secrets are required.
+The workflow in .github/workflows/ci.yml runs on pushes, pull requests, and manual dispatch. It runs Java 21 backend tests/builds against disposable PostgreSQL 16 databases, Node 24 frontend checks, lint and build, and a Playwright Chromium job backed by disposable PostgreSQL and Keycloak containers. It automatically initializes the platform registry and both test tenants; your local services do not need to be running. No custom GitHub secrets are required.
 
-Test reports, the backend JAR and frontend build are uploaded as short-lived artifacts. Real Keycloak login and browser end-to-end tests are not included. This workflow validates builds and tests; it does not deploy the application. See [CI setup and troubleshooting](docs/ci.md) for bootstrap details and required-check setup.
+Test reports, Playwright traces/screenshots/videos on failure, service logs, the backend JAR, and the frontend build are uploaded as short-lived artifacts. This workflow validates builds and tests; it does not deploy the application. See [CI setup and troubleshooting](docs/ci.md) for bootstrap details and required-check setup.
 
 ## Troubleshooting
 
@@ -255,7 +269,7 @@ Prepare a dedicated production deployment rather than exposing the development C
 - Replace development credentials, use a secret store, and externalize frontend URLs and backend CORS configuration.
 - Verify issuer, role, audience and tenant authorization policies. Review the platform tenant listing's authorization before exposing it publicly.
 - Plan tenant provisioning and migrations, database connection capacity, backup/restore procedures, and monitoring.
-- Add deployment automation and browser end-to-end coverage for login, booking, cancellation and rescheduling.
+- Add deployment automation and extend browser coverage to production-specific proxy, TLS and backup/restore behavior.
 - Configure frontend SPA hosting, API HTTPS, structured logs and health monitoring.
 - Review customer data handling and retention requirements, and select a license before distributing the project for reuse.
 

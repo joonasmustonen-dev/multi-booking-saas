@@ -1,0 +1,67 @@
+{
+  "realm": "booking",
+  "enabled": true,
+  "displayName": "Multi Booking E2E",
+  "registrationAllowed": false,
+  "resetPasswordAllowed": false,
+  "loginWithEmailAllowed": true,
+  "roles": {
+    "realm": [
+      { "name": "TENANT_ADMIN" },
+      { "name": "STAFF" },
+      { "name": "CUSTOMER" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "booking-frontend",
+      "name": "Booking frontend E2E",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://localhost:5173/*"],
+      "webOrigins": ["http://localhost:5173"],
+      "defaultClientScopes": ["web-origins", "acr", "roles", "profile", "email"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:5173/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "tenant-id",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hardcoded-claim-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "tenant_id",
+            "claim.value": "tenant-a",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "multivalued": "false"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "e2e-admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "End-to-end",
+      "lastName": "Administrator",
+      "email": "e2e-admin@example.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "playwright-only-password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["TENANT_ADMIN"]
+    }
+  ]
+}

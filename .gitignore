@@ -1,8 +1,11 @@
 # Build output and installed dependencies
 **/target/
 **/node_modules/
+**/.npm-cache/
 **/dist/
 **/dist-ssr/
+**/playwright-report/
+**/test-results/
 *.tsbuildinfo
 *.class
 
