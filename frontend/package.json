@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "deploy:cloudflare": "npm run build && npx wrangler deploy",
+    "deploy:cloudflare": "npm run build && node scripts/prepareCloudflareAssets.mjs && wrangler deploy",
     "lint": "oxlint",
     "preview": "vite preview",
     "test:assignments": "node tests/assignmentFlows.mjs",
@@ -28,6 +28,7 @@
     "@vitejs/plugin-react": "^6.1.1",
     "oxlint": "^1.81.0",
     "typescript": "~6.0.2",
-    "vite": "^8.3.0"
+    "vite": "^8.3.0",
+    "wrangler": "^4.133.0"
   }
 }
