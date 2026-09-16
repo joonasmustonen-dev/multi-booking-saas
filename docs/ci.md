@@ -13,6 +13,8 @@ GitHub Actions runs four independent concerns: backend verification, frontend ch
 5. Start Vite through Playwright and run Chromium against the real Keycloak authorization-code flow.
 6. Stop the application and delete the isolated containers and volumes, even after a failure.
 
+Keycloak startup imports `infrastructure/e2e/booking-realm.json`. Keep that exact `<realm-name>-realm.json` filename: Keycloak's directory importer uses the filename to identify the realm. The runner prints Keycloak logs immediately if the realm endpoint does not appear.
+
 The tests cover login, creating a booking from generated availability, rescheduling it to another date, and cancelling it. The booking tests run serially because they intentionally exercise one lifecycle across multiple browser sessions.
 
 ## Run locally

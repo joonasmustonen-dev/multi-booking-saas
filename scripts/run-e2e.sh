@@ -21,28 +21,42 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 cd "$repo_root"
+echo "[e2e] Starting disposable PostgreSQL and Keycloak containers..."
 docker compose -f "$compose_file" down --volumes --remove-orphans >/dev/null 2>&1 || true
 docker compose -f "$compose_file" up -d --wait postgres keycloak
 
+echo "[e2e] Waiting for the imported booking realm..."
 keycloak_ready=false
-for ((attempt = 0; attempt < 90; attempt++)); do
-    if curl --fail --silent --max-time 2 \
-        http://localhost:8081/realms/booking/.well-known/openid-configuration \
-        >/dev/null; then
+last_keycloak_status=unreachable
+for ((attempt = 1; attempt <= 60; attempt++)); do
+    last_keycloak_status=$(curl --silent --output /dev/null --write-out '%{http_code}' \
+        --max-time 2 \
+        http://localhost:8081/realms/booking/.well-known/openid-configuration
+    ) || last_keycloak_status=unreachable
+    if [[ "$last_keycloak_status" == 200 ]]; then
         keycloak_ready=true
         break
+    fi
+    if ((attempt % 10 == 0)); then
+        echo "[e2e] Still waiting for realm (attempt $attempt/60, HTTP $last_keycloak_status)..."
     fi
     sleep 2
 done
 if [[ "$keycloak_ready" != true ]]; then
-    echo "Keycloak did not become ready within 180 seconds." >&2
+    echo "Keycloak realm did not become ready within 120 seconds (last HTTP status: $last_keycloak_status)." >&2
+    echo "Keycloak logs:" >&2
+    docker compose -f "$compose_file" logs --no-color keycloak >&2 || true
     exit 1
 fi
+echo "[e2e] Keycloak realm is ready."
 
+echo "[e2e] Building the Spring Boot application..."
 (cd backend && bash mvnw --batch-mode --no-transfer-progress -DskipTests package)
+echo "[e2e] Creating and migrating disposable tenant databases..."
 POSTGRES_CONTAINER=$(docker compose -f "$compose_file" ps -q postgres) \
     bash scripts/ci-bootstrap-db.sh
 
+echo "[e2e] Starting the JWT-enabled backend..."
 jar_files=(backend/target/booking-backend-*.jar)
 java -jar "${jar_files[0]}" \
     --server.address=127.0.0.1 \
@@ -51,7 +65,7 @@ java -jar "${jar_files[0]}" \
 backend_pid=$!
 
 backend_ready=false
-for ((attempt = 0; attempt < 90; attempt++)); do
+for ((attempt = 1; attempt <= 90; attempt++)); do
     if ! kill -0 "$backend_pid" 2>/dev/null; then
         echo "Backend exited before becoming ready." >&2
         cat "$backend_log"
@@ -61,6 +75,9 @@ for ((attempt = 0; attempt < 90; attempt++)); do
         backend_ready=true
         break
     fi
+    if ((attempt % 10 == 0)); then
+        echo "[e2e] Still waiting for backend (attempt $attempt/90)..."
+    fi
     sleep 2
 done
 if [[ "$backend_ready" != true ]]; then
@@ -68,11 +85,14 @@ if [[ "$backend_ready" != true ]]; then
     cat "$backend_log"
     exit 1
 fi
+echo "[e2e] Backend is ready."
 
+echo "[e2e] Loading deterministic booking fixtures..."
 postgres_container=$(docker compose -f "$compose_file" ps -q postgres)
 docker exec -i "$postgres_container" psql \
     -U booking -d platform_db -v ON_ERROR_STOP=1 \
     < scripts/e2e-seed.sql
 
+echo "[e2e] Running Playwright in Chromium..."
 cd frontend
 npm run test:e2e

@@ -229,7 +229,7 @@ cd ..
 bash scripts/run-e2e.sh
 ```
 
-The browser suite uses deliberately public test-only credentials from `infrastructure/e2e/booking-e2e-realm.json`. Do not replace them with deployment credentials. See [CI setup and browser-test troubleshooting](docs/ci.md).
+The browser suite uses deliberately public test-only credentials from `infrastructure/e2e/booking-realm.json`. Do not replace them with deployment credentials. See [CI setup and browser-test troubleshooting](docs/ci.md).
 
 Build output is `backend/target/booking-backend-0.0.1-SNAPSHOT.jar` and `frontend/dist/`. Serve the frontend through a web server with SPA fallback for client routes. `vite preview` is useful for local build inspection and is not the production hosting setup.
 

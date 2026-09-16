@@ -24,5 +24,4 @@ services:
     ports:
       - "127.0.0.1:8081:8080"
     volumes:
-      - ./booking-e2e-realm.json:/opt/keycloak/data/import/booking-e2e-realm.json:ro
-
+      - ./booking-realm.json:/opt/keycloak/data/import/booking-realm.json:ro
