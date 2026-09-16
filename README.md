@@ -1,301 +1,256 @@
-# Multi Booking SaaS
+# MultiBooking
 
-A multi-tenant booking workspace built with Spring Boot, React, PostgreSQL, and Keycloak. Services describe the staff, locations, and equipment needed for a booking. Availability generates complete assignment combinations, and appointments validate those combinations again when saved.
+> A multi-tenant scheduling platform for coordinating customers, services, staff, locations, and shared resources.
 
-This repository is under active development. The included Docker Compose configuration is for local development; it is not a production deployment.
+[![CI](https://github.com/joonasmustonen-dev/multi-booking-saas/actions/workflows/ci.yml/badge.svg)](https://github.com/joonasmustonen-dev/multi-booking-saas/actions/workflows/ci.yml)
+[![Live preview](https://img.shields.io/badge/live-multibooking.org-ef765f)](https://multibooking.org)
 
-## Features
+**Live site:** [multibooking.org](https://multibooking.org)
 
-- **Customers:** bounded name/email/phone search, preferred staff, paginated booking history, completed-visit summaries, and attendance context in booking and calendar details. [Customer guide](docs/customer-operations.md)
+MultiBooking is a full-stack portfolio project built around a scheduling problem that becomes difficult as soon as one booking can depend on several independently available assignments. A service can require a staff member, a location, a resource, or any supported combination of the three. The platform generates only complete combinations, validates the selected combination again when it is saved, and relies on PostgreSQL constraints as the final guard against concurrent double-booking.
 
-- **Services:** duration, pricing, description, independent eligible staff/location/resource lists, and required/optional/forbidden assignment rules.
-- **Staff:** contact information, activation, archiving, location assignments, free agents, recurring hours, time off, and dated weekly rotas with split shifts and copying from another week.
-- **Locations:** contact/address details, opening hours, closures, and staff assignments.
-- **Resources:** equipment and other bookable things, descriptions, activation, and their own hours and exceptions.
-- **Appointments:** create, reschedule, cancel, update status, and view styled appointment details and customer contact information.
-- **Waitlists:** service and time-range requests with optional staff/location preferences, recorded notification consent, cancellation matching, deduplicated offers, and accepted/expired/removed lifecycle tracking.
-- **Calendar:** weekly view with staff, location, service, and status filters.
-- **Dashboard:** booking summaries and staff information.
-- **Settings:** business details, timezone, currency, booking notice/horizon, slot interval, calendar hours/week start, and initial appointment status.
-- **Tenant isolation:** a platform tenant registry plus a separate PostgreSQL database for each tenant, selected from the authenticated JWT.
+The project covers the complete path from domain modeling and API design to a responsive operations interface, authenticated browser tests, containerized infrastructure, CI, and a public cloud deployment.
 
-## Stack and prerequisites
+**Project status:** active engineering project and development preview. The hosted environment is provided for demonstration, has no public registration, and should not be used for real customer data.
 
-| Component | Technology / local requirement |
+## What this project demonstrates
+
+| Area | Implementation |
 | --- | --- |
-| Backend | Java 21, Spring Boot 4.1.1, Maven wrapper |
-| Frontend | React 19, TypeScript 6, Vite 8, React Query, React Router |
-| Node | Node.js 24 LTS recommended; the frontend checks use `node:module` registerHooks |
-| Database | PostgreSQL 16 with Flyway migrations |
-| Authentication | Keycloak 26.7.3 in the development Compose file; browser Authorization Code flow with PKCE S256 |
-| Infrastructure | Docker Desktop / Docker Engine with Compose v2 |
+| Domain modeling | Services independently declare staff, location, and resource assignments as required, optional, or forbidden. Eligibility and requirement rules remain separate. |
+| Scheduling | Availability intersects recurring hours, dated staff rotas, closures, time off, extra availability, service eligibility, location assignments, booking policies, and existing appointments. |
+| Concurrency | Appointment creation and rescheduling revalidate inside a transaction; PostgreSQL `tstzrange` exclusion constraints reject races for staff, locations, and resources. |
+| Multi-tenancy | A platform registry selects a dedicated PostgreSQL database from a trusted JWT tenant claim. Tenant context is request-scoped and cleared after every request. |
+| Authentication | Keycloak OpenID Connect, Authorization Code flow with PKCE S256, Spring Security resource-server validation, audience checks, and role-based authorization. |
+| Privacy controls | Customer export, contact-detail or full erasure, processing restriction, legal hold, retention preview/apply workflows, and security audit events. |
+| Event-driven workflow | Appointment cancellation publishes an event that matches released capacity against eligible waitlist entries in a new transaction. |
+| Delivery | GitHub Actions, disposable PostgreSQL and Keycloak services, Playwright browser tests, Docker Compose, Caddy TLS termination, Cloudflare Workers, and Civo deployment assets. |
 
-Install Git, Java 21, Node.js 24, and Docker. The Maven wrapper downloads Maven on first use, so a separate Maven installation is optional. Commands below use Git Bash on Windows; on Linux/macOS use the same commands with your clone path.
+## Architecture
 
-## Repository structure
+```mermaid
+flowchart LR
+    browser[React client] -->|static assets| cloudflare[Cloudflare Workers]
+    browser -->|OIDC + PKCE| caddy
+    browser -->|Bearer JWT / REST| caddy
+    caddy --> keycloak[Keycloak]
+    caddy --> api[Spring Boot API]
+    api -->|issuer and audience validation| keycloak
+    api --> registry[(Platform tenant registry)]
+    api --> router{Tenant routing datasource}
+    router --> tenantA[(Tenant database A)]
+    router --> tenantB[(Tenant database B)]
+    router --> tenantN[(Tenant database N)]
+
+    subgraph Civo VM
+        caddy[Caddy / TLS]
+        api
+        keycloak
+        registry
+        tenantA
+        tenantB
+        tenantN
+    end
+```
+
+The frontend is a static React application. Keycloak owns authentication, while Spring Security validates access tokens and establishes the tenant context. Platform metadata lives in a small registry database; operational data is physically separated into one database per tenant. Flyway migrates the platform schema and every active tenant schema during startup.
+
+## Core scheduling model
+
+A bookable slot is more than a timestamp. It is a complete assignment tuple:
+
+```text
+(start, end, staff?, location?, resource?)
+```
+
+Each service defines:
+
+- which staff, locations, and resources are eligible;
+- whether each assignment category is `REQUIRED`, `OPTIONAL`, or `FORBIDDEN`;
+- duration, price, and booking status defaults.
+
+Availability is computed from the intersection of every selected assignment's schedule. Blocked exceptions take precedence over recurring hours, while extra-availability exceptions can open additional time. Staff can be restricted to assigned locations or configured as free agents.
+
+Saving an appointment repeats the assignment and availability checks. The transaction flushes immediately so a conflicting PostgreSQL exclusion constraint becomes an HTTP `409 Conflict` instead of a silent double-booking. Rescheduling uses the same path while excluding the appointment being moved.
+
+## Product capabilities
+
+- **Calendar and appointments** — weekly and agenda views, searchable filters, complete assignment selection, rescheduling, cancellation, status transitions, and detailed customer context.
+- **Services** — duration, pricing, descriptions, eligible assignments, and independent requirement policies for staff, locations, and resources.
+- **Staff scheduling** — contact details, activation, location assignments, recurring hours, time off, split shifts, and dated weekly rotas with copy/reset operations.
+- **Locations and resources** — independent opening hours, closures, extra availability, activation, and assignment management.
+- **Customers** — bounded search, contact details, operational notes, booking history, attendance context, and preferred staff.
+- **Waitlists** — service and time-range requests, optional staff/location preferences, notification consent, cancellation matching, deduplicated offers, expiry, acceptance, and removal states.
+- **Dashboard and settings** — operational summaries, today's scheduled team, booking policies, timezone, currency, calendar range, and slot spacing.
+- **Privacy administration** — paginated data export, erasure controls, legal holds, processing restrictions, retention policies, and auditable administrative actions.
+
+## Technology
+
+### Backend
+
+- Java 21 and Spring Boot 4
+- Spring Web MVC, Spring Data JPA, Spring Security, and Bean Validation
+- PostgreSQL 16 and Flyway
+- OAuth 2.0 resource server with Keycloak-issued JWTs
+- Maven and JUnit 5
+
+### Frontend
+
+- React 19 and TypeScript 6
+- Vite 8
+- TanStack Query
+- React Router
+- Playwright
+- Custom responsive component and design system CSS
+
+### Infrastructure and delivery
+
+- Docker Compose for development, E2E, and single-VM staging
+- Caddy for HTTPS and reverse proxying
+- Cloudflare Workers Static Assets for the frontend
+- Civo Compute for the containerized backend stack
+- GitHub Actions, Dependabot, dependency review, and Gitleaks
+
+## Quality strategy
+
+The test suite focuses on boundaries where scheduling systems usually fail:
+
+- tenant selection and cross-tenant isolation;
+- JWT claims, audience validation, roles, and suspended tenants;
+- required, optional, and forbidden assignment combinations;
+- overlapping staff, location, and resource bookings;
+- recurring rules, blocked periods, extra availability, and weekly rotas;
+- cancellation capacity and waitlist offer lifecycle;
+- customer privacy, retention, erasure, and legal-hold behavior;
+- appointment create, reschedule, and cancel flows through a real Keycloak login in Chromium.
+
+GitHub Actions creates disposable databases, applies the real Flyway migrations, builds both applications, runs the backend and frontend suites, and then starts isolated PostgreSQL and Keycloak containers for Playwright. Failure artifacts include test reports, browser traces, screenshots, videos, and service logs.
+
+```mermaid
+flowchart LR
+    push[Push or pull request] --> backend[Backend tests + JAR]
+    push --> frontend[Typecheck + lint + frontend checks]
+    backend --> e2e[Authenticated Playwright lifecycle]
+    frontend --> e2e
+    push --> security[Dependency review + secret scan]
+```
+
+## Repository layout
 
 ```text
 backend/
-  src/main/java/com/example/booking/
-    config/                 Security, persistence and routing configuration
-    tenant/                 Platform registry and tenant database routing
-    tenantdata/             Booking domain and REST APIs
-  src/main/resources/
-    application.yml         Local defaults
-    db/migration/           Platform migrations
-    db/tenant/              Per-tenant migrations
-  src/test/                 Unit and integration tests
+  src/main/java/              REST APIs, domain services, security, tenant routing
+  src/main/resources/db/      Platform and tenant Flyway migrations
+  src/test/                   Unit and PostgreSQL integration tests
 frontend/
-  src/auth/                 Keycloak browser integration
-  src/api/                  Authenticated API client
-  src/components/           Shared controls and interaction styles
-  src/features/             Services, staff, locations, resources, bookings, settings
-  e2e/                      Playwright browser booking lifecycle tests
-  tests/assignmentFlows.mjs  API, helper and server-render checks
-infrastructure/compose/     Development PostgreSQL and Keycloak
-infrastructure/e2e/         Disposable PostgreSQL and Keycloak browser-test stack
-scripts/                    Local setup helpers
-docs/                       Project documentation
+  src/api/                    Authenticated API client
+  src/auth/                   Keycloak browser integration
+  src/components/             Shared UI controls
+  src/features/               Domain-oriented React features
+  e2e/                        Playwright booking lifecycle
+infrastructure/
+  compose/                    Local PostgreSQL and Keycloak
+  e2e/                        Isolated browser-test infrastructure
+  civo/                       Staging Compose, Caddy, backups, realm import
+scripts/                      Database bootstrap and E2E orchestration
+docs/                         Focused operational documentation
 ```
 
-## Run locally
+## Run the verification suites
 
-### 1. Clone and start infrastructure
+Prerequisites: Java 21, Node.js 24, Docker with Compose v2, and Git Bash or another Bash environment.
+
+The browser suite is the fastest way to exercise the complete system with disposable infrastructure. It starts PostgreSQL and Keycloak, imports a test realm, migrates and seeds the databases, starts the API and frontend, performs the authenticated booking lifecycle, and removes its containers and volumes afterward.
 
 ```bash
 git clone https://github.com/joonasmustonen-dev/multi-booking-saas.git
-cd multi-booking-saas
-docker compose -f infrastructure/compose/docker-compose.dev.yml up -d
-docker compose -f infrastructure/compose/docker-compose.dev.yml ps
-```
-
-| Service | Address | Development credentials |
-| --- | --- | --- |
-| PostgreSQL | `localhost:5432` | user/password `booking` / `booking` |
-| Keycloak Admin Console | `http://localhost:8081` | `admin` / `admin` |
-| Backend | `http://localhost:8080` | Bearer access token for protected APIs |
-| Frontend | `http://localhost:5173` | A Keycloak user configured below |
-
-These credentials are deliberately public local defaults. Never reuse them in a deployed environment. Compose stores database and Keycloak state in Docker volumes; ordinary `down` preserves those volumes.
-
-### 2. Initialize the platform database
-
-Run the backend once so Flyway creates the platform tenant registry:
-
-```bash
-cd backend
-./mvnw spring-boot:run
-```
-
-Wait for startup to finish, then stop with Ctrl+C. Return to the repository root and create the demo tenants:
-
-```bash
-cd ..
-docker compose -f infrastructure/compose/docker-compose.dev.yml exec -T postgres \
-  psql -U booking -d platform_db -v ON_ERROR_STOP=1 < scripts/setup-dev-tenants.sql
-```
-
-The script creates `tenant_a` and `tenant_b`, adds `tenant-a` and `tenant-b` to the registry, and adds markers used by the routing integration tests. It preserves existing databases and registry rows. Run it only against the development Compose database.
-
-Restart the backend after running it. Startup migrates every ACTIVE tenant using `db/tenant`; business tables are created by Flyway, not by the setup script. A new tenant needs both a PostgreSQL database and an ACTIVE registry row. Self-service tenant provisioning is not implemented.
-
-### 3. Configure Keycloak
-
-The repository currently does not contain a realm export. A fresh Keycloak installation must be configured manually:
-
-1. Sign in to the Admin Console and create a realm named **booking**.
-2. Create an OpenID Connect client with ID **booking-frontend**.
-3. Disable client authentication for this public browser client. Enable Standard Flow; use PKCE **S256**. A browser client must not contain a client secret.
-4. Set Valid Redirect URIs to `http://localhost:5173/*`, Web Origins to `http://localhost:5173`, and Valid Post Logout Redirect URIs to `http://localhost:5173/*`.
-5. Create realm roles **TENANT_ADMIN**, **STAFF**, and **CUSTOMER**. The backend reads `realm_access.roles` with these exact names.
-6. Create a development user and set a password. Assign **TENANT_ADMIN** for full workspace management.
-7. Add a user attribute `tenant_id` with value `tenant-a`. Depending on the realm user-profile settings, define this attribute first. End users must not be allowed to edit their tenant assignment.
-8. Add a User Attribute protocol mapper to the client's dedicated client scope: User Attribute `tenant_id`, Token Claim Name `tenant_id`, JSON type String, Add to access token enabled. Ensure the realm role mapper also includes roles in the access token.
-9. Verify the user's access token has `tenant_id: "tenant-a"` and the appropriate `realm_access.roles`. Do not paste real tokens into issues or documentation.
-
-Use `tenant-b` for a user in the second demo workspace. Adding a Staff record in the application creates a scheduling record; it does not create a Keycloak login account.
-
-### 4. Start the application
-
-Backend terminal, from the repository root:
-
-```bash
-cd backend
-./mvnw spring-boot:run
-```
-
-Frontend terminal, from the repository root:
-
-```bash
-cd frontend
-npm ci
-npm run dev -- --host localhost --port 5173 --strictPort
-```
-
-Open `http://localhost:5173` for the public development-preview homepage. Open `http://localhost:5173/app` or use its **Open development app** button to sign in through Keycloak. Authenticated routes attach a refreshed access token to API requests. Use `localhost` consistently: `127.0.0.1` is a different origin for redirects and CORS.
-
-Cloudflare Pages deployments use `frontend/public/_redirects` to rewrite client-side routes such as `/app` to `index.html`. Keep that file in the published build so direct navigation, browser refreshes, and Keycloak redirects work instead of returning a static-host 404.
-
-To create a usable first booking, add staff/locations/resources, configure their hours, define a service's assignment requirements and eligible owners, then create a customer and appointment.
-
-## Configuration
-
-Backend defaults are in `backend/src/main/resources/application.yml`. Spring Boot can override them with environment variables:
-
-| Variable | Purpose |
-| --- | --- |
-| `SPRING_DATASOURCE_URL` | Platform PostgreSQL JDBC URL |
-| `SPRING_DATASOURCE_USERNAME` / `SPRING_DATASOURCE_PASSWORD` | Platform database credentials |
-| `APP_TENANT_DATABASE_HOST` | Tenant database host |
-| `APP_TENANT_DATABASE_USERNAME` / `APP_TENANT_DATABASE_PASSWORD` | Tenant database credentials |
-| `SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI` | Keycloak realm issuer |
-| `APP_SECURITY_JWT_ENABLED` | JWT authentication toggle; keep enabled for application use |
-| `SERVER_PORT` | Backend HTTP port |
-
-**Current configuration limits:** tenant routing currently hardcodes PostgreSQL port 5432, even though application.yml includes a tenant port property. Frontend API URL (`frontend/src/api/apiClient.ts`), Keycloak settings (`frontend/src/auth/keycloak.ts`), and backend CORS allowed origins (`SecurityConfig.java`) are currently source constants. They must be changed or externalized before deployment; adding a frontend `.env` alone does not change them.
-
-Local `.env` files, credentials, keys, build output, and editor settings are excluded from Git. Dependency lockfiles and Flyway SQL migrations belong in Git. Do not edit a migration already applied to a shared database; add a new versioned migration instead.
-
-## Booking and availability behavior
-
-Each service specifies REQUIRED, OPTIONAL, or FORBIDDEN for staff, location, and resource. At least one category must be required. Eligible owners and requirement rules are separate: omitting a required category must not produce an incomplete booking.
-
-Availability intersects the schedules of every selected owner and excludes conflicting appointments. Blocked exceptions override recurring hours and extra availability. Restricted staff can work only at assigned locations; free agents can work at any service-eligible location. Service eligibility still applies to free agents.
-
-Appointments validate the service's exact assignment combination and availability at creation/rescheduling. Rescheduling excludes the appointment itself when calculating available slots. PostgreSQL exclusion constraints provide final protection against overlapping active bookings for the same staff, location, or resource. Cancellation frees capacity.
-
-Dated staff rotas replace recurring hours for one Monday-based week. Resetting a week restores recurring rules while preserving independent time-off exceptions. Location management emphasizes regular opening hours and closures; resource management supports its own recurring hours and exceptions.
-
-## REST API overview
-
-Protected requests use `Authorization: Bearer <access-token>`. Tenant-scoped APIs require the token's `tenant_id` claim. Authorization differs by endpoint; management APIs generally require TENANT_ADMIN or STAFF, while settings updates require TENANT_ADMIN. Check controller method annotations for exact permissions.
-
-| Route | Purpose |
-| --- | --- |
-| `GET /api/health` | Public application health endpoint |
-| `GET /api/platform/tenants` | Platform registry listing; authenticated |
-| `/api/v1/customers` | Customer management |
-| `/api/v1/services` | Service definitions and assignment eligibility |
-| `/api/v1/staff` | Staff contacts, assignments, activation and archiving |
-| `/api/v1/locations` | Location management and activation |
-| `/api/v1/resources` | Resource management and activation |
-| `GET /api/v1/availability` | Complete available booking combinations |
-| `/api/v1/{staff|locations|resources}/{ownerId}/availability/rules` | Recurring owner schedules |
-| `/api/v1/{staff|locations|resources}/{ownerId}/availability/exceptions` | Owner closures/time off/extra availability |
-| `/api/v1/staff/{id}/schedule?weekStart=YYYY-MM-DD` | GET/PUT dated weekly rota; DELETE resets it |
-| `/api/v1/appointments` | Appointment creation, listing and details |
-| `GET /api/v1/appointments/calendar` | Calendar data with filters |
-| `POST /api/v1/appointments/{id}/reschedule` | Reschedule with validation |
-| `GET /api/v1/appointments/{id}/availability` | Available combinations excluding that appointment |
-| `POST /api/v1/appointments/{id}/cancel` | Cancel a booking |
-| `PATCH /api/v1/appointments/{id}/status` | Update booking status |
-| `/api/v1/waitlist` | Create and list customer waitlist requests |
-| `POST /api/v1/waitlist/{id}/{accept|expire}` | Accept or expire a waitlist offer/request |
-| `DELETE /api/v1/waitlist/{id}` | Remove a waitlist request |
-| `GET /api/v1/dashboard/summary` | Workspace dashboard |
-| `/api/v1/settings` | Read/update tenant settings |
-
-Example availability query (substitute a service UUID and use the tenant timezone's desired dates):
-
-```text
-/api/v1/availability?serviceId=<uuid>&from=2026-10-05&to=2026-10-11
-```
-
-Optional `staffId`, `locationId`, and `resourceId` filters restrict the combinations. A slot includes the actual assignment IDs; preserve the complete combination when creating or rescheduling a booking rather than identifying a slot only by its time.
-
-## Tests and builds
-
-Backend tests require the local PostgreSQL instance, both demo tenants, their registry rows, and routing markers. Tests use mocked JWTs where appropriate, but this is not a database-free suite. Run against development databases, never production. Startup can apply migrations.
-
-```bash
-cd backend
-./mvnw clean test
-./mvnw clean package
-```
-
-Frontend checks:
-
-```bash
-cd frontend
-npm ci
-npm run test:assignments
-npm run lint
-npm run build
-```
-
-The frontend checks cover API contracts, assignment identity, date helpers, filtering helpers, and server-rendered components.
-
-Authenticated browser tests use disposable PostgreSQL and Keycloak containers. They verify the real authorization-code login and a complete create, reschedule, and cancel booking lifecycle through Chromium. The runner deletes its isolated Docker volumes on exit; it never uses the development or production databases.
-
-```bash
-cd frontend
+cd multi-booking-saas/frontend
 npm ci
 npx playwright install --with-deps chromium
 cd ..
 bash scripts/run-e2e.sh
 ```
 
-The browser suite uses deliberately public test-only credentials from `infrastructure/e2e/booking-realm.json`. Do not replace them with deployment credentials. See [CI setup and browser-test troubleshooting](docs/ci.md).
-
-Build output is `backend/target/booking-backend-0.0.1-SNAPSHOT.jar` and `frontend/dist/`. Serve the frontend through a web server with SPA fallback for client routes. `vite preview` is useful for local build inspection and is not the production hosting setup.
-
-## GitHub Actions CI
-
-The workflow in .github/workflows/ci.yml runs on pushes, pull requests, and manual dispatch. It runs Java 21 backend tests/builds against disposable PostgreSQL 16 databases, Node 24 frontend checks, lint and build, and a Playwright Chromium job backed by disposable PostgreSQL and Keycloak containers. It automatically initializes the platform registry and both test tenants; your local services do not need to be running. No custom GitHub secrets are required.
-
-Test reports, Playwright traces/screenshots/videos on failure, service logs, the backend JAR, and the frontend build are uploaded as short-lived artifacts. This workflow validates builds and tests; it does not deploy the application. See [CI setup and troubleshooting](docs/ci.md) for bootstrap details and required-check setup.
-
-## Troubleshooting
-
-| Symptom | Check / action |
-| --- | --- |
-| PostgreSQL connection refused | Start Compose; check port 5432 and container logs |
-| Unknown tenant / database missing | Run local tenant setup after platform initialization, then restart backend |
-| Routing marker tests fail | Confirm both routing_test_data tables have the expected A/B markers |
-| Login redirect error | Check realm/client IDs and exact frontend redirect origin |
-| API 401 | Check issuer URL, token expiry, and whether authentication is enabled |
-| API 403 / missing tenant claim | Check realm roles and tenant_id access-token mapper |
-| No booking slots | Check requirements, eligibility, owner activity, hours, closures, location assignments, booking notice/horizon and existing appointments |
-| NoSuchFieldError after edits | Stop competing IDE builds and restart after `./mvnw clean test`; stale target classes can cause this |
-| Vite cannot spawn config bundler in a restricted environment | Try `npx tsc -b` followed by `npx vite build --configLoader native` |
-| LF/CRLF warning in Git Bash | Review .gitattributes; shell scripts must use LF. This warning alone is not a failed commit |
-
-Infrastructure logs and shutdown:
+Run the individual project checks with an initialized local PostgreSQL environment:
 
 ```bash
-docker compose -f infrastructure/compose/docker-compose.dev.yml logs --tail=100
-docker compose -f infrastructure/compose/docker-compose.dev.yml down
+# Backend
+cd backend
+./mvnw clean verify
+
+# Frontend
+cd ../frontend
+npm ci
+npm run test:assignments
+npm run lint
+npm run build
 ```
 
-## Before production
+See [CI setup and browser-test troubleshooting](docs/ci.md) for the isolated test lifecycle and artifact locations.
 
-Prepare a dedicated production deployment rather than exposing the development Compose stack:
+## Local development
 
-- Run Keycloak in production mode with HTTPS, a proper database, restricted administrator access, secure redirects, email delivery and backups.
-- Replace development credentials, use a secret store, and externalize frontend URLs and backend CORS configuration.
-- Verify issuer, role, audience and tenant authorization policies. Review the platform tenant listing's authorization before exposing it publicly.
-- Plan tenant provisioning and migrations, database connection capacity, backup/restore procedures, and monitoring.
-- Add deployment automation and extend browser coverage to production-specific proxy, TLS and backup/restore behavior.
-- Configure frontend SPA hosting, API HTTPS, structured logs and health monitoring.
-- Review customer data handling and retention requirements, and select a license before distributing the project for reuse.
+Start the development infrastructure:
 
-The repository includes a single-VM staging bundle, but does not yet provide a
-high-availability production stack or automated deployment. GitHub Actions CI
-validates the project but does not deploy it, and GitHub source hosting does not
-transfer existing Docker/database data.
+```bash
+docker compose -f infrastructure/compose/docker-compose.dev.yml up -d
+```
 
-For the first single-VM Civo staging deployment, use the checked-in
-[`infrastructure/civo`](infrastructure/civo/README.md) bundle. It provides the
-backend image, private PostgreSQL network, Keycloak realm import, Caddy HTTPS,
-initial tenant provisioning and backup commands. Promote to the `prod` Spring
-profile only after moving PostgreSQL to a verified-TLS production service.
+Start the backend once so Flyway creates the platform registry, then provision the two local tenant databases:
 
-## Calendar and management refinements
+```bash
+cd backend
+./mvnw spring-boot:run
+# Stop the application after startup, then return to the repository root.
 
-The calendar offers Week, Day and Agenda views, adaptive time labels and selectable groups for dense bookings. Booking details keep their header and actions visible, and customer details can open a prefilled appointment. Management pages offer searchable, paginated lists and optional cards. Recurring hours use day buttons and whole-week saving across staff, locations and resources. See [visual refinements](docs/visual-refinements.md) for the API contract and verification details.
+cd ..
+docker compose -f infrastructure/compose/docker-compose.dev.yml exec -T postgres \
+  psql -U booking -d platform_db -v ON_ERROR_STOP=1 < scripts/setup-dev-tenants.sql
+```
 
-Booking availability includes explicit loading, empty/error and retry states, and the dashboard appointment shortcut opens the editor directly. Duplicate staff/location names receive identifying labels. See [functional report follow-up](docs/functional-report-followup.md) for validation and remaining browser checks.
-# Security and privacy
+Configure a local Keycloak `booking` realm with the `booking-frontend` public client, PKCE S256, the `TENANT_ADMIN`, `STAFF`, and `CUSTOMER` roles, and a `tenant_id` access-token claim. Local redirect and web origins are `http://localhost:5173/*` and `http://localhost:5173`.
 
-See [the security and privacy operations guide](docs/security.md) for role changes,
-Keycloak audience setup, customer export/erasure, retention and production settings.
+Start the applications in separate terminals:
+
+```bash
+# Backend
+cd backend
+./mvnw spring-boot:run
+
+# Frontend
+cd frontend
+npm ci
+npm run dev -- --host localhost --port 5173 --strictPort
+```
+
+Open `http://localhost:5173`. Development credentials in the Compose files are intentionally local-only and must never be reused in a deployment.
+
+## Deployment
+
+The demonstration topology separates the static frontend from the stateful application services:
+
+- Cloudflare Workers serves the Vite build with SPA fallback routing.
+- Caddy terminates TLS for `api.multibooking.org` and `auth.multibooking.org`.
+- Spring Boot, Keycloak, and PostgreSQL run as containers on a Civo VM.
+- PostgreSQL and application ports remain private to Docker networks; only SSH, HTTP, and HTTPS are exposed.
+- Production frontend endpoints are compiled from `frontend/.env.production`.
+- The repository contains backup and update scripts for the staging VM.
+
+The checked-in deployment is intentionally a single-VM staging design rather than a high-availability production claim. See the [Civo deployment guide](infrastructure/civo/README.md) for DNS, secrets, TLS, provisioning, backups, and update procedures.
+
+## Security and privacy notes
+
+This project implements technical controls that are useful in privacy-sensitive systems, but software features alone do not make a deployment GDPR compliant. A real operator would still need documented lawful bases, processor agreements, retention decisions, incident handling, access governance, and verified backup/restore and deletion procedures.
+
+The hosted instance is a development preview. Do not enter real personal, medical, payment, or confidential business data.
+
+## Current boundaries
+
+- Tenant provisioning is an administrative infrastructure operation; self-service onboarding is not implemented.
+- Waitlist offers are tracked and deduplicated, while external email/SMS delivery is not yet connected.
+- Payments, public customer registration, billing, and subscription management are outside the current scope.
+- The included deployment favors a reviewable, low-cost staging topology over multi-region availability.
+
+---
+
+Built by [joonasmustonen-dev](https://github.com/joonasmustonen-dev) as an end-to-end demonstration of backend design, frontend product work, database correctness, identity integration, automated testing, and cloud delivery.
