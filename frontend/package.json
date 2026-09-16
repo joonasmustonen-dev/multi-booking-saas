@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "deploy:cloudflare": "npm run build && node scripts/prepareCloudflareAssets.mjs && wrangler deploy",
+    "prepare:cloudflare": "node scripts/prepareCloudflareAssets.mjs",
+    "publish:cloudflare": "npm run prepare:cloudflare && wrangler deploy",
+    "deploy:cloudflare": "npm run build && npm run publish:cloudflare",
     "lint": "oxlint",
     "preview": "vite preview",
     "test:assignments": "node tests/assignmentFlows.mjs",
