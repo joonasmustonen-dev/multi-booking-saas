@@ -260,3 +260,46 @@
     margin-top: 5px;
     color: #72808b;
 }
+.waitlist-panel {
+    margin: 24px 0;
+    padding: 20px;
+    border: 1px solid #d9e4d9;
+    border-radius: 18px;
+    background: #f5f8f3;
+}
+.waitlist-panel h3,
+.waitlist-panel p { margin-top: 0; }
+.waitlist-form {
+    margin: 16px 0;
+    padding: 18px;
+    border: 1px solid #e8ded6;
+    border-radius: 16px;
+    background: #fffaf6;
+}
+.waitlist-form .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.waitlist-form .choice-card { margin: 16px 0; }
+.waitlist-entries { display: grid; gap: 10px; }
+.waitlist-entries article {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 15px;
+    border: 1px solid #e5ddd3;
+    border-radius: 14px;
+    background: #fff;
+}
+.waitlist-entry-main { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
+.waitlist-entry-main p { margin: 6px 0; color: #627084; font-size: 13px; }
+.waitlist-entry-main small { color: #627084; }
+.waitlist-entry-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 7px; max-width: 310px; }
+.waitlist-status { padding: 5px 9px; border-radius: 999px; background: #edf0f2; font-size: 11px; font-weight: 700; }
+.waitlist-offered { background: #fff0cf; color: #775710; }
+.waitlist-accepted { background: #dff3e9; color: #146549; }
+.waitlist-expired, .waitlist-removed { background: #f1edeb; color: #766a64; }
+.waitlist-offer { flex-basis: 100%; text-align: right; margin: 0; font-size: 12px; color: #627084; }
+@media (max-width: 700px) {
+    .waitlist-form .form-grid { grid-template-columns: 1fr; }
+    .waitlist-entries article { flex-direction: column; }
+    .waitlist-entry-actions { justify-content: flex-start; max-width: none; }
+    .waitlist-offer { text-align: left; }
+}

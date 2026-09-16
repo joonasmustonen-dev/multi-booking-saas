@@ -10,6 +10,7 @@ import { Mail, Phone, UserRound, Clock3 } from "lucide-react";
 import { getCustomerActivity } from "./customerApi";
 import { formatDate, formatTime } from "../settings/timeFormat";
 import type { Customer } from "./customerTypes";
+import WaitlistPanel from "../waitlist/WaitlistPanel";
 
 export default function CustomerDetail({
     id,
@@ -168,6 +169,11 @@ export default function CustomerDetail({
                     Preferred staff:{" "}
                     <strong>{d.preferredStaffName || "No preference"}</strong>
                 </p>
+                <WaitlistPanel
+                    customerId={id}
+                    timeZone={timeZone}
+                    disabled={!!c.processingRestricted || !!c.erasedAt}
+                />
                 <h3>Most-booked services</h3>
                 <p className="field-note">Based on completed visits.</p>
                 {d.mostBookedServices.length ? (

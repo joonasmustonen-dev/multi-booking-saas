@@ -13,6 +13,7 @@ This repository is under active development. The included Docker Compose configu
 - **Locations:** contact/address details, opening hours, closures, and staff assignments.
 - **Resources:** equipment and other bookable things, descriptions, activation, and their own hours and exceptions.
 - **Appointments:** create, reschedule, cancel, update status, and view styled appointment details and customer contact information.
+- **Waitlists:** service and time-range requests with optional staff/location preferences, recorded notification consent, cancellation matching, deduplicated offers, and accepted/expired/removed lifecycle tracking.
 - **Calendar:** weekly view with staff, location, service, and status filters.
 - **Dashboard:** booking summaries and staff information.
 - **Settings:** business details, timezone, currency, booking notice/horizon, slot interval, calendar hours/week start, and initial appointment status.
@@ -131,7 +132,7 @@ npm ci
 npm run dev -- --host localhost --port 5173 --strictPort
 ```
 
-Open `http://localhost:5173`. The frontend redirects to Keycloak for login and attaches a refreshed access token to API requests. Use `localhost` consistently: `127.0.0.1` is a different origin for redirects and CORS.
+Open `http://localhost:5173` for the public development-preview homepage. Open `http://localhost:5173/app` or use its **Open development app** button to sign in through Keycloak. Authenticated routes attach a refreshed access token to API requests. Use `localhost` consistently: `127.0.0.1` is a different origin for redirects and CORS.
 
 To create a usable first booking, add staff/locations/resources, configure their hours, define a service's assignment requirements and eligible owners, then create a customer and appointment.
 
@@ -186,6 +187,9 @@ Protected requests use `Authorization: Bearer <access-token>`. Tenant-scoped API
 | `GET /api/v1/appointments/{id}/availability` | Available combinations excluding that appointment |
 | `POST /api/v1/appointments/{id}/cancel` | Cancel a booking |
 | `PATCH /api/v1/appointments/{id}/status` | Update booking status |
+| `/api/v1/waitlist` | Create and list customer waitlist requests |
+| `POST /api/v1/waitlist/{id}/{accept|expire}` | Accept or expire a waitlist offer/request |
+| `DELETE /api/v1/waitlist/{id}` | Remove a waitlist request |
 | `GET /api/v1/dashboard/summary` | Workspace dashboard |
 | `/api/v1/settings` | Read/update tenant settings |
 

@@ -20,27 +20,31 @@ const queryClient = new QueryClient({
     }
 });
 
-keycloak
-    .init({
-        onLoad: "login-required",
-        pkceMethod: "S256",
-        checkLoginIframe: false
-    })
-    .then(authenticated => {
-        if (!authenticated) {
-            return;
-        }
+function render() {
+    createRoot(document.getElementById("root")!).render(
+        <StrictMode>
+            <QueryClientProvider client={queryClient}>
+                <BrowserRouter>
+                    <App />
+                </BrowserRouter>
+            </QueryClientProvider>
+        </StrictMode>
+    );
+}
 
-        createRoot(document.getElementById("root")!).render(
-            <StrictMode>
-                <QueryClientProvider client={queryClient}>
-                    <BrowserRouter>
-                        <App />
-                    </BrowserRouter>
-                </QueryClientProvider>
-            </StrictMode>
-        );
-    })
-    .catch(error => {
-        console.error("Keycloak initialization failed", error);
-    });
+if (window.location.pathname === "/") {
+    render();
+} else {
+    keycloak
+        .init({
+            onLoad: "login-required",
+            pkceMethod: "S256",
+            checkLoginIframe: false
+        })
+        .then(authenticated => {
+            if (authenticated) render();
+        })
+        .catch(error => {
+            console.error("Keycloak initialization failed", error);
+        });
+}

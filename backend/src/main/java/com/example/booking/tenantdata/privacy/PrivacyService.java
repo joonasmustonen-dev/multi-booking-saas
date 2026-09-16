@@ -244,6 +244,29 @@ public class PrivacyService {
                 .executeUpdate();
         } else {
             entityManager
+                .createNativeQuery(
+                    """
+                    UPDATE waitlist_offers SET status = 'REMOVED'
+                    WHERE entry_id IN (
+                        SELECT id FROM waitlist_entries
+                        WHERE customer_id = :id AND status IN ('WAITING', 'OFFERED')
+                    ) AND status = 'OFFERED'
+                    """
+                )
+                .setParameter("id", id)
+                .executeUpdate();
+
+            entityManager
+                .createNativeQuery(
+                    """
+                    UPDATE waitlist_entries SET status = 'REMOVED', updated_at = now(), version = version + 1
+                    WHERE customer_id = :id AND status IN ('WAITING', 'OFFERED')
+                    """
+                )
+                .setParameter("id", id)
+                .executeUpdate();
+
+            entityManager
                 .createQuery(
                     "update Appointment a set a.notes = null, a.version = a.version + 1 where a.customer.id = :id"
                 )
@@ -276,6 +299,8 @@ public class PrivacyService {
       AND c.last_activity_at < :cutoff AND c.created_at < :cutoff
       AND NOT EXISTS (SELECT 1 FROM appointments a WHERE a.customer_id = c.id
           AND (a.end_at >= :cutoff OR a.status IN ('PENDING', 'CONFIRMED')))
+      AND NOT EXISTS (SELECT 1 FROM waitlist_entries w WHERE w.customer_id = c.id
+          AND w.status IN ('WAITING', 'OFFERED'))
     ORDER BY c.id LIMIT 100
     """;
 
@@ -336,6 +361,11 @@ public class PrivacyService {
                 """
                 SELECT e.id FROM security_audit_event e WHERE e.occurred_at < :cutoff
                   AND NOT EXISTS (SELECT 1 FROM customers c WHERE c.id = e.record_id AND c.legal_hold = true)
+                  AND NOT EXISTS (
+                      SELECT 1 FROM waitlist_entries w
+                      JOIN customers c ON c.id = w.customer_id
+                      WHERE w.id = e.record_id AND c.legal_hold = true
+                  )
                 ORDER BY e.id LIMIT 1000
                 """,
                 UUID.class

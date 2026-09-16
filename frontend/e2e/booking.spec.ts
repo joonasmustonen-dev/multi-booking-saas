@@ -16,7 +16,7 @@ function addDays(date: string, days: number): string {
 }
 
 async function login(page: Page) {
-    await page.goto("/");
+    await page.goto("/app");
     await expect(page).toHaveURL(/localhost:8081\/realms\/booking/);
     await page.locator("#username").fill("e2e-admin");
     await page.locator("#password").fill("playwright-only-password");
@@ -24,7 +24,7 @@ async function login(page: Page) {
         response.url().endsWith("/api/v1/dashboard/summary")
     );
     await page.locator("#kc-login").click();
-    await expect(page).toHaveURL(/^http:\/\/localhost:5173\/?(?:#.*)?$/);
+    await expect(page).toHaveURL(/^http:\/\/localhost:5173\/app\/?(?:#.*)?$/);
     expect((await dashboardResponse).status()).toBe(200);
     await expect(page.getByRole("heading", { name: /Good (morning|afternoon|evening)/ })).toBeVisible();
 }

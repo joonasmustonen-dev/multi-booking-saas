@@ -17,7 +17,7 @@ import { useTenantSettings } from "../features/settings/useTenantSettings";
 
 const navigation = [
     {
-        to: "/",
+        to: "/app",
         label: "Dashboard",
         icon: LayoutDashboard,
         end: true
@@ -58,7 +58,7 @@ const navigation = [
 import TooltipLayer from "./TooltipLayer";
 export default function AppLayout() {
     const calendarPage = useLocation().pathname === "/appointments";
-    const dashboardPage = useLocation().pathname === "/";
+    const dashboardPage = useLocation().pathname === "/app";
     const settingsQuery = useTenantSettings();
 
     const username = keycloak.tokenParsed?.preferred_username as

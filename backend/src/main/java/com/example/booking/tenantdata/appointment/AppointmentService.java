@@ -13,10 +13,12 @@ import com.example.booking.tenantdata.service.ServiceOfferingRepository;
 import com.example.booking.tenantdata.availability.AvailabilityService;
 import com.example.booking.tenantdata.location.LocationRepository;
 import com.example.booking.tenantdata.location.Location;
+import com.example.booking.tenantdata.waitlist.AppointmentCancelledEvent;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -46,6 +48,7 @@ public class AppointmentService {
     private final StaffMemberRepository staffRepository;
 
     private final LocationRepository locationRepository;
+    private final ApplicationEventPublisher events;
 
     public AppointmentService(
         AppointmentRepository appointmentRepository,
@@ -55,7 +58,8 @@ public class AppointmentService {
         AvailabilityService availabilityService,
         TenantSettingsService tenantSettingsService,
         StaffMemberRepository staffRepository,
-        LocationRepository locationRepository
+        LocationRepository locationRepository,
+        ApplicationEventPublisher events
     ) {
         this.appointmentRepository = appointmentRepository;
 
@@ -72,6 +76,7 @@ public class AppointmentService {
         this.staffRepository = staffRepository;
 
         this.locationRepository = locationRepository;
+        this.events = events;
     }
 
     @Transactional("tenantTransactionManager")
@@ -229,8 +234,11 @@ public class AppointmentService {
         validateStatusTransition(appointment, targetStatus);
 
         appointment.changeStatus(targetStatus);
-
-        return flushMutation(appointment);
+        AppointmentResponse response = flushMutation(appointment);
+        if (targetStatus == AppointmentStatus.CANCELLED) {
+            publishCancellation(appointment);
+        }
+        return response;
     }
 
     private Appointment getAppointment(UUID id) {
@@ -251,8 +259,28 @@ public class AppointmentService {
         validateStatusTransition(appointment, AppointmentStatus.CANCELLED);
 
         appointment.changeStatus(AppointmentStatus.CANCELLED);
+        AppointmentResponse response = flushMutation(appointment);
+        publishCancellation(appointment);
+        return response;
+    }
 
-        return flushMutation(appointment);
+    private void publishCancellation(Appointment appointment) {
+        events.publishEvent(
+            new AppointmentCancelledEvent(
+                appointment.getService().getId(),
+                appointment.getStaff() == null
+                    ? null
+                    : appointment.getStaff().getId(),
+                appointment.getLocation() == null
+                    ? null
+                    : appointment.getLocation().getId(),
+                appointment.getResource() == null
+                    ? null
+                    : appointment.getResource().getId(),
+                appointment.getStartAt(),
+                appointment.getEndAt()
+            )
+        );
     }
 
     @Transactional("tenantTransactionManager")

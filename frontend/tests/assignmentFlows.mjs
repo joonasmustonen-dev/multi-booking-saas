@@ -66,6 +66,17 @@ try {
     const dates = await server.ssrLoadModule(
         "/src/features/availability/scheduleDates.ts"
     );
+    const { default: LandingPage } = await server.ssrLoadModule(
+        "/src/pages/LandingPage.tsx"
+    );
+    const landingHtml = renderToStaticMarkup(
+        React.createElement(LandingPage)
+    );
+    check("Public homepage clearly identifies the development preview", () => {
+        assert(landingHtml.includes("not a real commercial product"));
+        assert(landingHtml.includes('href="/app"'));
+        assert(landingHtml.includes("No purchases or public registrations"));
+    });
     const base = {
         staffId: "staff-a",
         locationId: "room-a",
