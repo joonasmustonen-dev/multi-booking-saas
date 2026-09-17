@@ -33,7 +33,7 @@ export default function LandingPage() {
 
             <header className="landing-nav">
                 <a className="landing-brand" href="/" aria-label="MultiBooking home">
-                    <span className="landing-brand-mark"><CalendarDays size={20} /></span>
+                    <span className="landing-brand-mark">M</span>
                     <span>MULTIBOOKING</span>
                 </a>
                 <nav aria-label="Homepage navigation">
@@ -72,7 +72,7 @@ export default function LandingPage() {
 
                     <div className="landing-product-frame" aria-label="Booking dashboard preview">
                         <div className="preview-sidebar">
-                            <div className="preview-logo"><CalendarDays size={17} /></div>
+                            <div className="preview-logo">M</div>
                             {[0, 1, 2, 3, 4].map(item => (
                                 <span className={item === 0 ? "active" : ""} key={item} />
                             ))}
@@ -167,7 +167,7 @@ export default function LandingPage() {
 
             <footer className="landing-footer">
                 <a className="landing-brand" href="/">
-                    <span className="landing-brand-mark"><CalendarDays size={18} /></span>
+                    <span className="landing-brand-mark">M</span>
                     <span>MULTIBOOKING</span>
                 </a>
                 <p>Development preview · Not a commercial product</p>

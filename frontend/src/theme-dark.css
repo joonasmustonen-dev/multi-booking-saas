@@ -1,0 +1,1221 @@
+/* Warm dark visual system. Imported last so feature pages share one palette. */
+:root {
+    color-scheme: dark;
+    --page: #100f0c;
+    --card: #201c17;
+    --sidebar: #15120e;
+    --sidebar-active: #cd844f;
+    --ink: #f6ede0;
+    --muted: #ab9780;
+    --line: #3a332b;
+    --sage: #91b499;
+    --sage-soft: #24352c;
+    --sky: #79a9c8;
+    --sky-soft: #24323a;
+    --lilac: #ae8ac7;
+    --lilac-soft: #33283a;
+    --butter: #c7a461;
+    --butter-soft: #3b301d;
+    --blush: #bd7f83;
+    --blush-soft: #3c2728;
+    --coral: #cd844f;
+    --coral-soft: #3d2a1d;
+    --danger: #d66f69;
+    --danger-soft: #402526;
+    --shadow-card: none;
+    --sidebar-width: 232px;
+}
+
+html,
+body,
+#root {
+    background: var(--page);
+}
+
+body {
+    color: var(--ink);
+}
+
+::selection {
+    color: #17110c;
+    background: #d99766;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #15120e;
+}
+
+::-webkit-scrollbar-thumb {
+    border: 3px solid #15120e;
+    border-radius: 999px;
+    background: #55483b;
+}
+
+/* Shell */
+.app-shell,
+.app-main,
+.page-content {
+    background: var(--page);
+}
+
+.sidebar {
+    padding: 18px 13px 22px;
+    border-right: 1px solid #29241e;
+    background: var(--sidebar);
+}
+
+.sidebar-brand {
+    gap: 11px;
+    min-height: 50px;
+    margin-bottom: 20px;
+    padding: 0 7px;
+}
+
+.sidebar-brand-mark,
+.landing-brand-mark {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    color: #1b120c;
+    background: var(--coral);
+    box-shadow: none;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 17px;
+    font-style: italic;
+    font-weight: 800;
+}
+
+.sidebar-brand-copy {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.sidebar-brand-name {
+    color: #fff5e8;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 17px;
+    font-style: italic;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.sidebar-brand-copy small {
+    color: #7f7060;
+    font-size: 10px;
+}
+
+.sidebar-nav {
+    gap: 3px;
+}
+
+.sidebar-link {
+    height: 42px;
+    gap: 11px;
+    border-radius: 9px;
+    color: #a89177;
+    font-size: 13px;
+    font-weight: 520;
+}
+
+.sidebar-link:hover {
+    color: #f2dfca;
+    background: #211c16;
+}
+
+.sidebar-link.active {
+    color: #1b120c;
+    background: var(--coral);
+    font-weight: 700;
+}
+
+.sidebar-footer {
+    border-color: #2b251e;
+    color: #8f7d6b;
+}
+
+.sidebar-business svg {
+    display: none;
+}
+
+.sidebar-timezone {
+    padding-left: 0;
+    color: #706253;
+}
+
+.topbar {
+    height: 66px;
+    border-bottom: 1px solid #28231d;
+    background: rgba(16, 15, 12, 0.9);
+    backdrop-filter: blur(14px);
+}
+
+.topbar-profile {
+    padding: 4px 5px;
+    border-color: #373029;
+    background: #1b1814;
+}
+
+.topbar-profile .profile-avatar {
+    color: #e8a56e;
+    background: #3b291d;
+}
+
+.topbar-profile .logout-button {
+    color: #9e8a73;
+    background: transparent;
+}
+
+.topbar-profile .logout-button:hover {
+    color: #f2dfca;
+    background: #2b251f;
+}
+
+.page-content {
+    max-width: 1560px;
+    padding: 26px 34px 44px;
+}
+
+.page-title,
+.calendar-page-header .page-title {
+    color: #fff4e5;
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 650;
+    letter-spacing: -0.025em;
+}
+
+.page-eyebrow {
+    width: fit-content;
+    padding: 5px 9px;
+    border-radius: 5px;
+    color: #c9a77f;
+    background: #0b0a08;
+    font-size: 10px;
+    font-weight: 650;
+}
+
+.page-description,
+.field-note {
+    color: var(--muted);
+}
+
+/* Shared surfaces and controls */
+.card,
+.dashboard-panel,
+.management-card,
+.form-card,
+.settings-card,
+.catalog-card,
+.customer-card,
+.waitlist-panel,
+.regular-hours,
+.availability-panel {
+    border-color: var(--line);
+    background: var(--card);
+    box-shadow: none;
+}
+
+.button {
+    border-radius: 10px;
+}
+
+.button-primary {
+    color: #1b120c;
+    background: var(--coral);
+}
+
+.button-primary:hover:not(:disabled) {
+    background: #dc9662;
+}
+
+.button-secondary {
+    border-color: #493f34;
+    color: #eadbc8;
+    background: #1d1915;
+}
+
+.button-secondary:hover:not(:disabled) {
+    border-color: #725a46;
+    background: #282119;
+}
+
+.button-danger {
+    border-color: #633536;
+    color: #ef9993;
+    background: #362122;
+}
+
+.input,
+.select,
+.textarea,
+.search-select,
+input[type="date"],
+input[type="time"],
+input[type="number"] {
+    border-color: #463c32;
+    color: var(--ink);
+    background: #12100d;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus,
+.search-select:focus-within,
+.search-select.is-open {
+    border-color: #b87343;
+    box-shadow: 0 0 0 3px rgba(205, 132, 79, 0.14);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #796b5c;
+}
+
+input[type="date"],
+input[type="time"] {
+    color-scheme: dark;
+}
+
+.search-select input,
+.search-select > button {
+    color: var(--ink);
+}
+
+.search-select-icon,
+.search-select-chevron {
+    color: #a78b6d;
+}
+
+.select-popover {
+    border-color: #463c32;
+    background: #1c1814;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
+}
+
+.select-popover-hint {
+    border-color: #393028;
+    color: #907d69;
+}
+
+.select-option {
+    color: #eadbc8;
+}
+
+.select-option small {
+    color: #998672;
+}
+
+.select-option.highlighted,
+.select-option:hover,
+.select-option[aria-selected="true"] {
+    color: #fff2e2;
+    background: #3c2b1e;
+}
+
+.segmented-control {
+    border-color: #312a23;
+    background: #0c0b09;
+}
+
+.segmented-control button {
+    color: #b49a7c;
+}
+
+.segmented-control button.active,
+.segmented-control button[aria-pressed="true"] {
+    color: #1a120c;
+    background: var(--coral);
+}
+
+.styled-tooltip {
+    border-color: #634d3b;
+    color: #fff1df;
+    background: #2b241d;
+}
+
+.styled-tooltip::after {
+    background: #2b241d;
+}
+
+.form-error {
+    border-color: #633536;
+    color: #ef9993;
+    background: #362122;
+}
+
+/* Dashboard */
+.dashboard-workspace .page-content {
+    background: var(--page);
+}
+
+.dashboard-page .page-header {
+    align-items: end;
+}
+
+.dashboard-page .page-title {
+    font-size: 34px;
+}
+
+.metric-card {
+    border-color: #3b342c;
+    background: #211d18;
+}
+
+.metric-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    color: #d89a66;
+    background: #0d0c09;
+}
+
+.metric-icon-sage,
+.metric-icon-sky,
+.metric-icon-lilac {
+    color: #d89a66;
+    background: #0d0c09;
+}
+
+.metric-value,
+.dashboard-big-number {
+    color: #fff2df;
+    font-family: Georgia, "Times New Roman", serif;
+}
+
+.dashboard-panel-title,
+.today-customer,
+.team-name,
+.popular-name {
+    color: #fff1df;
+}
+
+.week-chart-bar {
+    background: #cd844f;
+}
+
+.status-track {
+    background: #0e0d0a;
+}
+
+.today-row,
+.team-row {
+    border-color: #393129;
+}
+
+.team-avatar,
+.popular-rank {
+    color: #f0b17d;
+    background: #3c2a1d;
+}
+
+.dashboard-lower .today-list,
+.dashboard-lower .team-list,
+.dashboard-lower .popular-list {
+    scrollbar-color: #5b4939 transparent;
+}
+
+/* Calendar */
+.calendar-workspace .page-content {
+    max-width: none;
+}
+
+.calendar-title-icon {
+    color: #e1a171;
+    background: #3a291e;
+}
+
+.refined-calendar .calendar-shell,
+.refined-calendar .calendar-grid,
+.refined-calendar .calendar-agenda {
+    border-color: #3a332a;
+    background: #1f1b16;
+    box-shadow: none;
+}
+
+.refined-calendar .calendar-day-header {
+    border-color: #383129;
+    color: #d8c4aa;
+    background: #201c17;
+}
+
+.refined-calendar .calendar-day-header:hover {
+    background: #2b241c;
+}
+
+.refined-calendar .calendar-day-header.is-today {
+    color: #f0a86e;
+    background: #493222;
+}
+
+.refined-calendar .calendar-day-name {
+    color: inherit;
+}
+
+.refined-calendar .calendar-day-count,
+.refined-calendar .calendar-hour-label,
+.refined-calendar .calendar-empty-day {
+    color: #8c7864;
+}
+
+.refined-calendar .calendar-day-column,
+.refined-calendar .calendar-day-column.is-today {
+    border-left-color: #3a332a;
+    background: #1d1a15;
+}
+
+.refined-calendar .calendar-day-column.is-today {
+    background: #211c16;
+}
+
+.refined-calendar .calendar-hour-line {
+    background: #40382f;
+    opacity: 0.65;
+}
+
+.refined-calendar .calendar-appointment {
+    border-color: color-mix(in srgb, var(--booking-accent) 52%, #352d26);
+    color: #f8ddee;
+    background: var(--booking-surface);
+    box-shadow: none;
+}
+
+.refined-calendar .calendar-appointment:hover {
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24);
+}
+
+.refined-calendar .tone-sage {
+    --booking-accent: #5fc2ad;
+    --booking-surface: #263832;
+}
+
+.refined-calendar .tone-sky {
+    --booking-accent: #70a9d0;
+    --booking-surface: #29343a;
+}
+
+.refined-calendar .tone-lilac {
+    --booking-accent: #ad80c5;
+    --booking-surface: #382d3d;
+}
+
+.refined-calendar .tone-butter {
+    --booking-accent: #c8a35b;
+    --booking-surface: #3c321f;
+}
+
+.refined-calendar .tone-blush {
+    --booking-accent: #c67579;
+    --booking-surface: #3c292a;
+}
+
+.booking-card-top,
+.booking-card-service {
+    color: #b9a992;
+}
+
+.booking-card-customer {
+    color: #fff1df;
+}
+
+.refined-calendar .calendar-booking-group {
+    border-color: #5b4733;
+    color: #dfaa79;
+    background: repeating-linear-gradient(135deg, #2d241b, #2d241b 8px, #34291f 8px, #34291f 16px);
+}
+
+.calendar-agenda .agenda-booking,
+.grouped-bookings-dialog .overlap-list-item {
+    border-color: #40362d;
+    color: #f2e4d2;
+    background: #211d18;
+}
+
+.calendar-agenda .agenda-booking:hover {
+    background: #2c251d;
+}
+
+.calendar-modal,
+.appointment-detail-panel {
+    border-color: #463a30;
+    color: var(--ink);
+    background: #1b141a;
+}
+
+.calendar-modal-backdrop,
+.appointment-drawer-backdrop {
+    background: rgba(0, 0, 0, 0.68);
+}
+
+/* Editors, catalogs, schedules, customer detail and booking drawer */
+.catalog-toolbar,
+.catalog-pagination,
+.section-heading,
+.form-actions {
+    border-color: var(--line);
+}
+
+.catalog-card,
+.customer-list-item,
+.customer-detail-card,
+.waitlist-entry,
+.choice-card,
+.assigned-person,
+.recurring-day-row,
+.rota-days,
+.rota-day,
+.rota-day.day-off,
+.weekly-rota,
+.settings-section {
+    border-color: #40362d;
+    color: var(--ink);
+    background: #211d18;
+}
+
+.catalog-card:hover,
+.customer-list-item:hover {
+    border-color: #74553d;
+    background: #29221b;
+}
+
+.customer-avatar,
+.staff-avatar {
+    color: #efb07d;
+    background: #3d2b1e;
+}
+
+.selected-tag,
+.customer-context,
+.appointment-time-card {
+    border-color: #455245;
+    color: #bad0ba;
+    background: #253027;
+}
+
+.day-dot-button,
+.text-action {
+    color: #d69a67;
+}
+
+.day-dot-button > span {
+    border-color: #655340;
+    background: #17130f;
+}
+
+.day-dot-button[aria-pressed="true"] > span {
+    border-color: var(--coral);
+    color: #18110b;
+    background: var(--coral);
+}
+
+.appointment-detail-hero {
+    border-color: #482f40;
+    background: linear-gradient(125deg, #39281d, #25251d);
+}
+
+.appointment-detail-hero .drawer-close,
+.drawer-close {
+    border-color: #504235;
+    color: #eadbc8;
+    background: #211b16;
+}
+
+.customer-detail-avatar,
+.appointment-assignment-tiles > div,
+.appointment-note {
+    border-color: #493d32;
+    color: #d8c7b2;
+    background: #211c17;
+}
+
+.appointment-customer-heading h2,
+.appointment-time-card p,
+.appointment-assignment-tiles strong {
+    color: #ffdff3;
+}
+
+.appointment-detail-actions {
+    border-color: #442d43;
+    background: #171410;
+}
+
+.styled-checkbox,
+.toggle-control {
+    accent-color: var(--coral);
+}
+
+/* Landing page */
+.landing-page {
+    background:
+        radial-gradient(circle at 78% 5%, rgba(106, 67, 42, 0.18), transparent 29%),
+        radial-gradient(circle at 12% 20%, rgba(65, 47, 33, 0.18), transparent 25%),
+        var(--page);
+}
+
+.landing-preview-banner {
+    border-bottom: 1px solid #2d271f;
+    color: #cbb59a;
+    background: #0b0a08;
+}
+
+.landing-brand {
+    color: #fff3e4;
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    letter-spacing: 0;
+}
+
+.landing-nav nav {
+    color: #ac957a;
+}
+
+.landing-sign-in,
+.landing-primary {
+    color: #19110b;
+    box-shadow: none;
+}
+
+.landing-secondary {
+    border-color: #473b31;
+    color: #e6d5c0;
+    background: #1c1814;
+}
+
+.landing-eyebrow {
+    color: #c79265;
+}
+
+.landing-hero h1,
+.landing-section-heading h2,
+.landing-workflow h2,
+.landing-status-card h2 {
+    color: #fff3e4;
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 650;
+}
+
+.landing-product-frame {
+    border-color: #493c31;
+    background: #171410;
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.34);
+}
+
+.preview-sidebar {
+    background: #15120e;
+}
+
+.preview-workspace,
+.preview-metrics article,
+.preview-dashboard-grid > article {
+    border-color: #3d342b;
+    background: #201c17;
+}
+
+.preview-bars span {
+    background: var(--coral);
+}
+
+.preview-logo {
+    color: #1a120c;
+    background: var(--coral);
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 800;
+}
+
+.preview-today > div {
+    border-color: #3d342b;
+}
+
+.landing-feature-section {
+    background: #15120e;
+}
+
+.landing-feature-grid article,
+.landing-feature-grid .tone-1,
+.landing-feature-grid .tone-2,
+.landing-feature-grid .tone-3,
+.landing-workflow li {
+    border-color: #42382e;
+    background: #211d18;
+}
+
+.landing-status-card {
+    border: 1px solid #503e2f;
+    background: #241c15;
+}
+
+.landing-footer {
+    border-color: #302920;
+    color: #9e8b75;
+}
+
+/* Remaining feature-specific surfaces */
+.catalog-search,
+.customer-search,
+.customer-empty,
+.catalog-empty {
+    border-color: #44392f;
+    color: #9f8b74;
+    background: #1d1915;
+}
+
+.catalog-search input {
+    color: var(--ink);
+}
+
+.customer-card {
+    border-color: #41372e;
+    color: var(--ink);
+    background: #211d18;
+}
+
+.customer-card:hover,
+.customer-card.selected {
+    border-color: #8a6041;
+    background: #30251c;
+    box-shadow: none;
+}
+
+.customer-card small,
+.customer-history p,
+.customer-history small,
+.waitlist-entry-main p,
+.waitlist-entry-main small,
+.waitlist-offer {
+    color: var(--muted);
+}
+
+.customer-form,
+.customer-detail-header {
+    border-color: #4a3c30;
+    background: linear-gradient(125deg, #35251b, #27221f);
+}
+
+.customer-detail,
+.customer-history article,
+.customer-stats > div,
+.waitlist-form,
+.waitlist-entries article {
+    border-color: #40362d;
+    color: var(--ink);
+    background: #211d18;
+}
+
+.customer-stats small,
+.customer-context-facts span {
+    color: var(--muted);
+}
+
+.customer-context-facts strong {
+    color: #f4e4d0;
+}
+
+.customer-contact-links a,
+.customer-preference,
+.customer-context a {
+    color: #d69a67;
+}
+
+.privacy-audit-list article {
+    border-color: #40362d;
+}
+
+.waitlist-status {
+    color: #c7b49d;
+    background: #342e27;
+}
+
+.waitlist-offered {
+    color: #e0b86f;
+    background: #3a301d;
+}
+
+.waitlist-accepted {
+    color: #9bc9aa;
+    background: #22362b;
+}
+
+.waitlist-expired,
+.waitlist-removed {
+    color: #aa9b8a;
+    background: #302b26;
+}
+
+.date-time-trigger {
+    color: #d29a6b;
+}
+
+.date-time-trigger:hover {
+    background: #3a2a1f;
+}
+
+.date-time-popover {
+    border-color: #4a3e33;
+    color: #f3e3cf;
+    background: #1c1814;
+    box-shadow: 0 18px 55px rgba(0, 0, 0, 0.4);
+}
+
+.date-time-popover button:hover {
+    background: #3b2b1f;
+}
+
+.date-picker-weekdays,
+.date-picker-grid .outside-month,
+.time-picker-section small {
+    color: #8f7d69;
+}
+
+.date-picker-grid .is-today {
+    box-shadow: inset 0 0 0 1px #c68151;
+}
+
+.date-time-popover button[aria-pressed="true"] {
+    color: #1a120c;
+    background: var(--coral);
+}
+
+.date-picker-footer {
+    border-color: #40362d;
+}
+
+.time-picker-hours button,
+.time-picker-minutes button {
+    background: #2b251f;
+}
+
+.tinted-panel,
+.tinted-panel.sage-panel,
+.service-editor .assignment-panel:nth-child(1),
+.service-editor .assignment-panel:nth-child(2),
+.service-editor .assignment-panel:nth-child(3),
+.location-card,
+.resource-card,
+.staff-card,
+.booking-availability {
+    border-color: #473a2f;
+    background: #211d18;
+}
+
+.tinted-panel .input,
+.tinted-panel .select,
+.tinted-panel .textarea,
+.tinted-panel.sage-panel .input,
+.tinted-panel.sage-panel .select {
+    border-color: #493d32;
+    color: var(--ink);
+    background: #15120f;
+}
+
+.service-editor .assignment-panel legend {
+    color: #e3ceb4;
+}
+
+.booking-summary {
+    color: #b7d0bc;
+    background: #24352c;
+}
+
+.choice-list .check-row:has(input:checked) {
+    color: #f1d9bd;
+    background: #3a2a1f;
+}
+
+input[type="checkbox"] {
+    border-color: #665545 !important;
+    background-color: #16130f !important;
+}
+
+input[type="checkbox"]:checked {
+    border-color: var(--coral) !important;
+    background-color: var(--coral) !important;
+}
+
+.location-editor-dialog {
+    border-color: #493d32;
+    color: var(--ink);
+    background: #1c1814;
+    box-shadow: 0 22px 80px rgba(0, 0, 0, 0.5);
+}
+
+.location-editor-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.location-editor-dialog .form-actions {
+    background: #1c1814;
+}
+
+.recurring-rota-days .rota-day,
+.recurring-rota-days .rota-day.day-off {
+    border-color: #40362d;
+    color: var(--ink);
+    background: #211d18;
+}
+
+@media (max-width: 900px) {
+    .sidebar-brand-copy {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .page-content {
+        padding: 20px 16px 32px;
+    }
+}
+
+/*
+ * Final field guardrail. Feature styles intentionally use stronger selectors,
+ * so keep this block last and scoped to the authenticated application.
+ */
+.app-shell .input,
+.app-shell .select,
+.app-shell .textarea,
+.app-shell input:not([type="checkbox"]):not([type="radio"]),
+.app-shell select,
+.app-shell textarea,
+.app-shell .date-time-control input,
+.app-shell .booking-form .input,
+.app-shell .booking-form .textarea,
+.app-shell .tinted-panel .input,
+.app-shell .tinted-panel .select,
+.app-shell .tinted-panel .textarea,
+.app-shell .tinted-panel.sage-panel .input,
+.app-shell .tinted-panel.sage-panel .select {
+    border-color: #4a3e33 !important;
+    color: #f5e7d5 !important;
+    background: #12100d !important;
+    box-shadow: none;
+    color-scheme: dark;
+}
+
+.app-shell .input:hover:not(:disabled),
+.app-shell .select:hover:not(:disabled),
+.app-shell .textarea:hover:not(:disabled),
+.app-shell input:not([type="checkbox"]):not([type="radio"]):hover:not(:disabled),
+.app-shell select:hover:not(:disabled),
+.app-shell textarea:hover:not(:disabled) {
+    border-color: #685341 !important;
+}
+
+.app-shell .input:focus,
+.app-shell .select:focus,
+.app-shell .textarea:focus,
+.app-shell input:not([type="checkbox"]):not([type="radio"]):focus,
+.app-shell select:focus,
+.app-shell textarea:focus {
+    border-color: #cd844f !important;
+    background: #15120f !important;
+    box-shadow: 0 0 0 3px rgba(205, 132, 79, 0.16) !important;
+    outline: none;
+}
+
+.app-shell input:disabled,
+.app-shell select:disabled,
+.app-shell textarea:disabled {
+    color: #827361 !important;
+    background: #181510 !important;
+    opacity: 0.72;
+}
+
+.app-shell input::placeholder,
+.app-shell textarea::placeholder {
+    color: #796b5b !important;
+    opacity: 1;
+}
+
+.app-shell select option {
+    color: #f5e7d5;
+    background: #171410;
+}
+
+.app-shell input:-webkit-autofill,
+.app-shell input:-webkit-autofill:hover,
+.app-shell input:-webkit-autofill:focus,
+.app-shell textarea:-webkit-autofill,
+.app-shell select:-webkit-autofill {
+    -webkit-text-fill-color: #f5e7d5;
+    -webkit-box-shadow: 0 0 0 1000px #12100d inset !important;
+    caret-color: #f5e7d5;
+}
+
+.app-shell .date-time-trigger {
+    color: #dba06e;
+}
+
+.app-shell .search-select,
+.app-shell .catalog-search,
+.app-shell .customer-search {
+    border-color: #4a3e33 !important;
+    color: #f5e7d5;
+    background: #171410 !important;
+}
+
+.app-shell .search-select input,
+.app-shell .catalog-search input,
+.app-shell .customer-search input {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.app-shell .management-form,
+.app-shell .staff-form,
+.app-shell .customer-form {
+    border-color: #493d32 !important;
+    color: var(--ink);
+    background: #211d18 !important;
+}
+
+.app-shell .staff-form > .section-heading {
+    border-color: #44382e;
+}
+
+.app-shell .staff-form .check-row,
+.app-shell .staff-form .staff-placement,
+.app-shell .check-row,
+.app-shell .choice-card {
+    border-color: #44382e;
+    color: #e6d5c0;
+    background: #181510 !important;
+}
+
+.app-shell .catalog-browser .service-card,
+.app-shell .catalog-list .service-card,
+.app-shell .catalog-browser.catalog-cards .service-card,
+.app-shell .catalog-browser.catalog-cards.catalog-grid-only .service-card,
+.app-shell .service-card.staff-card,
+.app-shell .service-card.location-card,
+.app-shell .service-card.resource-card {
+    border-color: #43382e;
+    color: var(--ink);
+    background: #211d18 !important;
+}
+
+.app-shell .catalog-browser .service-card:hover {
+    border-color: #74553d;
+    background: #29221b !important;
+}
+
+.app-shell .rota-days .rota-day,
+.app-shell .rota-days .rota-day.day-off,
+.app-shell .recurring-rota-days .rota-day,
+.app-shell .recurring-rota-days .rota-day.day-off,
+.app-shell .recurring-day-row {
+    border-color: #44382e;
+    color: var(--ink);
+    background: #1b1814 !important;
+}
+
+.app-shell .date-time-popover,
+.app-shell .select-popover {
+    border-color: #4a3e33;
+    color: #f5e7d5;
+    background: #1c1814;
+}
+
+/* Appointment drawer: override the original high-specificity cream surfaces. */
+.app-shell .appointment-drawer.appointment-detail-panel {
+    border-color: #473b31;
+    color: var(--ink);
+    background: #171410;
+    box-shadow: -18px 0 52px rgba(0, 0, 0, 0.48);
+}
+
+.app-shell .appointment-detail-panel .appointment-detail-hero {
+    border-color: #462e3d;
+    background: linear-gradient(135deg, #33241a, #222019);
+}
+
+.app-shell .appointment-detail-panel .appointment-detail-body {
+    color: var(--ink);
+    background: #171410;
+    scrollbar-color: #5b4939 transparent;
+}
+
+.app-shell .appointment-detail-panel .appointment-time-card,
+.app-shell .appointment-detail-panel .customer-context {
+    border-color: #425344;
+    color: #ceb8ce;
+    background: #213027;
+}
+
+.app-shell .appointment-detail-panel .appointment-time-card p,
+.app-shell .appointment-detail-panel .appointment-time-card strong,
+.app-shell .appointment-detail-panel .customer-context strong {
+    color: #f3e9f3;
+}
+
+.app-shell .appointment-detail-panel .appointment-time-card small,
+.app-shell .appointment-detail-panel .customer-context span {
+    color: #92a390;
+}
+
+.app-shell .appointment-detail-panel .appointment-assignment-tiles > div,
+.app-shell .appointment-detail-panel .appointment-note {
+    border-color: #493d32;
+    color: #d7c5ae;
+    background: #211c17;
+}
+
+.app-shell .appointment-detail-panel .appointment-info-section h3,
+.app-shell .appointment-detail-panel .appointment-contact-list,
+.app-shell .appointment-detail-panel .appointment-customer-heading p {
+    color: #ab9780;
+}
+
+.app-shell .appointment-detail-panel .appointment-contact-list a,
+.app-shell .appointment-detail-panel .customer-context a {
+    color: #d49a68;
+}
+
+.app-shell .appointment-detail-panel .appointment-detail-actions {
+    border-color: #44372d;
+    background: #12100d;
+}
+
+.app-shell .appointment-detail-actions .button {
+    border-color: #493d32;
+    color: #dfcfbb;
+    background: #211c17;
+}
+
+.app-shell .appointment-detail-actions .button:hover:not(:disabled) {
+    border-color: #6d5643;
+    color: #fff0de;
+    background: #2b241d;
+}
+
+.app-shell .appointment-detail-actions .button-primary {
+    border-color: #557f69;
+    color: #f3f5ed;
+    background: #3f6f5c;
+}
+
+.app-shell .appointment-detail-actions .button-primary:hover:not(:disabled) {
+    border-color: #66927c;
+    color: #ffffff;
+    background: #4b7d69;
+}
+
+.app-shell .appointment-detail-actions .button-danger {
+    border-color: #743f42;
+    color: #ffd9d5;
+    background: #9f3e46;
+}
+
+.app-shell .appointment-detail-actions .button-danger:hover:not(:disabled) {
+    border-color: #a34b4f;
+    color: #ffffff;
+    background: #b44850;
+}

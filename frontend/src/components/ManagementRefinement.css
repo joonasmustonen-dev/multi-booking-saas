@@ -256,14 +256,14 @@ input[type="checkbox"]:disabled {
     overflow: hidden;
     padding: 0;
     box-sizing: border-box;
-    border-left: 1px solid #e8e1d9;
-    background: #fcf9f2;
+    border-left: 1px solid #15120e;
+    background: #15120e;
 }
 .appointment-detail-panel .appointment-detail-hero {
     flex: 0 0 auto;
     padding: 22px 26px;
-    border-bottom: 1px solid #e8e1d9;
-    background: linear-gradient(125deg, #f7e8dc, #eff1e5);
+    border-bottom: 1px solid #15120e;
+    background: linear-gradient(125deg, #292219, #110e0b);
 }
 .appointment-detail-panel .appointment-detail-body {
     flex: 1 1 0;
@@ -281,8 +281,8 @@ input[type="checkbox"]:disabled {
     gap: 10px;
     padding: 18px 26px;
     padding-bottom: max(18px, env(safe-area-inset-bottom));
-    border-top: 1px solid #e4dcd3;
-    background: #f5f0e7;
+    border-top: 1px solid #15120e;
+    background: #15120e;
     margin: 0;
 }
 .appointment-detail-actions .button {
@@ -291,8 +291,8 @@ input[type="checkbox"]:disabled {
     font-size: 12px;
     font-weight: 600;
     box-shadow: none;
-    border: 1px solid #e4dcd3;
-    background: #fffdf9;
+    border: 1px solid #5c5041;
+    background: #2b2014;
     gap: 7px;
     padding: 11px 13px;
     color: #4c6354;
@@ -335,9 +335,9 @@ input[type="checkbox"]:disabled {
     overflow-x: hidden;
     overflow-y: hidden;
     line-height: 1.7;
-    background: #f5f0e7;
+    background: #15120e;
     padding: 14px;
-    border: 1px solid #e8e1d9;
+    border: 1px solid #3a3229;
     border-radius: 13px;
     overscroll-behavior: contain;
     scrollbar-width: thin;

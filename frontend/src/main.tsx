@@ -10,6 +10,7 @@ import "./features/customers/CustomerStyles.css";
 import "./components/InteractionStyles.css";
 import "./features/assignments/AssignmentStyles.css";
 import "./components/ManagementRefinement.css";
+import "./theme-dark.css";
 
 const queryClient = new QueryClient({
     defaultOptions: {

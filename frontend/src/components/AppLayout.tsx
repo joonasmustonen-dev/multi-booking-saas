@@ -77,10 +77,15 @@ export default function AppLayout() {
             <aside className="sidebar">
                 <div className="sidebar-brand">
                     <div className={"sidebar-brand-mark"}>
-                        <CalendarDays size={19} strokeWidth={2} />
+                        M
                     </div>
 
-                    <span className={"sidebar-brand-name"}>BOOKING</span>
+                    <span className={"sidebar-brand-copy"}>
+                        <strong className={"sidebar-brand-name"}>
+                            MultiBooking
+                        </strong>
+                        <small>Workspace</small>
+                    </span>
                 </div>
 
                 <nav className="sidebar-nav">
