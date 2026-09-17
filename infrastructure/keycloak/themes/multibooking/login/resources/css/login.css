@@ -289,3 +289,318 @@ input[type="checkbox"] {
     }
 }
 
+/* Warm dark product theme shared with the application shell. */
+:root {
+    color-scheme: dark;
+    --mb-page: #0e0d0a;
+    --mb-card: #211d18;
+    --mb-ink: #f7ecdc;
+    --mb-muted: #b09a7f;
+    --mb-line: #3b342b;
+    --mb-sage: #cd844f;
+    --mb-sage-dark: #dd9560;
+    --mb-sage-soft: #3b2a1e;
+    --mb-coral: #cd844f;
+    --mb-coral-hover: #dc9561;
+    --mb-danger: #df7770;
+    --mb-danger-soft: #3d2425;
+}
+
+body,
+.login-pf body {
+    background:
+        radial-gradient(circle at 50% 45%, rgba(91, 64, 43, 0.12), transparent 35rem),
+        var(--mb-page);
+}
+
+.login-pf-page {
+    display: grid;
+    grid-template-columns: minmax(380px, 540px) minmax(340px, 440px);
+    grid-template-rows: auto auto;
+    justify-content: center;
+    align-content: center;
+    gap: 0 18px;
+    padding: 42px 24px;
+}
+
+.login-pf-page::before {
+    content: none;
+    grid-column: 1;
+    grid-row: 1 / 3;
+    align-self: stretch;
+    min-height: 450px;
+    padding: 56px 46px;
+    border: 1px solid #332c25;
+    border-radius: 20px;
+    color: #ccb18f;
+    background: linear-gradient(145deg, #2b2119, #211d18 68%);
+    white-space: pre-line;
+    font-size: 14px;
+    line-height: 1.55;
+    box-sizing: border-box;
+}
+
+#kc-header {
+    grid-column: 2;
+    grid-row: 1;
+    width: 100%;
+    margin: 0;
+    padding: 32px 34px 0;
+    border: 1px solid var(--mb-line);
+    border-bottom: 0;
+    border-radius: 20px 20px 0 0;
+    color: var(--mb-ink);
+    background: var(--mb-card);
+    box-sizing: border-box;
+    position: relative;
+}
+
+#kc-header::before {
+    content: "Manage your shop’s schedule,\A calmly.";
+    position: absolute;
+    top: 0;
+    right: calc(100% + 18px);
+    width: 540px;
+    height: 100%;
+    min-height: 450px;
+    padding: 56px 46px;
+    border: 1px solid #332c25;
+    border-radius: 20px;
+    color: #fff0df;
+    background: linear-gradient(145deg, #2b2119, #211d18 68%);
+    white-space: pre-line;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 29px;
+    font-style: italic;
+    font-weight: 650;
+    line-height: 1.14;
+    box-sizing: border-box;
+}
+
+#kc-header::after {
+    content: "One workspace for bookings, staff, and customers — built for teams that run on appointments.\A\A Every booking in one place\A See today’s schedule across staff, rooms, and resources at a glance.\A\A Built for service businesses\A Made for shops and studios that run on appointments, not tickets.";
+    position: absolute;
+    top: 152px;
+    right: calc(100% + 64px);
+    width: 448px;
+    z-index: 1;
+    color: #ccb18f;
+    white-space: pre-line;
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+#kc-header-wrapper {
+    min-height: 44px;
+    padding: 2px 0 0 54px;
+    background:
+        radial-gradient(circle, #cd844f 0 21px, transparent 22px)
+        left center / 44px 44px no-repeat;
+}
+
+#kc-header-wrapper::before {
+    content: "MultiBooking";
+    color: #fff0dd;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 18px;
+    font-style: italic;
+    font-weight: 700;
+}
+
+#kc-header-wrapper::after {
+    margin-top: 1px;
+    color: #8f7d69;
+    font-size: 10px;
+}
+
+.card-pf,
+.pf-v5-c-login__main,
+.pf-c-login__main {
+    grid-column: 2;
+    grid-row: 2;
+    width: 100%;
+    margin: 0;
+    padding: 26px 34px 34px;
+    border-color: var(--mb-line);
+    border-top: 0;
+    border-radius: 0 0 20px 20px;
+    background: var(--mb-card);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+    box-sizing: border-box;
+}
+
+.card-pf::before,
+.pf-v5-c-login__main::before,
+.pf-c-login__main::before {
+    display: none !important;
+}
+
+.pf-v5-c-login__main-header,
+.pf-c-login__main-header {
+    border-top: 0 !important;
+}
+
+/* Keep the standard sign-in card aligned with the 450px introduction card. */
+@media (min-width: 901px) {
+    .login-pf-page:has(#kc-form-login) {
+        grid-template-rows: 112px 338px;
+    }
+
+    .login-pf-page:has(#kc-form-login) #kc-header {
+        height: 112px;
+        padding-top: 28px;
+    }
+
+    .login-pf-page:has(#kc-form-login) .pf-v5-c-login__main,
+    .login-pf-page:has(#kc-form-login) .pf-c-login__main,
+    .login-pf-page:has(#kc-form-login) .card-pf {
+        height: 338px;
+        min-height: 0;
+        padding-top: 12px;
+        padding-bottom: 22px;
+        overflow: visible;
+    }
+
+    .login-pf-page:has(#kc-form-login) .pf-v5-c-login__main-header,
+    .login-pf-page:has(#kc-form-login) .pf-c-login__main-header {
+        padding-top: 0;
+        padding-bottom: 16px;
+    }
+}
+
+/* Keycloak 26 renders .pf-v5-c-login__container rather than .login-pf-page. */
+@media (min-width: 901px) {
+    .pf-v5-c-login:has(#kc-form-login) .pf-v5-c-login__container {
+        grid-template-rows: 101px 349px;
+        height: 450px;
+    }
+
+    .pf-v5-c-login:has(#kc-form-login) #kc-header {
+        height: 101px;
+        padding: 25px 34px 0;
+    }
+
+    .pf-v5-c-login:has(#kc-form-login) .pf-v5-c-login__main {
+        align-self: stretch;
+        height: 349px;
+        min-height: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .pf-v5-c-login:has(#kc-form-login) .pf-v5-c-login__main-header {
+        padding: 20px 34px 12px !important;
+    }
+
+    .pf-v5-c-login:has(#kc-form-login) .pf-v5-c-login__main-body {
+        padding: 0 34px 20px !important;
+    }
+}
+
+#kc-page-title,
+.pf-v5-c-title,
+.pf-c-title {
+    color: #fff1df;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 26px;
+    font-style: italic;
+    font-weight: 650;
+}
+
+label,
+.pf-v5-c-form__label-text,
+.pf-c-form__label-text {
+    color: #f1dfca;
+}
+
+.pf-v5-c-form-control,
+.pf-c-form-control,
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    border-color: #4a4035;
+    background: #0f0e0b;
+    color: #fff2e1;
+}
+
+.pf-v5-c-form-control:focus-within,
+.pf-c-form-control:focus-within,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: var(--mb-coral);
+    background: #12100d;
+    box-shadow: 0 0 0 4px rgba(205, 132, 79, 0.15);
+}
+
+.pf-v5-c-input-group .pf-v5-c-button,
+.pf-c-input-group .pf-c-button {
+    border-color: #4a4035;
+    color: #bd9a78;
+    background: #0f0e0b;
+}
+
+#kc-login,
+.pf-v5-c-button.pf-m-primary,
+.pf-c-button.pf-m-primary {
+    color: #1a120c;
+    box-shadow: none;
+}
+
+#kc-login:hover,
+.pf-v5-c-button.pf-m-primary:hover,
+.pf-c-button.pf-m-primary:hover {
+    box-shadow: none;
+}
+
+#kc-info-wrapper,
+.pf-v5-c-login__main-footer-band,
+.pf-c-login__main-footer-band {
+    border-color: #332b24;
+    color: var(--mb-muted);
+    background: #181511;
+}
+
+@media (max-width: 900px) {
+    .login-pf-page {
+        grid-template-columns: minmax(0, 440px);
+        grid-template-rows: auto auto;
+    }
+
+    .login-pf-page::before {
+        display: none;
+    }
+
+    #kc-header::before {
+        display: none;
+    }
+
+    #kc-header::after {
+        display: none;
+    }
+
+    #kc-header,
+    .card-pf,
+    .pf-v5-c-login__main,
+    .pf-c-login__main {
+        grid-column: 1;
+    }
+}
+
+@media (max-width: 540px) {
+    .login-pf-page {
+        justify-content: stretch;
+        padding: 22px 14px;
+    }
+
+    #kc-header {
+        padding: 24px 22px 0;
+    }
+
+    .card-pf,
+    .pf-v5-c-login__main,
+    .pf-c-login__main {
+        padding: 24px 22px;
+        border-radius: 0 0 18px 18px;
+    }
+}

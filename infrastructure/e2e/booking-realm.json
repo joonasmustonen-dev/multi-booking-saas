@@ -2,6 +2,7 @@
   "realm": "booking",
   "enabled": true,
   "displayName": "Multi Booking E2E",
+  "loginTheme": "multibooking",
   "registrationAllowed": false,
   "resetPasswordAllowed": false,
   "loginWithEmailAllowed": true,
