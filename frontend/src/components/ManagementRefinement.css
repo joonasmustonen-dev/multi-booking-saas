@@ -777,8 +777,12 @@ input[type="checkbox"]:disabled {
 }
 .catalog-browser.catalog-cards.catalog-grid-only .service-card {
     min-width: 0;
-    min-height: 190px;
+    min-height: 156px;
     padding: 18px;
+}
+
+.catalog-browser.catalog-cards.catalog-grid-only .resource-card {
+    min-height: 0;
 }
 .catalog-browser.catalog-cards.catalog-grid-only .service-card > .field-note {
     max-height: none;

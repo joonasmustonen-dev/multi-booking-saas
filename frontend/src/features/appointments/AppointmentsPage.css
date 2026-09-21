@@ -779,8 +779,8 @@
         margin-top: 10px;
     }
     .calendar-filters {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 5px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px;
     }
     .calendar-header-main > .button {
         font-size: 12px;
@@ -793,7 +793,19 @@
         display: none;
     }
     .calendar-grid {
-        grid-template-columns: 35px repeat(7, minmax(0, 1fr));
+        grid-template-columns: 42px repeat(7, minmax(84px, 1fr));
+    }
+    .calendar-grid.single-day {
+        min-width: 0;
+        grid-template-columns: 42px minmax(0, 1fr);
+    }
+    .calendar-shell:has(.calendar-grid:not(.single-day)) {
+        overflow-x: auto;
+        overflow-y: hidden;
+        overscroll-behavior-x: contain;
+    }
+    .calendar-grid:not(.single-day) {
+        min-width: 700px;
     }
     .calendar-day-header,
     .calendar-day-column {

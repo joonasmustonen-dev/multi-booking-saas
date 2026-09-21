@@ -6,7 +6,7 @@
     --sidebar: #15120e;
     --sidebar-active: #cd844f;
     --ink: #f6ede0;
-    --muted: #ab9780;
+    --muted: #bda78e;
     --line: #3a332b;
     --sage: #91b499;
     --sage-soft: #24352c;
@@ -1218,4 +1218,51 @@ input[type="checkbox"]:checked {
     border-color: #a34b4f;
     color: #ffffff;
     background: #b44850;
+}
+
+/* Responsive and legibility refinements. */
+.preview-topbar small,
+.preview-metrics small,
+.preview-week small {
+    color: #b9a58e;
+}
+
+.landing-footer,
+.catalog-search,
+.customer-search,
+.customer-empty,
+.catalog-empty {
+    color: #b5a088;
+}
+
+@media (max-width: 640px) {
+    .sidebar-brand-copy {
+        display: grid;
+    }
+
+    .sidebar-brand-name {
+        display: block;
+    }
+
+    .dashboard-page > .page-header {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .dashboard-page .page-title {
+        max-width: 100%;
+        font-size: clamp(30px, 10vw, 38px);
+        line-height: 1.02;
+    }
+
+    .dashboard-page > .page-header > .button {
+        width: 100%;
+    }
+
+    .mobile-menu-button {
+        border-color: #44382e;
+        color: #f6ede0;
+        background: #211d18;
+    }
 }

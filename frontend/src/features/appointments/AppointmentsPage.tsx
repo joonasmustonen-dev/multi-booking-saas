@@ -75,7 +75,12 @@ export default function AppointmentsPage() {
     const settings = useTenantSettings();
     const services = useQuery({ queryKey: ["services"], queryFn: getServices });
     const [selectedDate, setSelectedDate] = useState("");
-    const [view, setView] = useState<"week" | "day" | "agenda">("week");
+    const [view, setView] = useState<"week" | "day" | "agenda">(() =>
+        typeof window !== "undefined" &&
+        window.matchMedia("(max-width: 700px)").matches
+            ? "day"
+            : "week"
+    );
     const [staff, setStaff] = useState("");
     const [location, setLocation] = useState("");
     const [service, setService] = useState("");

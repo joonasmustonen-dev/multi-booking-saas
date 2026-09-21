@@ -3,12 +3,15 @@ import {
     CalendarDays,
     LayoutDashboard,
     LogOut,
+    Menu,
     Package,
     Settings,
     Tag,
-    Users
+    Users,
+    X
 } from "lucide-react";
 
+import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 
 import keycloak from "../auth/keycloak";
@@ -57,8 +60,10 @@ const navigation = [
 
 import TooltipLayer from "./TooltipLayer";
 export default function AppLayout() {
-    const calendarPage = useLocation().pathname === "/appointments";
-    const dashboardPage = useLocation().pathname === "/app";
+    const location = useLocation();
+    const calendarPage = location.pathname === "/appointments";
+    const dashboardPage = location.pathname === "/app";
+    const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
     const settingsQuery = useTenantSettings();
 
     const username = keycloak.tokenParsed?.preferred_username as
@@ -74,7 +79,10 @@ export default function AppLayout() {
         <div
             className={`app-shell${calendarPage ? " calendar-workspace" : ""}${dashboardPage ? " dashboard-workspace" : ""}`}
         >
-            <aside className="sidebar">
+            <aside
+                className={`sidebar${mobileNavigationOpen ? " mobile-open" : ""}`}
+                aria-label="Workspace navigation"
+            >
                 <div className="sidebar-brand">
                     <div className={"sidebar-brand-mark"}>
                         M
@@ -100,6 +108,7 @@ export default function AppLayout() {
                                     ? "sidebar-link active"
                                     : "sidebar-link"
                             }
+                            onClick={() => setMobileNavigationOpen(false)}
                         >
                             <Icon size={19} strokeWidth={1.9} />
 
@@ -122,8 +131,37 @@ export default function AppLayout() {
                 </div>
             </aside>
 
+            <button
+                type="button"
+                className={`sidebar-scrim${mobileNavigationOpen ? " visible" : ""}`}
+                aria-label="Close navigation"
+                aria-hidden={!mobileNavigationOpen}
+                tabIndex={mobileNavigationOpen ? 0 : -1}
+                onClick={() => setMobileNavigationOpen(false)}
+            />
+
             <div className="app-main">
                 <header className="topbar">
+                    <button
+                        type="button"
+                        className="mobile-menu-button"
+                        aria-label={
+                            mobileNavigationOpen
+                                ? "Close navigation"
+                                : "Open navigation"
+                        }
+                        aria-expanded={mobileNavigationOpen}
+                        onClick={() =>
+                            setMobileNavigationOpen(open => !open)
+                        }
+                    >
+                        {mobileNavigationOpen ? (
+                            <X size={20} />
+                        ) : (
+                            <Menu size={20} />
+                        )}
+                    </button>
+
                     <div className={"topbar-profile"}>
                         <div className={"profile-avatar"}>{initial}</div>
 

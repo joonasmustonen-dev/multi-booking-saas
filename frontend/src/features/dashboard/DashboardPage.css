@@ -661,7 +661,16 @@
         font-size: 27px;
     }
     .dashboard-page .dashboard-insights {
-        flex-basis: 160px;
+        flex-basis: 176px;
+    }
+    .dashboard-page .dashboard-insights .dashboard-panel {
+        padding-block: 13px;
+    }
+    .dashboard-page .dashboard-insights .dashboard-panel-header {
+        margin-bottom: 6px;
+    }
+    .dashboard-page .status-summary {
+        gap: 6px;
     }
     .dashboard-page .dashboard-lower > .dashboard-panel {
         padding: 13px;

@@ -319,6 +319,15 @@
     font-size: 12px;
 }
 @media (max-width: 750px) {
+    .refined-calendar .calendar-shell:has(.calendar-grid:not(.single-day)) {
+        overflow-x: auto;
+        overflow-y: hidden;
+        overscroll-behavior-x: contain;
+    }
+    .refined-calendar .calendar-grid:not(.single-day) {
+        min-width: 700px;
+        grid-template-columns: 42px repeat(7, minmax(84px, 1fr));
+    }
     .calendar-view-bar > .field-note {
         display: none;
     }
