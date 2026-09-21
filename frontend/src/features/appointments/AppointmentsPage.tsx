@@ -197,6 +197,18 @@ export default function AppointmentsPage() {
     const positioned = visibleDays.flatMap(
         day => layouts[day]?.appointments ?? []
     );
+    const hasFilters = Boolean(staff || location || service || status);
+    const isEmptyPeriod = !appointments.isFetching && positioned.length === 0;
+    const emptyPeriodTitle = hasFilters
+        ? "No matching appointments"
+        : view === "day"
+          ? "No appointments this day"
+          : "Your week is open";
+    const emptyPeriodDescription = hasFilters
+        ? "Clear the filters to see the full schedule."
+        : view === "day"
+          ? "There is room for a new booking on this day."
+          : "No appointments are scheduled for this week.";
     const start = Math.max(
         0,
         Math.min(
@@ -445,16 +457,24 @@ export default function AppointmentsPage() {
                     ))}
                 </div>
             ) : (
-                <div ref={calendarRef} className="calendar-shell">
+                <div
+                    ref={calendarRef}
+                    className={`calendar-shell ${
+                        isEmptyPeriod ? "is-empty-period" : ""
+                    }`}
+                >
                     <div
-                        className={`calendar-grid ${view === "day" ? "single-day" : ""}`}
+                        className={`calendar-grid ${
+                            view === "day" ? "single-day" : ""
+                        } ${isEmptyPeriod ? "is-empty-period" : ""}`}
                         style={{
                             gridTemplateColumns: `64px repeat(${visibleDays.length}, minmax(0, 1fr))`,
                             gridTemplateRows: "68px minmax(0, 1fr)"
                         }}
                     >
                         <div className="calendar-time-header">
-                            <small>Time</small>
+                            <Clock3 size={13} aria-hidden="true" />
+                            <span>Time</span>
                         </div>
                         {visibleDays.map(day => (
                             <button
@@ -582,14 +602,43 @@ export default function AppointmentsPage() {
                                               );
                                           })
                                 )}
-                                {!layouts[day].appointments.length && (
-                                    <span className="calendar-empty-day">
-                                        No appointments
-                                    </span>
-                                )}
+                                {!isEmptyPeriod &&
+                                    !layouts[day].appointments.length && (
+                                        <span className="calendar-empty-day">
+                                            No appointments
+                                        </span>
+                                    )}
                             </div>
                         ))}
                     </div>
+                    {isEmptyPeriod && (
+                        <div className="calendar-empty-period" role="status">
+                            <span className="calendar-empty-period-icon">
+                                <CalendarDays size={22} aria-hidden="true" />
+                            </span>
+                            <div>
+                                <strong>{emptyPeriodTitle}</strong>
+                                <p>{emptyPeriodDescription}</p>
+                            </div>
+                            <button
+                                className="button button-secondary"
+                                type="button"
+                                onClick={() => {
+                                    if (hasFilters) {
+                                        setStaff("");
+                                        setLocation("");
+                                        setService("");
+                                        setStatus("");
+                                    } else {
+                                        setCreating(true);
+                                    }
+                                }}
+                            >
+                                {!hasFilters && <Plus size={16} />}
+                                {hasFilters ? "Clear filters" : "Book appointment"}
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
             {creating && (

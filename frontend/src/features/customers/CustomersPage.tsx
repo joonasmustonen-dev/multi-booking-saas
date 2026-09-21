@@ -12,6 +12,7 @@ import type { Customer, CreateCustomerRequest } from "./customerTypes";
 import CustomerForm from "./CustomerForm";
 import CustomerDetail from "./CustomerDetail";
 import { useTenantSettings } from "../settings/useTenantSettings";
+import { CustomerListSkeleton } from "../../components/LoadingSkeletons";
 
 export default function CustomersPage() {
     const client = useQueryClient();
@@ -104,10 +105,10 @@ export default function CustomersPage() {
                 Showing up to 50 matches. Narrow your search to find someone
                 quickly.
             </p>
-            {results.isFetching && (
-                <p role="status" className="field-note">
-                    Searching customers…
-                </p>
+            {results.isFetching && !results.isPending && (
+                <span role="status" className="sr-only">
+                    Updating customer results…
+                </span>
             )}
             {results.error && (
                 <p role="alert" className="form-error">
@@ -117,42 +118,48 @@ export default function CustomersPage() {
             <div
                 className={`customer-directory ${selectedId ? "with-detail" : ""}`}
             >
-                <div className="customer-cards">
-                    {results.data?.map(c => (
-                        <button
-                            type="button"
-                            className={`customer-card ${selectedId === c.id ? "selected" : ""}`}
-                            key={c.id}
-                            onClick={() => setParams({ customerId: c.id })}
-                        >
-                            <span className="customer-detail-avatar">
-                                <UserRound size={22} />
-                            </span>
-                            <span>
-                                <strong>
-                                    {c.firstName} {c.lastName}
-                                </strong>
-                                {c.processingRestricted && (
-                                    <small>Processing restricted</small>
-                                )}
-                                {c.legalHold && <small>Legal hold</small>}
-                                <small>
-                                    <Phone size={14} />
-                                    {c.phone || "No phone added"}
-                                </small>
-                                <small>
-                                    <Mail size={14} />
-                                    {c.email || "No email added"}
-                                </small>
-                            </span>
-                        </button>
-                    ))}
-                    {results.data?.length === 0 && (
-                        <div className="customer-empty">
-                            No customers match your search.
-                        </div>
-                    )}
-                </div>
+                {results.isPending ? (
+                    <CustomerListSkeleton />
+                ) : (
+                    <div className="customer-cards">
+                        {results.data?.map(c => (
+                            <button
+                                type="button"
+                                className={`customer-card ${selectedId === c.id ? "selected" : ""}`}
+                                key={c.id}
+                                onClick={() =>
+                                    setParams({ customerId: c.id })
+                                }
+                            >
+                                <span className="customer-detail-avatar">
+                                    <UserRound size={22} />
+                                </span>
+                                <span>
+                                    <strong>
+                                        {c.firstName} {c.lastName}
+                                    </strong>
+                                    {c.processingRestricted && (
+                                        <small>Processing restricted</small>
+                                    )}
+                                    {c.legalHold && <small>Legal hold</small>}
+                                    <small>
+                                        <Phone size={14} />
+                                        {c.phone || "No phone added"}
+                                    </small>
+                                    <small>
+                                        <Mail size={14} />
+                                        {c.email || "No email added"}
+                                    </small>
+                                </span>
+                            </button>
+                        ))}
+                        {results.data?.length === 0 && (
+                            <div className="customer-empty">
+                                No customers match your search.
+                            </div>
+                        )}
+                    </div>
+                )}
                 {selectedId && settings.data && (
                     <CustomerDetail
                         key={selectedId}

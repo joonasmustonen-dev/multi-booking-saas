@@ -35,6 +35,18 @@
     pointer-events: none;
     opacity: 0.45;
 }
+
+@media (max-width: 640px) {
+    .date-time-control input {
+        padding-right: 52px;
+    }
+
+    .date-time-trigger {
+        right: 2px;
+        width: 44px;
+        height: 44px;
+    }
+}
 .date-time-popover {
     position: fixed;
     z-index: 1000;

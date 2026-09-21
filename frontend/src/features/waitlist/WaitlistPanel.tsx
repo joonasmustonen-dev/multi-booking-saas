@@ -16,11 +16,15 @@ import {
     getWaitlist,
     removeWaitlistEntry
 } from "./waitlistApi";
+import { CardListSkeleton } from "../../components/LoadingSkeletons";
 
 interface Props {
     customerId: string;
     timeZone: string;
     disabled?: boolean;
+    customerEmail?: string | null;
+    customerPhone?: string | null;
+    onAddContactDetails?: () => void;
 }
 
 function tomorrow(timeZone: string, hour: number) {
@@ -40,7 +44,14 @@ function channelLabel(channel: "EMAIL" | "SMS" | "IN_APP") {
     return "workspace only";
 }
 
-export default function WaitlistPanel({ customerId, timeZone, disabled }: Props) {
+export default function WaitlistPanel({
+    customerId,
+    timeZone,
+    disabled,
+    customerEmail,
+    customerPhone,
+    onAddContactDetails
+}: Props) {
     const client = useQueryClient();
     const list = useQuery({
         queryKey: ["waitlist", customerId],
@@ -49,13 +60,19 @@ export default function WaitlistPanel({ customerId, timeZone, disabled }: Props)
     const services = useQuery({ queryKey: ["services"], queryFn: getServices });
     const staff = useQuery({ queryKey: ["staff"], queryFn: getStaff });
     const locations = useQuery({ queryKey: ["locations"], queryFn: getLocations });
+    const contactChannelKey = [customerEmail?.trim(), customerPhone?.trim()]
+        .filter(Boolean)
+        .join("|");
+    const hasContactChannel = contactChannelKey.length > 0;
     const [adding, setAdding] = useState(false);
     const [serviceId, setServiceId] = useState("");
     const [staffId, setStaffId] = useState("");
     const [locationId, setLocationId] = useState("");
     const [start, setStart] = useState(() => tomorrow(timeZone, 9));
     const [end, setEnd] = useState(() => tomorrow(timeZone, 17));
-    const [consent, setConsent] = useState(false);
+    const [consentedForChannels, setConsentedForChannels] = useState<
+        string | null
+    >(null);
     const [pending, setPending] = useState(false);
     const [error, setError] = useState("");
     const selectedService = services.data?.find(item => item.id === serviceId);
@@ -65,6 +82,8 @@ export default function WaitlistPanel({ customerId, timeZone, disabled }: Props)
     const eligibleLocations = (locations.data ?? []).filter(item =>
         selectedService?.locationIds.includes(item.id)
     );
+    const consent =
+        hasContactChannel && consentedForChannels === contactChannelKey;
 
     async function refresh() {
         await invalidateBookingData(client);
@@ -87,7 +106,7 @@ export default function WaitlistPanel({ customerId, timeZone, disabled }: Props)
                 preferredStaffId: staffId || null,
                 preferredLocationId: locationId || null,
                 windowStart: start, windowEnd: end, expiresAt: null,
-                notificationConsent: consent
+                notificationConsent: consent && hasContactChannel
             });
             setAdding(false);
         });
@@ -204,20 +223,42 @@ export default function WaitlistPanel({ customerId, timeZone, disabled }: Props)
                             />
                         </label>
                     </div>
-                    <label className="choice-card">
+                    <div
+                        className={`choice-card waitlist-consent-card ${
+                            hasContactChannel ? "" : "is-disabled"
+                        }`}
+                    >
                         <input
+                            id={`waitlist-consent-${customerId}`}
                             type="checkbox"
-                            checked={consent}
-                            onChange={event => setConsent(event.target.checked)}
+                            checked={consent && hasContactChannel}
+                            disabled={!hasContactChannel}
+                            onChange={event =>
+                                setConsentedForChannels(
+                                    event.target.checked
+                                        ? contactChannelKey
+                                        : null
+                                )
+                            }
                         />
-                        <span>
+                        <label htmlFor={`waitlist-consent-${customerId}`}>
                             <strong>Customer consents to notifications</strong>
                             <small>
-                                With consent, offers use email or SMS. Without
-                                it, offers remain visible only in this workspace.
+                                {hasContactChannel
+                                    ? "With consent, offers use email or SMS. Without it, offers remain visible only in this workspace."
+                                    : "Add an email address or phone number to enable notifications. You can still save a workspace-only request."}
                             </small>
-                        </span>
-                    </label>
+                        </label>
+                        {!hasContactChannel && onAddContactDetails && (
+                            <button
+                                className="button button-secondary"
+                                type="button"
+                                onClick={onAddContactDetails}
+                            >
+                                Add contact details
+                            </button>
+                        )}
+                    </div>
                     <div className="form-actions">
                         <button
                             className="button button-primary"
@@ -234,7 +275,7 @@ export default function WaitlistPanel({ customerId, timeZone, disabled }: Props)
                 </p>
             )}
             {list.isPending && (
-                <p className="field-note">Loading waitlist…</p>
+                <CardListSkeleton rows={2} label="Loading waitlist" />
             )}
             {list.error && (
                 <p className="form-error" role="alert">

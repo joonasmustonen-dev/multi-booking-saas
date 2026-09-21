@@ -631,6 +631,13 @@ a {
     background: #e9e0d5;
     color: var(--ink);
 }
+
+@media (max-width: 640px) {
+    .topbar-profile .logout-button {
+        width: 44px;
+        height: 44px;
+    }
+}
 .sidebar-business > svg {
     flex-shrink: 0;
 }

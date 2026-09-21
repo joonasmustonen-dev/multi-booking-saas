@@ -11,6 +11,7 @@ import { getCustomerActivity } from "./customerApi";
 import { formatDate, formatTime } from "../settings/timeFormat";
 import type { Customer } from "./customerTypes";
 import WaitlistPanel from "../waitlist/WaitlistPanel";
+import { CustomerDetailSkeleton } from "../../components/LoadingSkeletons";
 
 export default function CustomerDetail({
     id,
@@ -49,12 +50,7 @@ export default function CustomerDetail({
         queryKey: ["customer-activity", id, page, 20],
         queryFn: () => getCustomerActivity(id, page)
     });
-    if (query.isPending)
-        return (
-            <section className="customer-detail">
-                <p>Loading customer details…</p>
-            </section>
-        );
+    if (query.isPending) return <CustomerDetailSkeleton />;
     if (query.error)
         return (
             <section className="customer-detail">
@@ -68,6 +64,14 @@ export default function CustomerDetail({
         );
     const d = query.data;
     const c = d.customer;
+    function editCustomer() {
+        onEdit(c);
+        requestAnimationFrame(() =>
+            document
+                .querySelector(".customer-form")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" })
+        );
+    }
     return (
         <section className="customer-detail" aria-label="Customer details">
             <header className="customer-detail-header">
@@ -108,7 +112,7 @@ export default function CustomerDetail({
                     <button
                         className="button button-secondary"
                         disabled={!!c.erasedAt}
-                        onClick={() => onEdit(c)}
+                        onClick={editCustomer}
                     >
                         Edit customer
                     </button>
@@ -173,6 +177,9 @@ export default function CustomerDetail({
                     customerId={id}
                     timeZone={timeZone}
                     disabled={!!c.processingRestricted || !!c.erasedAt}
+                    customerEmail={c.email}
+                    customerPhone={c.phone}
+                    onAddContactDetails={editCustomer}
                 />
                 <h3>Most-booked services</h3>
                 <p className="field-note">Based on completed visits.</p>

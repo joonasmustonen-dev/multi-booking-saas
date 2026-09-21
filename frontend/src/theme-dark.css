@@ -447,6 +447,12 @@ input[type="time"] {
     background: #201c17;
 }
 
+.refined-calendar .calendar-time-header {
+    border-color: #453a30;
+    color: #d7b995;
+    background: #191611;
+}
+
 .refined-calendar .calendar-day-header:hover {
     background: #2b241c;
 }
@@ -481,8 +487,28 @@ input[type="time"] {
 }
 
 .refined-calendar .calendar-hour-line {
-    background: #40382f;
-    opacity: 0.65;
+    background: #4b4136;
+    opacity: 0.72;
+}
+
+.refined-calendar .calendar-grid.is-empty-period .calendar-hour-line {
+    opacity: 0.3;
+}
+
+.refined-calendar .calendar-empty-period {
+    border-color: #4a3e33;
+    color: #f3e5d3;
+    background: rgba(31, 27, 22, 0.97);
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.3);
+}
+
+.refined-calendar .calendar-empty-period-icon {
+    color: #e0a06d;
+    background: #3b2b20;
+}
+
+.refined-calendar .calendar-empty-period p {
+    color: #c4ad92;
 }
 
 .refined-calendar .calendar-appointment {
@@ -1101,6 +1127,28 @@ input[type="checkbox"]:checked {
     border-color: #44382e;
     color: #e6d5c0;
     background: #181510 !important;
+}
+
+.app-shell .waitlist-consent-card small {
+    color: #c4ad92;
+}
+
+.app-shell .loading-skeleton {
+    --skeleton-base: #332c25;
+    --skeleton-highlight: #4a3e33;
+}
+
+.app-shell .skeleton-customer-card,
+.app-shell .skeleton-day-card,
+.app-shell .skeleton-list-card,
+.app-shell .skeleton-stat-grid > div,
+.app-shell .skeleton-panel-card {
+    border-color: #40362d;
+    background: #211d18;
+}
+
+.app-shell .skeleton-detail-header {
+    background: linear-gradient(125deg, #2c2119, #24201d);
 }
 
 .app-shell .catalog-browser .service-card,

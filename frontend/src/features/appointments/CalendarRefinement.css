@@ -1,4 +1,5 @@
 .refined-calendar .calendar-shell {
+    position: relative;
     border: 1px solid #e8e1d9;
     border-radius: 20px;
     background: #fffdf9;
@@ -12,10 +13,16 @@
 }
 .refined-calendar .calendar-time-header {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #8c948b;
-    font-size: 9px;
+    gap: 4px;
+    color: #68776b;
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: .02em;
+    background: #f7f3ec;
+    border-right: 1px solid #e2dbd1;
     border-bottom: 1px solid #e8e1d9;
 }
 .refined-calendar .calendar-day-header {
@@ -46,7 +53,7 @@
     font-weight: 650;
 }
 .refined-calendar .calendar-day-count {
-    font-size: 10px;
+    font-size: 11px;
     color: #839087;
 }
 .refined-calendar .calendar-day-column,
@@ -77,7 +84,7 @@
     left: 0;
     right: 8px;
     text-align: right;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 500;
     color: #8b9289;
     transform: translateY(-50%);
@@ -144,7 +151,7 @@
     align-items: center;
     gap: 4px;
     min-width: 0;
-    font-size: 10px;
+    font-size: 11px;
     color: #536c60;
     font-weight: 500;
     white-space: nowrap;
@@ -161,7 +168,7 @@
     text-overflow: ellipsis;
 }
 .booking-card-service {
-    font-size: 10px;
+    font-size: 11px;
     color: #68776b;
     overflow: hidden;
     white-space: nowrap;
@@ -203,12 +210,53 @@
     font-size: 11px;
 }
 .calendar-booking-group small {
-    font-size: 9px;
+    font-size: 11px;
     color: #839087;
 }
 .refined-calendar .calendar-empty-day {
     color: #b3b7ac;
-    font-size: 10px;
+    font-size: 11px;
+}
+
+.calendar-empty-period {
+    position: absolute;
+    z-index: 4;
+    top: calc(50% + 34px);
+    left: calc(50% + 32px);
+    width: min(460px, calc(100% - 112px));
+    transform: translate(-50%, -50%);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+    border: 1px solid #dcd5ca;
+    border-radius: 16px;
+    color: #273a35;
+    background: rgba(255, 253, 249, .96);
+    box-shadow: 0 12px 34px rgba(42, 53, 39, .12);
+}
+.calendar-empty-period-icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    color: #557866;
+    background: #e8f0e8;
+}
+.calendar-empty-period strong {
+    display: block;
+    font-size: 14px;
+}
+.calendar-empty-period p {
+    margin: 4px 0 0;
+    color: #68776b;
+    font-size: 12px;
+    line-height: 1.45;
+}
+.calendar-grid.is-empty-period .calendar-hour-line {
+    opacity: .28;
 }
 .calendar-view-bar {
     display: flex;
@@ -332,19 +380,20 @@
         display: none;
     }
     .refined-calendar .calendar-day-name {
-        font-size: 10px;
+        font-size: 12px;
     }
     .refined-calendar .calendar-day-count {
-        font-size: 8px;
+        display: block;
+        font-size: 11px;
     }
     .refined-calendar .calendar-appointment {
         padding: 5px 4px;
     }
     .booking-card-top {
-        font-size: 8px;
+        font-size: 11px;
     }
     .refined-calendar .booking-card-customer {
-        font-size: 10px;
+        font-size: 12px;
     }
     .agenda-booking {
         flex-wrap: wrap;
@@ -373,11 +422,11 @@
     border-bottom: 0;
 }
 .refined-calendar .calendar-day-column {
-    border-left-color: #eee9e1;
+    border-left-color: #e2dbd1;
 }
 .refined-calendar .calendar-hour-line {
-    background: #eae6de;
-    opacity: .45;
+    background: #ddd6cc;
+    opacity: .72;
     box-shadow: none;
 }
 
@@ -396,10 +445,37 @@
     gap: 1px;
 }
 .refined-calendar .compact-booking .booking-card-top {
-    font-size: 9px;
+    font-size: 11px;
 }
 .refined-calendar .compact-booking .booking-card-customer {
     font-size: 11px;
+}
+
+@media (max-width: 700px) {
+    .calendar-header-main {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .calendar-header-main > .button {
+        width: 100%;
+        min-height: 44px;
+        white-space: nowrap;
+        justify-content: center;
+    }
+
+    .calendar-empty-period {
+        top: calc(50% + 34px);
+        left: calc(50% + 21px);
+        width: min(320px, calc(100% - 62px));
+        grid-template-columns: auto minmax(0, 1fr);
+        padding: 16px;
+    }
+
+    .calendar-empty-period .button {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
 }
 .calendar-modal {
     width: min(680px, 100%);

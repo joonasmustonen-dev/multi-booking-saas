@@ -16,6 +16,10 @@ import type { AvailabilityException } from "./availabilityTypes";
 import { formatDate, formatTime } from "../settings/timeFormat";
 import { localDateTimeInZone } from "./scheduleDates";
 import RecurringWeekEditor from "./RecurringWeekEditor";
+import {
+    CardListSkeleton,
+    RecurringHoursSkeleton
+} from "../../components/LoadingSkeletons";
 interface Props {
     kind: AssignmentKind;
     ownerId: string;
@@ -111,7 +115,7 @@ export default function SchedulePanel({
                     </div>
                 </div>
                 {rules.isPending ? (
-                    <p>Loading recurring hours…</p>
+                    <RecurringHoursSkeleton />
                 ) : rules.error ? (
                     <p className="form-error" role="alert">
                         {rules.error.message}
@@ -236,7 +240,7 @@ export default function SchedulePanel({
                     </form>
                 )}
                 {exceptions.isPending ? (
-                    <p>Loading exceptions…</p>
+                    <CardListSkeleton rows={2} label="Loading exceptions" />
                 ) : exceptions.error ? (
                     <p className="form-error" role="alert">
                         {exceptions.error.message}

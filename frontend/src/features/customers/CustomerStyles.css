@@ -278,6 +278,38 @@
 }
 .waitlist-form .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .waitlist-form .choice-card { margin: 16px 0; }
+.waitlist-consent-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid #e5ddd3;
+    border-radius: 14px;
+    background: #fff;
+}
+.waitlist-consent-card > input {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    accent-color: #557866;
+}
+.waitlist-consent-card > label {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+    cursor: pointer;
+}
+.waitlist-consent-card small {
+    color: #627084;
+    line-height: 1.45;
+}
+.waitlist-consent-card.is-disabled > label {
+    cursor: default;
+}
+.waitlist-consent-card.is-disabled > input {
+    opacity: .55;
+}
 .waitlist-entries { display: grid; gap: 10px; }
 .waitlist-entries article {
     display: flex;
@@ -299,6 +331,8 @@
 .waitlist-offer { flex-basis: 100%; text-align: right; margin: 0; font-size: 12px; color: #627084; }
 @media (max-width: 700px) {
     .waitlist-form .form-grid { grid-template-columns: 1fr; }
+    .waitlist-consent-card { grid-template-columns: auto minmax(0, 1fr); }
+    .waitlist-consent-card > .button { grid-column: 1 / -1; width: 100%; }
     .waitlist-entries article { flex-direction: column; }
     .waitlist-entry-actions { justify-content: flex-start; max-width: none; }
     .waitlist-offer { text-align: left; }

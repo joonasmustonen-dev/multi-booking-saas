@@ -932,6 +932,37 @@ input[type="checkbox"]:disabled {
     .settings-page .settings-sections .form-grid {
         grid-template-columns: minmax(0, 1fr);
     }
+
+    .segmented-control button {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 10px 13px;
+    }
+
+    .management-page .button,
+    .catalog-grid-only .service-card .button,
+    .catalog-list .service-card .button {
+        min-height: 44px;
+    }
+
+    .rota-days .rota-shift .icon-action,
+    .recurring-rota-shift .recurring-remove {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 10px;
+    }
+
+    .day-dot-button {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 8px 0;
+    }
+
+    .rota-days .text-action,
+    .recurring-rota-days .text-action {
+        min-height: 44px;
+        padding: 10px 0;
+    }
 }
 
 /* Keep oversized text inside its own column, including unbroken strings. */
