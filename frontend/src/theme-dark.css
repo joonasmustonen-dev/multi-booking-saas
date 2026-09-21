@@ -109,7 +109,7 @@ body {
 }
 
 .sidebar-brand-copy small {
-    color: #7f7060;
+    color: #b7a187;
     font-size: 10px;
 }
 
@@ -139,7 +139,7 @@ body {
 
 .sidebar-footer {
     border-color: #2b251e;
-    color: #8f7d6b;
+    color: #b7a187;
 }
 
 .sidebar-business svg {
@@ -148,7 +148,7 @@ body {
 
 .sidebar-timezone {
     padding-left: 0;
-    color: #706253;
+    color: #b7a187;
 }
 
 .topbar {
@@ -463,7 +463,11 @@ input[type="time"] {
 .refined-calendar .calendar-day-count,
 .refined-calendar .calendar-hour-label,
 .refined-calendar .calendar-empty-day {
-    color: #8c7864;
+    color: #c4ad92;
+}
+
+.refined-calendar .calendar-day-header.is-today .calendar-day-count {
+    color: #f0c7a5;
 }
 
 .refined-calendar .calendar-day-column,
@@ -828,6 +832,15 @@ input[type="time"] {
 
 .privacy-audit-list article {
     border-color: #40362d;
+}
+
+.requirement-pill.sage {
+    color: #b9ddc3;
+    background: #24352c;
+}
+
+.regular-hours > summary {
+    color: #b9d5c0;
 }
 
 .waitlist-status {
