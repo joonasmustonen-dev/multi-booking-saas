@@ -15,46 +15,69 @@ import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 
 import keycloak from "../auth/keycloak";
+import {
+    hasCapability,
+    primaryWorkspaceRole,
+    type Capability
+} from "../auth/permissions";
 
 import { useTenantSettings } from "../features/settings/useTenantSettings";
 
-const navigation = [
+const navigation: Array<{
+    to: string;
+    label: string;
+    icon: typeof LayoutDashboard;
+    capability: Capability;
+    end?: boolean;
+}> = [
     {
         to: "/app",
         label: "Dashboard",
         icon: LayoutDashboard,
-        end: true
+        end: true,
+        capability: "dashboard.view"
     },
     {
         to: "/appointments",
         label: "Calendar",
-        icon: CalendarDays
+        icon: CalendarDays,
+        capability: "appointments.manage"
     },
     {
         to: "/customers",
         label: "Customers",
-        icon: Users
+        icon: Users,
+        capability: "customers.manage"
     },
     {
         to: "/resources",
         label: "Resources",
-        icon: Package
+        icon: Package,
+        capability: "catalog.view"
     },
     {
         to: "/services",
         label: "Services",
-        icon: Tag
+        icon: Tag,
+        capability: "catalog.view"
     },
-    { to: "/locations", label: "Locations", icon: Building2 },
+    {
+        to: "/locations",
+        label: "Locations",
+        icon: Building2,
+        capability: "catalog.view"
+    },
     {
         to: "/staff",
         label: "Staff",
-        icon: Users
+        icon: Users,
+        capability: "staff.view"
     },
     {
         to: "/settings",
         label: "Settings",
-        icon: Settings
+        icon: Settings,
+        capability: "settings.manage"
     }
 ];
 
@@ -74,6 +97,8 @@ export default function AppLayout() {
     const initial = displayName.charAt(0).toUpperCase();
 
     const timezone = settingsQuery.data?.timeZone ?? "Loading…";
+    const role = primaryWorkspaceRole();
+    const roleLabel = role === "TENANT_ADMIN" ? "Administrator" : "Staff";
 
     return (
         <div
@@ -97,24 +122,26 @@ export default function AppLayout() {
                 </div>
 
                 <nav className="sidebar-nav">
-                    {navigation.map(({ to, label, icon: Icon, end }) => (
-                        <NavLink
-                            key={to}
-                            to={to}
-                            end={end}
-
-                            className={({ isActive }) =>
-                                isActive
-                                    ? "sidebar-link active"
-                                    : "sidebar-link"
-                            }
-                            onClick={() => setMobileNavigationOpen(false)}
-                        >
-                            <Icon size={19} strokeWidth={1.9} />
-
-                            <span>{label}</span>
-                        </NavLink>
-                    ))}
+                    {navigation
+                        .filter(item => hasCapability(item.capability))
+                        .map(({ to, label, icon: Icon, end }) => (
+                            <NavLink
+                                key={to}
+                                to={to}
+                                end={end}
+                                className={({ isActive }) =>
+                                    isActive
+                                        ? "sidebar-link active"
+                                        : "sidebar-link"
+                                }
+                                onClick={() =>
+                                    setMobileNavigationOpen(false)
+                                }
+                            >
+                                <Icon size={19} strokeWidth={1.9} />
+                                <span>{label}</span>
+                            </NavLink>
+                        ))}
                 </nav>
 
                 <div className="sidebar-footer">
@@ -166,6 +193,8 @@ export default function AppLayout() {
                         <div className={"profile-avatar"}>{initial}</div>
 
                         <span className={"profile-name"}>{displayName}</span>
+
+                        <span className="profile-role">{roleLabel}</span>
 
                         <button
                             className={"logout-button"}

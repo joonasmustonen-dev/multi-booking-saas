@@ -15,6 +15,7 @@ import type { ServiceOffering, UpdateServiceRequest } from "./serviceTypes";
 import ServiceForm, { type ServiceFormValues } from "./ServiceForm";
 import { useTenantSettings } from "../settings/useTenantSettings";
 export default function ServicesPage() {
+    const canManage = canManageWorkspace();
     const settings = useTenantSettings();
     const client = useQueryClient();
     const catalogs = useAssignmentCatalogs();
@@ -65,16 +66,17 @@ export default function ServicesPage() {
                         The people, places, and resources behind every booking.
                     </p>
                 </div>
-                <button
-                    className="button button-primary"
-                    disabled={!canManageWorkspace()}
-                    onClick={() => setEditing("new")}
-                >
-                    <Plus size={17} />
-                    Add service
-                </button>
+                {canManage && (
+                    <button
+                        className="button button-primary"
+                        onClick={() => setEditing("new")}
+                    >
+                        <Plus size={17} />
+                        Add service
+                    </button>
+                )}
             </div>
-            {editing && (
+            {canManage && editing && (
                 <ServiceForm
                     key={editing === "new" ? "new" : editing.id}
                     service={editing === "new" ? undefined : editing}
@@ -91,7 +93,11 @@ export default function ServicesPage() {
             {services.data.length === 0 ? (
                 <div className="card empty-state">
                     <h3>No services yet</h3>
-                    <p>Add a service and define what each booking needs.</p>
+                    <p>
+                        {canManage
+                            ? "Add a service and define what each booking needs."
+                            : "No services have been configured."}
+                    </p>
                 </div>
             ) : (
                 <CatalogBrowser
@@ -193,33 +199,35 @@ export default function ServicesPage() {
                                             </div>
                                         )
                                     )}
-                                    <div className="form-actions">
-                                        <button
-                                            className="button button-secondary"
-                                            disabled={!canManageWorkspace()}
-                                            onClick={() => setEditing(service)}
-                                        >
-                                            <Pencil size={15} />
-                                            Edit
-                                        </button>
-                                        <button
-                                            className="button button-danger"
-                                            disabled={
-                                                remove.isPending ||
-                                                !canManageWorkspace()
-                                            }
-                                            onClick={() => {
-                                                if (
-                                                    window.confirm(
-                                                        `Delete ${service.name}?`
+                                    {canManage && (
+                                        <div className="form-actions">
+                                            <button
+                                                className="button button-secondary"
+                                                onClick={() =>
+                                                    setEditing(service)
+                                                }
+                                            >
+                                                <Pencil size={15} />
+                                                Edit
+                                            </button>
+                                            <button
+                                                className="button button-danger"
+                                                disabled={remove.isPending}
+                                                onClick={() => {
+                                                    if (
+                                                        window.confirm(
+                                                            `Delete ${service.name}?`
+                                                        )
                                                     )
-                                                )
-                                                    remove.mutate(service.id);
-                                            }}
-                                        >
-                                            Delete
-                                        </button>
-                                    </div>
+                                                        remove.mutate(
+                                                            service.id
+                                                        );
+                                                }}
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    )}
                                 </article>
                             ))}
                         </div>

@@ -16,7 +16,7 @@ public class TenantSettingsController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'STAFF', 'CUSTOMER')")
+    @PreAuthorize("hasAnyRole('TENANT_ADMIN', 'STAFF')")
     public TenantSettingsResponse getSettings() {
         return service.getSettings();
     }

@@ -22,6 +22,63 @@ import {
 import { copyShiftsToWeek } from "./rotaDates";
 import { invalidateBookingData } from "../assignments/invalidateBookingData";
 import { formatDate } from "../settings/timeFormat";
+
+function ReadOnlyWeekForm({ week }: { week: StaffWeek }) {
+    return (
+        <div className="rota-form read-only-schedule">
+            <div className="section-heading">
+                <span className="requirement-pill sage">
+                    {week.overridden
+                        ? "Schedule for this week"
+                        : "Using recurring hours"}
+                </span>
+                <span className="field-note">View only</span>
+            </div>
+            <div className="rota-days">
+                {Array.from({ length: 7 }, (_, day) => {
+                    const date = addDays(week.weekStart, day);
+                    const entries = week.shifts.filter(
+                        shift => shift.date === date
+                    );
+                    return (
+                        <div
+                            className={`rota-day ${entries.length ? "" : "day-off"}`}
+                            key={date}
+                        >
+                            <div className="rota-day-label">
+                                <strong>
+                                    {
+                                        [
+                                            "Monday",
+                                            "Tuesday",
+                                            "Wednesday",
+                                            "Thursday",
+                                            "Friday",
+                                            "Saturday",
+                                            "Sunday"
+                                        ][day]
+                                    }
+                                </strong>
+                                <small>{date.slice(5)}</small>
+                            </div>
+                            <span className="requirement-pill">
+                                {entries.length ? "Working" : "Day off"}
+                            </span>
+                            <div className="read-only-hours">
+                                {entries.map((shift, index) => (
+                                    <span key={index}>
+                                        {shift.startTime.slice(0, 5)}–
+                                        {shift.endTime.slice(0, 5)}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
 function WeekForm({
     id,
     week,
@@ -139,6 +196,7 @@ function WeekForm({
         );
         setSaved(false);
     }
+    if (!canManageWorkspace()) return <ReadOnlyWeekForm week={week} />;
     return (
         <form className="rota-form" onSubmit={submit}>
             <div className="section-heading">

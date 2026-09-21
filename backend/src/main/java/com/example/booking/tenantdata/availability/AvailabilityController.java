@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/availability")
-@PreAuthorize("hasAnyRole('TENANT_ADMIN', 'STAFF', 'CUSTOMER')")
+@PreAuthorize("hasAnyRole('TENANT_ADMIN', 'STAFF')")
 public class AvailabilityController {
 
     private final AvailabilityService service;

@@ -34,6 +34,7 @@ export default function SchedulePanel({
     timeZone,
     allowExtraAvailability = true
 }: Props) {
+    const canManage = canManageWorkspace();
     const client = useQueryClient();
     const rules = useQuery({
         queryKey: ["availability-rules", kind, ownerId],
@@ -142,25 +143,27 @@ export default function SchedulePanel({
                             · {timeZone}
                         </p>
                     </div>
-                    <button
-                        className="button button-secondary"
-                        disabled={pending || !canManageWorkspace()}
-                        onClick={() => edit("new")}
-                    >
-                        <Plus size={16} />
-                        Add {kind === "locations" ? "closure" : "exception"}
-                    </button>
+                    {canManage && (
+                        <button
+                            className="button button-secondary"
+                            disabled={pending}
+                            onClick={() => edit("new")}
+                        >
+                            <Plus size={16} />
+                            Add {kind === "locations" ? "closure" : "exception"}
+                        </button>
+                    )}
                 </div>
                 {error && (
                     <p className="form-error" role="alert">
                         {error}
                     </p>
                 )}
-                {editor && (
+                {canManage && editor && (
                     <form className="booking-form" onSubmit={submit}>
                         <fieldset
                             className="editor-fields"
-                            disabled={pending || !canManageWorkspace()}
+                            disabled={pending}
                         >
                             <div className="form-grid">
                                 <label className="form-field">
@@ -188,7 +191,7 @@ export default function SchedulePanel({
                                     <SearchSelect
                                         searchable={false}
                                         disabled={
-                                            pending || !canManageWorkspace()
+                                            pending
                                         }
                                         value={
                                             available ? "available" : "blocked"
@@ -225,14 +228,14 @@ export default function SchedulePanel({
                             <button
                                 type="button"
                                 className="button button-secondary"
-                                disabled={pending || !canManageWorkspace()}
+                                disabled={pending}
                                 onClick={() => setEditor(null)}
                             >
                                 Cancel
                             </button>
                             <button
                                 className="button button-primary"
-                                disabled={pending || !canManageWorkspace()}
+                                disabled={pending}
                             >
                                 {pending ? "Saving…" : "Save exception"}
                             </button>
@@ -271,41 +274,39 @@ export default function SchedulePanel({
                                         {formatTime(exception.endAt, timeZone)}
                                     </span>
                                 </div>
-                                <div className="form-actions">
-                                    <button
-                                        className="button button-secondary"
-                                        disabled={
-                                            pending || !canManageWorkspace()
-                                        }
-                                        onClick={() => edit(exception)}
-                                    >
-                                        <Pencil size={14} />
-                                        Edit
-                                    </button>
-                                    <button
-                                        className="button button-danger"
-                                        disabled={
-                                            pending || !canManageWorkspace()
-                                        }
-                                        onClick={() => {
-                                            if (
-                                                window.confirm(
-                                                    "Delete this exception?"
-                                                )
-                                            )
-                                                void mutate(() =>
-                                                    deleteAvailabilityException(
-                                                        kind,
-                                                        ownerId,
-                                                        exception.id
+                                {canManage && (
+                                    <div className="form-actions">
+                                        <button
+                                            className="button button-secondary"
+                                            disabled={pending}
+                                            onClick={() => edit(exception)}
+                                        >
+                                            <Pencil size={14} />
+                                            Edit
+                                        </button>
+                                        <button
+                                            className="button button-danger"
+                                            disabled={pending}
+                                            onClick={() => {
+                                                if (
+                                                    window.confirm(
+                                                        "Delete this exception?"
                                                     )
-                                                );
-                                        }}
-                                    >
-                                        <Trash2 size={14} />
-                                        Delete
-                                    </button>
-                                </div>
+                                                )
+                                                    void mutate(() =>
+                                                        deleteAvailabilityException(
+                                                            kind,
+                                                            ownerId,
+                                                            exception.id
+                                                        )
+                                                    );
+                                            }}
+                                        >
+                                            <Trash2 size={14} />
+                                            Delete
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

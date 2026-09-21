@@ -17,6 +17,7 @@ import ResourceForm from "./ResourceForm";
 import { setAssignmentActive } from "../assignments/assignmentApi";
 import { invalidateBookingData } from "../assignments/invalidateBookingData";
 export default function ResourcesPage() {
+    const canManage = canManageWorkspace();
     const [params] = useSearchParams();
     const [scheduleId, setScheduleId] = useState(params.get("ownerId") ?? "");
     const settings = useTenantSettings();
@@ -66,16 +67,17 @@ export default function ResourcesPage() {
                         things.
                     </p>
                 </div>
-                <button
-                    className="button button-primary"
-                    disabled={!canManageWorkspace()}
-                    onClick={() => setEditing("new")}
-                >
-                    <Plus size={17} />
-                    Add resource
-                </button>
+                {canManage && (
+                    <button
+                        className="button button-primary"
+                        onClick={() => setEditing("new")}
+                    >
+                        <Plus size={17} />
+                        Add resource
+                    </button>
+                )}
             </div>
-            {editing && (
+            {canManage && editing && (
                 <ResourceForm
                     key={editing === "new" ? "new" : editing.id}
                     resource={editing === "new" ? undefined : editing}
@@ -92,7 +94,11 @@ export default function ResourcesPage() {
                 <div className="card empty-state">
                     <Package size={30} />
                     <h3>No resources yet</h3>
-                    <p>Add a resource and set its availability here.</p>
+                    <p>
+                        {canManage
+                            ? "Add a resource and set its availability here."
+                            : "No resources have been configured."}
+                    </p>
                 </div>
             ) : (
                 <CatalogBrowser
@@ -151,56 +157,53 @@ export default function ResourcesPage() {
                                         >
                                             Availability
                                         </button>
-                                        <button
-                                            className="button button-secondary"
-                                            disabled={!canManageWorkspace()}
-                                            onClick={() => setEditing(resource)}
-                                        >
-                                            <Pencil size={15} />
-                                            Edit
-                                        </button>
-                                        <button
-                                            className="button button-secondary"
-                                            disabled={
-                                                pending || !canManageWorkspace()
-                                            }
-                                            onClick={() =>
-                                                mutate(() =>
-                                                    setAssignmentActive(
-                                                        "resources",
-                                                        resource.id,
-                                                        !resource.active
-                                                    )
-                                                )
-                                            }
-                                        >
-                                            {resource.active
-                                                ? "Deactivate"
-                                                : "Activate"}
-                                        </button>
-                                        <button
-                                            className="button button-danger"
-                                            data-tooltip="Delete resource"
-                                            aria-label="Delete resource"
-                                            disabled={
-                                                pending || !canManageWorkspace()
-                                            }
-                                            onClick={() => {
-                                                if (
-                                                    window.confirm(
-                                                        `Delete ${resource.name}? Deactivate it instead to keep it for future use.`
-                                                    )
-                                                )
-                                                    void mutate(() =>
-                                                        deleteResource(
-                                                            resource.id
+                                        {canManage && <>
+                                            <button
+                                                className="button button-secondary"
+                                                onClick={() => setEditing(resource)}
+                                            >
+                                                <Pencil size={15} />
+                                                Edit
+                                            </button>
+                                            <button
+                                                className="button button-secondary"
+                                                disabled={pending}
+                                                onClick={() =>
+                                                    mutate(() =>
+                                                        setAssignmentActive(
+                                                            "resources",
+                                                            resource.id,
+                                                            !resource.active
                                                         )
-                                                    );
-                                            }}
-                                        >
-                                            <Trash2 size={15} />
-                                            Delete
-                                        </button>
+                                                    )
+                                                }
+                                            >
+                                                {resource.active
+                                                    ? "Deactivate"
+                                                    : "Activate"}
+                                            </button>
+                                            <button
+                                                className="button button-danger"
+                                                data-tooltip="Delete resource"
+                                                aria-label="Delete resource"
+                                                disabled={pending}
+                                                onClick={() => {
+                                                    if (
+                                                        window.confirm(
+                                                            `Delete ${resource.name}? Deactivate it instead to keep it for future use.`
+                                                        )
+                                                    )
+                                                        void mutate(() =>
+                                                            deleteResource(
+                                                                resource.id
+                                                            )
+                                                        );
+                                                }}
+                                            >
+                                                <Trash2 size={15} />
+                                                Delete
+                                            </button>
+                                        </>}
                                     </div>
                                 </article>
                             ))}

@@ -199,6 +199,7 @@ function StaffForm({
     );
 }
 export default function StaffPage() {
+    const canManage = canManageWorkspace();
     const client = useQueryClient();
     const query = useQuery({ queryKey: ["staff"], queryFn: getStaff });
     const catalogs = useAssignmentCatalogs();
@@ -273,16 +274,17 @@ export default function StaffPage() {
                         scheduling.
                     </p>
                 </div>
-                <button
-                    className="button button-primary"
-                    disabled={!canManageWorkspace()}
-                    onClick={() => setEditing("new")}
-                >
-                    <Plus size={17} />
-                    Add staff member
-                </button>
+                {canManage && (
+                    <button
+                        className="button button-primary"
+                        onClick={() => setEditing("new")}
+                    >
+                        <Plus size={17} />
+                        Add staff member
+                    </button>
+                )}
             </div>
-            {editing && (
+            {canManage && editing && (
                 <StaffForm
                     key={editing === "new" ? "new" : editing.id}
                     member={editing === "new" ? undefined : editing}
@@ -301,8 +303,9 @@ export default function StaffPage() {
                     <Users size={30} />
                     <h3>No staff yet</h3>
                     <p>
-                        Add a staff member to build their schedule for next
-                        week.
+                        {canManage
+                            ? "Add a staff member to build their schedule for next week."
+                            : "No staff members have been configured."}
                     </p>
                 </div>
             ) : (
@@ -373,27 +376,25 @@ export default function StaffPage() {
                                                 <CalendarDays size={15} />
                                                 Schedule
                                             </button>
-                                            <button
-                                                className="button button-secondary"
-                                                disabled={!canManageWorkspace()}
-                                                onClick={() =>
-                                                    setEditing(member)
-                                                }
-                                            >
-                                                <Pencil size={15} />
-                                                Edit
-                                            </button>
-                                            <button
-                                                className="button button-danger"
-                                                disabled={
-                                                    pending ||
-                                                    !canManageWorkspace()
-                                                }
-                                                onClick={() => remove(member)}
-                                            >
-                                                <Trash2 size={15} />
-                                                Remove
-                                            </button>
+                                            {canManage && <>
+                                                <button
+                                                    className="button button-secondary"
+                                                    onClick={() =>
+                                                        setEditing(member)
+                                                    }
+                                                >
+                                                    <Pencil size={15} />
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    className="button button-danger"
+                                                    disabled={pending}
+                                                    onClick={() => remove(member)}
+                                                >
+                                                    <Trash2 size={15} />
+                                                    Remove
+                                                </button>
+                                            </>}
                                         </div>
                                     </article>
                                 ))}

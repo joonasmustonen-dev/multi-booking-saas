@@ -60,6 +60,40 @@ const check = (name, action) => {
     results.push({ name, passed: true });
 };
 try {
+    const { default: keycloak } = await server.ssrLoadModule(
+        "/src/auth/keycloak.ts"
+    );
+    const permissions = await server.ssrLoadModule(
+        "/src/auth/permissions.ts"
+    );
+    check("Workspace roles map to explicit capabilities", () => {
+        const admin = permissions.capabilitiesForRoles(["TENANT_ADMIN"]);
+        const staff = permissions.capabilitiesForRoles(["STAFF"]);
+        const customer = permissions.capabilitiesForRoles(["CUSTOMER"]);
+        assert(admin.has("settings.manage"));
+        assert(admin.has("catalog.manage"));
+        assert(staff.has("appointments.manage"));
+        assert(staff.has("catalog.view"));
+        assert(!staff.has("catalog.manage"));
+        assert(!staff.has("settings.manage"));
+        assert(!customer.has("workspace.access"));
+    });
+    keycloak.tokenParsed = {
+        preferred_username: "customer",
+        realm_access: { roles: ["CUSTOMER"] }
+    };
+    const { default: UnsupportedWorkspaceRolePage } =
+        await server.ssrLoadModule(
+            "/src/pages/UnsupportedWorkspaceRolePage.tsx"
+        );
+    const deniedHtml = renderToStaticMarkup(
+        React.createElement(UnsupportedWorkspaceRolePage)
+    );
+    check("Customer accounts receive a deliberate workspace denial", () => {
+        assert(deniedHtml.includes("Workspace access unavailable"));
+        assert(deniedHtml.includes("Customer accounts cannot use"));
+        assert(deniedHtml.includes("Sign out"));
+    });
     const labels = await server.ssrLoadModule(
         "/src/features/assignments/assignmentLabels.ts"
     );
@@ -505,6 +539,10 @@ try {
         }
     );
     client.setQueryData(["locations"], [location]);
+    keycloak.tokenParsed = {
+        preferred_username: "admin",
+        realm_access: { roles: ["TENANT_ADMIN"] }
+    };
     const locationsPage = (
         await server.ssrLoadModule("/src/features/locations/LocationsPage.tsx")
     ).default;
@@ -531,6 +569,18 @@ try {
             assert(resourceHtml.includes("Add resource"));
         }
     );
+    keycloak.tokenParsed = {
+        preferred_username: "staff",
+        realm_access: { roles: ["STAFF"] }
+    };
+    const staffResourceHtml = wrap(React.createElement(resourcePage));
+    check("Staff catalog views omit administrator-only actions", () => {
+        assert(staffResourceHtml.includes("Availability"));
+        assert(!staffResourceHtml.includes("Add resource"));
+        assert(!staffResourceHtml.includes("Deactivate"));
+        assert(!staffResourceHtml.includes(">Edit<"));
+        assert(!staffResourceHtml.includes(">Delete<"));
+    });
     const settingsPage = (
         await server.ssrLoadModule("/src/features/settings/SettingsPage.tsx")
     ).default;
@@ -545,6 +595,10 @@ try {
             assert(settingsHtml.includes("Only a tenant administrator"));
         }
     );
+    keycloak.tokenParsed = {
+        preferred_username: "admin",
+        realm_access: { roles: ["TENANT_ADMIN"] }
+    };
     const datesApi = await server.ssrLoadModule(
         "/src/features/appointments/dateUtils.ts"
     );

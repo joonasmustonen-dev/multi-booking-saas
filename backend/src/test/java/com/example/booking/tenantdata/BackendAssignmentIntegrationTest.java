@@ -2131,6 +2131,21 @@ class BackendAssignmentIntegrationTest {
         });
     }
 
+    @Test
+    void customerRoleCannotUseOperationalWorkspaceEndpoints() throws Exception {
+        mvc.perform(
+            get("/api/v1/settings").with(authenticated("CUSTOMER"))
+        ).andExpect(status().isForbidden());
+
+        mvc.perform(
+            get("/api/v1/availability")
+                .param("serviceId", UUID.randomUUID().toString())
+                .param("from", LocalDate.now().toString())
+                .param("to", LocalDate.now().plusDays(1).toString())
+                .with(authenticated("CUSTOMER"))
+        ).andExpect(status().isForbidden());
+    }
+
     private RequestPostProcessor authenticated(String role) {
         return jwt()
             .jwt(token -> token.claim("tenant_id", "tenant-a"))

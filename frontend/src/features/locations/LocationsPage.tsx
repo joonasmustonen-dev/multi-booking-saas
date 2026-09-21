@@ -153,6 +153,7 @@ function LocationForm({
     );
 }
 export default function LocationsPage() {
+    const canManage = canManageWorkspace();
     const [params] = useSearchParams();
     const [scheduleId, setScheduleId] = useState(params.get("ownerId") ?? "");
     const settings = useTenantSettings();
@@ -209,16 +210,17 @@ export default function LocationsPage() {
                         Manage your rooms, studios, and booking locations.
                     </p>
                 </div>
-                <button
-                    className="button button-primary"
-                    disabled={!canManageWorkspace()}
-                    onClick={() => setEditing("new")}
-                >
-                    <Plus size={17} />
-                    Add location
-                </button>
+                {canManage && (
+                    <button
+                        className="button button-primary"
+                        onClick={() => setEditing("new")}
+                    >
+                        <Plus size={17} />
+                        Add location
+                    </button>
+                )}
             </div>
-            {editing && (
+            {canManage && editing && (
                 <LocationEditorDialog
                     key={`location-editor:${editing === "new" ? "new" : editing.id}`}
                     onClose={() => setEditing(null)}
@@ -240,8 +242,9 @@ export default function LocationsPage() {
                     <Building2 size={30} />
                     <h3>No locations yet</h3>
                     <p>
-                        Add your first location and configure its opening hours
-                        here.
+                        {canManage
+                            ? "Add your first location and configure its opening hours here."
+                            : "No locations have been configured."}
                     </p>
                 </div>
             ) : (
@@ -316,25 +319,24 @@ export default function LocationsPage() {
                                         >
                                             Opening hours & staff
                                         </button>
-                                        <button
-                                            className="button button-secondary"
-                                            disabled={!canManageWorkspace()}
-                                            onClick={() => setEditing(location)}
-                                        >
-                                            <Pencil size={15} />
-                                            Edit
-                                        </button>
-                                        <button
-                                            className="button button-secondary"
-                                            disabled={
-                                                pending || !canManageWorkspace()
-                                            }
-                                            onClick={() => toggle(location)}
-                                        >
-                                            {location.active
-                                                ? "Deactivate"
-                                                : "Activate"}
-                                        </button>
+                                        {canManage && <>
+                                            <button
+                                                className="button button-secondary"
+                                                onClick={() => setEditing(location)}
+                                            >
+                                                <Pencil size={15} />
+                                                Edit
+                                            </button>
+                                            <button
+                                                className="button button-secondary"
+                                                disabled={pending}
+                                                onClick={() => toggle(location)}
+                                            >
+                                                {location.active
+                                                    ? "Deactivate"
+                                                    : "Activate"}
+                                            </button>
+                                        </>}
                                     </div>
                                 </article>
                             ))}

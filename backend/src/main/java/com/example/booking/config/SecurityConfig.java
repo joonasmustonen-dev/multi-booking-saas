@@ -62,6 +62,8 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers("/api/platform/**")
                     .hasRole("PLATFORM_ADMIN")
+                    .requestMatchers("/api/v1/**")
+                    .hasAnyRole("TENANT_ADMIN", "STAFF")
                     .anyRequest()
                     .authenticated()
             );

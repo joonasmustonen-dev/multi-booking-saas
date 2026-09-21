@@ -19,6 +19,7 @@ export default function LocationStaffPanel({
     locationId: string;
     locationName: string;
 }) {
+    const canManage = canManageWorkspace();
     const client = useQueryClient();
     const query = useQuery({ queryKey: ["staff"], queryFn: getStaff });
     const [selectedId, setSelectedId] = useState("");
@@ -75,45 +76,54 @@ export default function LocationStaffPanel({
                     Staff at {locationName}
                 </h2>
                 <Link className="text-action" to="/staff">
-                    Manage staff
+                    {canManage ? "Manage staff" : "View staff"}
                 </Link>
             </div>
-            <div className="assignment-add-row">
-                <SearchSelect
-                    value={selectedId}
-                    options={candidates.map(member => ({
-                        value: member.id,
-                        label: entityLabel(member, query.data),
-                        description: member.freeAgent
-                            ? "Free agent · will be assigned here"
-                            : "Add this location to their assigned locations"
-                    }))}
-                    onChange={setSelectedId}
-                    ariaLabel="Assign staff to location"
-                    placeholder="Type a staff member's name…"
-                    disabled={pending || !canManageWorkspace()}
-                />
-                <button
-                    className="button button-primary"
-                    disabled={pending || !selected || !canManageWorkspace()}
-                    onClick={() =>
-                        selected &&
-                        update(
-                            selected,
-                            [...new Set([...selected.locationIds, locationId])],
-                            false
-                        )
-                    }
-                >
-                    <Plus size={15} />
-                    Assign here
-                </button>
-            </div>
-            <p className="field-note">
-                Assigning a free agent here limits them to selected locations.
-                Services still control which staff and locations are eligible
-                for each booking.
-            </p>
+            {canManage && (
+                <>
+                    <div className="assignment-add-row">
+                        <SearchSelect
+                            value={selectedId}
+                            options={candidates.map(member => ({
+                                value: member.id,
+                                label: entityLabel(member, query.data),
+                                description: member.freeAgent
+                                    ? "Free agent · will be assigned here"
+                                    : "Add this location to their assigned locations"
+                            }))}
+                            onChange={setSelectedId}
+                            ariaLabel="Assign staff to location"
+                            placeholder="Type a staff member's name…"
+                            disabled={pending}
+                        />
+                        <button
+                            className="button button-primary"
+                            disabled={pending || !selected}
+                            onClick={() =>
+                                selected &&
+                                update(
+                                    selected,
+                                    [
+                                        ...new Set([
+                                            ...selected.locationIds,
+                                            locationId
+                                        ])
+                                    ],
+                                    false
+                                )
+                            }
+                        >
+                            <Plus size={15} />
+                            Assign here
+                        </button>
+                    </div>
+                    <p className="field-note">
+                        Assigning a free agent here limits them to selected
+                        locations. Services still control which staff and
+                        locations are eligible for each booking.
+                    </p>
+                </>
+            )}
             {error && (
                 <p className="form-error" role="alert">
                     {error}
@@ -139,28 +149,30 @@ export default function LocationStaffPanel({
                                         (member.active ? "Active" : "Inactive")}
                                 </small>
                             </div>
-                            <button
-                                className="button button-secondary"
-                                disabled={pending || !canManageWorkspace()}
-                                data-tooltip={
-                                    member.locationIds.length === 1
-                                        ? "Allow this staff member to work at any service location."
-                                        : "Remove only this location from their assigned locations."
-                                }
-                                onClick={() =>
-                                    update(
-                                        member,
-                                        member.locationIds.filter(
-                                            id => id !== locationId
-                                        ),
+                            {canManage && (
+                                <button
+                                    className="button button-secondary"
+                                    disabled={pending}
+                                    data-tooltip={
                                         member.locationIds.length === 1
-                                    )
-                                }
-                            >
-                                {member.locationIds.length === 1
-                                    ? "Make free agent"
-                                    : "Unassign"}
-                            </button>
+                                            ? "Allow this staff member to work at any service location."
+                                            : "Remove only this location from their assigned locations."
+                                    }
+                                    onClick={() =>
+                                        update(
+                                            member,
+                                            member.locationIds.filter(
+                                                id => id !== locationId
+                                            ),
+                                            member.locationIds.length === 1
+                                        )
+                                    }
+                                >
+                                    {member.locationIds.length === 1
+                                        ? "Make free agent"
+                                        : "Unassign"}
+                                </button>
+                            )}
                         </div>
                     ))
                 )}

@@ -24,6 +24,47 @@ import {
     type RecurringDraft
 } from "./recurringDraft";
 
+function ReadOnlyRecurringWeek({ rules }: { rules: AvailabilityRule[] }) {
+    return (
+        <div className="recurring-week read-only-schedule">
+            <div>
+                <h3>Regular weekly hours</h3>
+                <p className="field-note">View-only schedule</p>
+            </div>
+            <div className="recurring-rota-days">
+                {weekDays.map(day => {
+                    const entries = rules.filter(
+                        rule => rule.dayOfWeek === day && rule.active
+                    );
+                    return (
+                        <article
+                            className={`rota-day ${entries.length ? "" : "day-off"}`}
+                            key={day}
+                        >
+                            <strong>
+                                {day.charAt(0) + day.slice(1).toLowerCase()}
+                            </strong>
+                            <span className="requirement-pill">
+                                {entries.length ? "Open" : "Closed"}
+                            </span>
+                            <div className="read-only-hours">
+                                {entries.length
+                                    ? entries.map((rule, index) => (
+                                          <span key={index}>
+                                              {rule.startTime.slice(0, 5)}–
+                                              {rule.endTime.slice(0, 5)}
+                                          </span>
+                                      ))
+                                    : null}
+                            </div>
+                        </article>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
 export default function RecurringWeekEditor({
     kind,
 
@@ -123,6 +164,10 @@ export default function RecurringWeekEditor({
         } finally {
             setPending(false);
         }
+    }
+
+    if (!canManageWorkspace()) {
+        return <ReadOnlyRecurringWeek rules={initialRules} />;
     }
 
     return (

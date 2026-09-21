@@ -1009,9 +1009,75 @@ input[type="checkbox"]:checked {
 }
 
 @media (max-width: 640px) {
+    .profile-role {
+        display: none;
+    }
     .page-content {
         padding: 20px 16px 32px;
     }
+}
+
+.profile-role {
+    padding: 5px 9px;
+    border: 1px solid #4a3c31;
+    border-radius: 999px;
+    color: #cbb69d;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.access-denied-page {
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    color: #f4ebdf;
+    background: #0c0b09;
+}
+
+.access-denied-card {
+    width: min(520px, 100%);
+    padding: clamp(28px, 5vw, 48px);
+    border: 1px solid #44382e;
+    border-radius: 22px;
+    background: #1d1915;
+    box-shadow: 0 24px 70px rgb(0 0 0 / 35%);
+}
+
+.access-denied-card h1 {
+    margin: 10px 0 12px;
+    font-size: clamp(1.9rem, 5vw, 2.65rem);
+}
+
+.access-denied-card > p:not(.page-eyebrow) {
+    max-width: 45ch;
+    margin-bottom: 26px;
+    color: #cbb69d;
+    line-height: 1.65;
+}
+
+.access-denied-icon {
+    width: 54px;
+    height: 54px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 24px;
+    border-radius: 16px;
+    color: #f1c39b;
+    background: #51311f;
+}
+
+.read-only-schedule .requirement-pill {
+    width: fit-content;
+}
+
+.read-only-hours {
+    display: grid;
+    gap: 4px;
+    color: #e5d6c2;
+    font-size: 0.82rem;
+    font-weight: 650;
 }
 
 /*
