@@ -50,6 +50,32 @@ if [[ "$keycloak_ready" != true ]]; then
 fi
 echo "[e2e] Keycloak realm is ready."
 
+echo "[e2e] Resolving the imported administrator identity..."
+keycloak_admin_response=$(curl --fail --silent \
+    --request POST \
+    --data-urlencode 'client_id=admin-cli' \
+    --data-urlencode 'username=e2e-admin-console' \
+    --data-urlencode 'password=e2e-admin-console-password' \
+    --data-urlencode 'grant_type=password' \
+    http://localhost:8081/realms/master/protocol/openid-connect/token)
+keycloak_admin_token=$(printf '%s' "$keycloak_admin_response" | node -e '
+const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
+if (!input.access_token) process.exit(1);
+process.stdout.write(input.access_token);
+')
+keycloak_users=$(curl --fail --silent \
+    --get \
+    --header "Authorization: Bearer $keycloak_admin_token" \
+    --data-urlencode 'username=e2e-admin' \
+    --data-urlencode 'exact=true' \
+    http://localhost:8081/admin/realms/booking/users)
+e2e_admin_subject=$(printf '%s' "$keycloak_users" | node -e '
+const users = JSON.parse(require("fs").readFileSync(0, "utf8"));
+if (users.length !== 1 || !users[0].id) process.exit(1);
+process.stdout.write(users[0].id);
+')
+echo "[e2e] Imported administrator identity resolved."
+
 echo "[e2e] Building the Spring Boot application..."
 (cd backend && bash mvnw --batch-mode --no-transfer-progress -DskipTests package)
 echo "[e2e] Creating and migrating disposable tenant databases..."
@@ -92,6 +118,7 @@ echo "[e2e] Loading deterministic booking fixtures..."
 postgres_container=$(docker compose -f "$compose_file" ps -q postgres)
 docker exec -i "$postgres_container" psql \
     -U booking -d platform_db -v ON_ERROR_STOP=1 \
+    --set=e2e_admin_subject="$e2e_admin_subject" \
     < scripts/e2e-seed.sql
 
 echo "[e2e] Running Playwright in Chromium..."

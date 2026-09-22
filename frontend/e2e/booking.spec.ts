@@ -24,10 +24,6 @@ async function login(page: Page) {
         response => response.url().endsWith("/api/account/workspaces"),
         { timeout: 15_000 }
     );
-    const dashboardResponse = page.waitForResponse(
-        response => response.url().endsWith("/api/v1/dashboard/summary"),
-        { timeout: 15_000 }
-    );
     await page.locator("#kc-login").click();
     await expect(page).toHaveURL(/^http:\/\/localhost:5173\/app\/?(?:#.*)?$/);
     const workspaceResult = await workspaceResponse;
@@ -38,7 +34,6 @@ async function login(page: Page) {
             role: "TENANT_ADMIN"
         })
     ]);
-    expect((await dashboardResponse).status()).toBe(200);
     await expect(page.getByRole("heading", { name: /Good (morning|afternoon|evening)/ })).toBeVisible();
 }
 

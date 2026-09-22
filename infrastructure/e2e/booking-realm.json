@@ -61,7 +61,6 @@
   ],
   "users": [
     {
-      "id": "e2000000-0000-4000-8000-000000000010",
       "username": "e2e-admin",
       "enabled": true,
       "emailVerified": true,
