@@ -61,6 +61,7 @@ jar_files=(backend/target/booking-backend-*.jar)
 java -jar "${jar_files[0]}" \
     --server.address=127.0.0.1 \
     --server.port=8080 \
+    --app.security.membership-enforcement=true \
     > "$backend_log" 2>&1 &
 backend_pid=$!
 

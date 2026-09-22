@@ -1,3 +1,33 @@
+\connect platform_db
+
+INSERT INTO workspace_memberships (
+    id,
+    tenant_id,
+    identity_subject,
+    email,
+    role,
+    status,
+    created_at,
+    updated_at
+)
+SELECT
+    'e2000000-0000-4000-8000-000000000011',
+    id,
+    'e2000000-0000-4000-8000-000000000010',
+    'e2e-admin@example.invalid',
+    'TENANT_ADMIN',
+    'ACTIVE',
+    now(),
+    now()
+FROM tenants
+WHERE slug = 'tenant-a'
+ON CONFLICT (tenant_id, identity_subject) DO UPDATE SET
+    email = EXCLUDED.email,
+    role = EXCLUDED.role,
+    status = 'ACTIVE',
+    removed_at = NULL,
+    updated_at = now();
+
 \connect tenant_a
 
 INSERT INTO customers (

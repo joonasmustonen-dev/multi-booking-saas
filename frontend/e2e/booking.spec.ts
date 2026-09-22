@@ -20,11 +20,24 @@ async function login(page: Page) {
     await expect(page).toHaveURL(/localhost:8081\/realms\/booking/);
     await page.locator("#username").fill("e2e-admin");
     await page.locator("#password").fill("playwright-only-password");
-    const dashboardResponse = page.waitForResponse(response =>
-        response.url().endsWith("/api/v1/dashboard/summary")
+    const workspaceResponse = page.waitForResponse(
+        response => response.url().endsWith("/api/account/workspaces"),
+        { timeout: 15_000 }
+    );
+    const dashboardResponse = page.waitForResponse(
+        response => response.url().endsWith("/api/v1/dashboard/summary"),
+        { timeout: 15_000 }
     );
     await page.locator("#kc-login").click();
     await expect(page).toHaveURL(/^http:\/\/localhost:5173\/app\/?(?:#.*)?$/);
+    const workspaceResult = await workspaceResponse;
+    expect(workspaceResult.status()).toBe(200);
+    expect(await workspaceResult.json()).toEqual([
+        expect.objectContaining({
+            slug: "tenant-a",
+            role: "TENANT_ADMIN"
+        })
+    ]);
     expect((await dashboardResponse).status()).toBe(200);
     await expect(page.getByRole("heading", { name: /Good (morning|afternoon|evening)/ })).toBeVisible();
 }
