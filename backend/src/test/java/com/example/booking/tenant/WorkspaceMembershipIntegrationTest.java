@@ -44,10 +44,16 @@ class WorkspaceMembershipIntegrationTest {
         createMembership("member-staff", "staff-member@example.test", WorkspaceRole.STAFF);
 
         mvc.perform(
-            put("/api/v1/settings")
-                .with(user("member-staff", "TENANT_ADMIN", "staff-member@example.test"))
-                .contentType("application/json")
-                .content("{}")
+            delete(
+                "/api/v1/workspace-access/members/" +
+                java.util.UUID.randomUUID()
+            ).with(
+                user(
+                    "member-staff",
+                    "TENANT_ADMIN",
+                    "staff-member@example.test"
+                )
+            )
         ).andExpect(status().isForbidden());
     }
 

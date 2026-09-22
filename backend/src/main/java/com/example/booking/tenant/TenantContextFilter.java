@@ -41,20 +41,15 @@ public class TenantContextFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
+        String requestUri = request.getRequestURI();
+        if (requestUri == null) return false;
+
+        String contextPath = request.getContextPath();
         return (
-            (request.getRequestURI() != null &&
-                request
-                    .getRequestURI()
-                    .startsWith(request.getContextPath() + "/api/platform/")) ||
-            (request.getContextPath() + "/api/health").equals(
-                request.getRequestURI()
-            ) ||
-            request
-                .getRequestURI()
-                .startsWith(request.getContextPath() + "/api/account/") ||
-            request
-                .getRequestURI()
-                .startsWith(request.getContextPath() + "/api/invitations/")
+            requestUri.startsWith(contextPath + "/api/platform/") ||
+            requestUri.equals(contextPath + "/api/health") ||
+            requestUri.startsWith(contextPath + "/api/account/") ||
+            requestUri.startsWith(contextPath + "/api/invitations/")
         );
     }
 
