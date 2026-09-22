@@ -51,28 +51,21 @@ fi
 echo "[e2e] Keycloak realm is ready."
 
 echo "[e2e] Resolving the imported administrator identity..."
-keycloak_admin_response=$(curl --fail --silent \
+e2e_token_response=$(curl --fail --silent \
     --request POST \
-    --data-urlencode 'client_id=admin-cli' \
-    --data-urlencode 'username=e2e-admin-console' \
-    --data-urlencode 'password=e2e-admin-console-password' \
+    --data-urlencode 'client_id=booking-frontend' \
+    --data-urlencode 'username=e2e-admin' \
+    --data-urlencode 'password=playwright-only-password' \
     --data-urlencode 'grant_type=password' \
-    http://localhost:8081/realms/master/protocol/openid-connect/token)
-keycloak_admin_token=$(printf '%s' "$keycloak_admin_response" | node -e '
+    http://localhost:8081/realms/booking/protocol/openid-connect/token)
+e2e_admin_subject=$(printf '%s' "$e2e_token_response" | node -e '
 const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
 if (!input.access_token) process.exit(1);
-process.stdout.write(input.access_token);
-')
-keycloak_users=$(curl --fail --silent \
-    --get \
-    --header "Authorization: Bearer $keycloak_admin_token" \
-    --data-urlencode 'username=e2e-admin' \
-    --data-urlencode 'exact=true' \
-    http://localhost:8081/admin/realms/booking/users)
-e2e_admin_subject=$(printf '%s' "$keycloak_users" | node -e '
-const users = JSON.parse(require("fs").readFileSync(0, "utf8"));
-if (users.length !== 1 || !users[0].id) process.exit(1);
-process.stdout.write(users[0].id);
+const segments = input.access_token.split(".");
+if (segments.length !== 3) process.exit(1);
+const claims = JSON.parse(Buffer.from(segments[1], "base64url").toString());
+if (!claims.sub) process.exit(1);
+process.stdout.write(claims.sub);
 ')
 echo "[e2e] Imported administrator identity resolved."
 
