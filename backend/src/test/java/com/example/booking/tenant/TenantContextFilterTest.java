@@ -89,6 +89,26 @@ public class TenantContextFilterTest {
     }
 
     @Test
+    void workspaceHeaderCannotOverrideClaimWithoutMembershipEnforcement()
+        throws Exception {
+        Jwt jwt = createJwt("tenant-a");
+        SecurityContextHolder.getContext().setAuthentication(
+            new JwtAuthenticationToken(jwt)
+        );
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("X-Workspace", "tenant-b");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        FilterChain chain = (req, res) ->
+            assertEquals("tenant-a", TenantContext.getTenantId());
+
+        filter.doFilter(request, response, chain);
+
+        assertNull(TenantContext.getTenantId());
+    }
+
+    @Test
     void jwtWithoutTenantDoesNotCreateTenantContext() throws Exception {
         Jwt jwt = createJwtWithoutTenant();
 

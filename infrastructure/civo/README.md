@@ -96,9 +96,32 @@ docker compose logs --tail=100 backend
 
 Open `https://auth.multibooking.org/admin/`, sign in with the bootstrap administrator
 from `.env`, select the `booking` realm, and create a user. Set a permanent
-password and assign the `TENANT_ADMIN` realm role. The imported frontend client
-already uses PKCE, the `booking-backend` audience, tenant `demo`, and the
-Cloudflare frontend origin.
+password, set a verified email address, and copy the user's **ID** from its
+Keycloak details page. Seed that account as the first workspace administrator:
+
+```bash
+./provision-demo-tenant.sh KEYCLOAK_USER_ID administrator@example.com
+```
+
+Then set `MEMBERSHIP_ENFORCEMENT=true` in `.env` and apply it:
+
+```bash
+docker compose up -d backend
+docker compose logs --tail=100 backend
+```
+
+Do not enable enforcement before this seed succeeds or every workspace request
+will be denied. Realm roles remain useful for platform administration, but
+tenant administration and staff access now come from the platform membership
+record. The imported frontend client already uses PKCE, the `booking-backend`
+audience, tenant `demo`, and the Cloudflare frontend origin.
+
+After signing in, an administrator manages access under **Settings -> Workspace
+access**. An invitation produces a one-time link bound to the invited email.
+Create the person's Keycloak account with that same verified email before they
+open the link. Removing a membership takes effect on the next API request even
+if the old access token has not expired. Staff records and appointment history
+remain intact when account access is removed.
 
 Configure SMTP under **Realm settings -> Email** before relying on password
 reset. After creating a separate permanent platform administrator, remove or

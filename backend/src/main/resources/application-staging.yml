@@ -26,6 +26,8 @@ app:
     audience: ${BACKEND_AUDIENCE:booking-backend}
     cors-origins: ${FRONTEND_ORIGIN}
     requests-per-minute: ${API_REQUESTS_PER_MINUTE:240}
+    membership-enforcement: ${MEMBERSHIP_ENFORCEMENT:false}
+    frontend-origin: ${FRONTEND_ORIGIN}
   tenant-database:
     host: postgres
     port: 5432

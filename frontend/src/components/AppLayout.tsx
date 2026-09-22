@@ -20,6 +20,11 @@ import {
     primaryWorkspaceRole,
     type Capability
 } from "../auth/permissions";
+import {
+    currentWorkspace,
+    selectWorkspace,
+    workspaceSessions
+} from "../auth/workspaceSession";
 
 import { useTenantSettings } from "../features/settings/useTenantSettings";
 
@@ -99,6 +104,8 @@ export default function AppLayout() {
     const timezone = settingsQuery.data?.timeZone ?? "Loading…";
     const role = primaryWorkspaceRole();
     const roleLabel = role === "TENANT_ADMIN" ? "Administrator" : "Staff";
+    const workspace = currentWorkspace();
+    const availableWorkspaces = workspaceSessions();
 
     return (
         <div
@@ -145,6 +152,30 @@ export default function AppLayout() {
                 </nav>
 
                 <div className="sidebar-footer">
+                    {availableWorkspaces.length > 1 && workspace && (
+                        <label className="sidebar-workspace-picker">
+                            Workspace
+                            <select
+                                className="input"
+                                value={workspace.slug}
+                                onChange={event => {
+                                    const next = availableWorkspaces.find(
+                                        item => item.slug === event.target.value
+                                    );
+                                    if (next) {
+                                        selectWorkspace(next);
+                                        window.location.assign("/app");
+                                    }
+                                }}
+                            >
+                                {availableWorkspaces.map(item => (
+                                    <option key={item.id} value={item.slug}>
+                                        {item.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                    )}
                     <div className="sidebar-business">
                         <Building2 size={19} />
 

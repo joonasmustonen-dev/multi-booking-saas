@@ -12,6 +12,7 @@ import SettingsPage from "./features/settings/SettingsPage";
 
 import LocationsPage from "./features/locations/LocationsPage";
 import LandingPage from "./pages/LandingPage";
+import AcceptInvitationPage from "./pages/AcceptInvitationPage";
 import {
     RequireCapability,
     RequireWorkspaceAccess
@@ -21,6 +22,10 @@ export default function App() {
     return (
         <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route
+                path="/accept-invitation"
+                element={<AcceptInvitationPage />}
+            />
             <Route element={<RequireWorkspaceAccess />}>
                 <Route element={<AppLayout />}>
                     <Route path="/app" element={<DashboardPage />} />

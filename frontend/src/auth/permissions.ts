@@ -1,4 +1,8 @@
 import keycloak from "./keycloak";
+import {
+    currentWorkspace,
+    workspaceSessionInitialized
+} from "./workspaceSession";
 
 export type WorkspaceRole = "TENANT_ADMIN" | "STAFF" | "CUSTOMER";
 
@@ -54,6 +58,9 @@ export function capabilitiesForRoles(roles: readonly string[]) {
 }
 
 export function currentRealmRoles() {
+    const workspace = currentWorkspace();
+    if (workspace) return [workspace.role];
+    if (workspaceSessionInitialized()) return [];
     return keycloak.tokenParsed?.realm_access?.roles ?? [];
 }
 

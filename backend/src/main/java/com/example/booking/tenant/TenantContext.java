@@ -17,6 +17,14 @@ public final class TenantContext {
         return CURRENT_TENANT.get();
     }
 
+    public static String getRequiredTenantId() {
+        String tenantId = CURRENT_TENANT.get();
+        if (tenantId == null) {
+            throw new IllegalStateException("Workspace context is unavailable");
+        }
+        return tenantId;
+    }
+
     public static void clear() {
         CURRENT_TENANT.remove();
     }

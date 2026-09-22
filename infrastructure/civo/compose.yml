@@ -57,6 +57,7 @@ services:
       FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:?required}
       BACKEND_AUDIENCE: ${BACKEND_AUDIENCE:-booking-backend}
       API_REQUESTS_PER_MINUTE: ${API_REQUESTS_PER_MINUTE:-240}
+      MEMBERSHIP_ENFORCEMENT: ${MEMBERSHIP_ENFORCEMENT:-false}
     depends_on:
       postgres:
         condition: service_healthy

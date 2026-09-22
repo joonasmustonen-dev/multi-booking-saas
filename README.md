@@ -20,8 +20,8 @@ The project covers the complete path from domain modeling and API design to a re
 | Domain modeling | Services independently declare staff, location, and resource assignments as required, optional, or forbidden. Eligibility and requirement rules remain separate. |
 | Scheduling | Availability intersects recurring hours, dated staff rotas, closures, time off, extra availability, service eligibility, location assignments, booking policies, and existing appointments. |
 | Concurrency | Appointment creation and rescheduling revalidate inside a transaction; PostgreSQL `tstzrange` exclusion constraints reject races for staff, locations, and resources. |
-| Multi-tenancy | A platform registry selects a dedicated PostgreSQL database from a trusted JWT tenant claim. Tenant context is request-scoped and cleared after every request. |
-| Authentication | Keycloak OpenID Connect, Authorization Code flow with PKCE S256, Spring Security resource-server validation, audience checks, and role-based authorization. |
+| Multi-tenancy | A platform registry resolves each active account-to-workspace membership and selects a dedicated PostgreSQL database. Tenant context is request-scoped and cleared after every request. |
+| Authentication | Keycloak OpenID Connect, Authorization Code flow with PKCE S256, Spring Security resource-server validation, audience checks, workspace memberships, and role-based authorization. |
 | Privacy controls | Customer export, contact-detail or full erasure, processing restriction, legal hold, retention preview/apply workflows, and security audit events. |
 | Event-driven workflow | Appointment cancellation publishes an event that matches released capacity against eligible waitlist entries in a new transaction. |
 | Delivery | GitHub Actions, disposable PostgreSQL and Keycloak services, Playwright browser tests, Docker Compose, Caddy TLS termination, Cloudflare Workers, and Civo deployment assets. |
@@ -53,7 +53,7 @@ flowchart LR
     end
 ```
 
-The frontend is a static React application. Keycloak owns authentication, while Spring Security validates access tokens and establishes the tenant context. Platform metadata lives in a small registry database; operational data is physically separated into one database per tenant. Flyway migrates the platform schema and every active tenant schema during startup.
+The frontend is a static React application. Keycloak owns authentication, while Spring Security validates access tokens and checks the selected workspace against the platform membership registry. Platform metadata lives in a small registry database; operational data is physically separated into one database per tenant. Flyway migrates the platform schema and every active tenant schema during startup.
 
 ## Core scheduling model
 
@@ -82,6 +82,7 @@ Saving an appointment repeats the assignment and availability checks. The transa
 - **Customers** — bounded search, contact details, operational notes, booking history, attendance context, and preferred staff.
 - **Waitlists** — service and time-range requests, optional staff/location preferences, notification consent, cancellation matching, deduplicated offers, expiry, acceptance, and removal states.
 - **Dashboard and settings** — operational summaries, today's scheduled team, booking policies, timezone, currency, calendar range, and slot spacing.
+- **Workspace access** — email-bound invitations, administrator and staff roles, account-to-staff linking, immediate access removal, last-administrator protection, and access audit events.
 - **Privacy administration** — paginated data export, erasure controls, legal holds, processing restrictions, retention policies, and auditable administrative actions.
 
 ## Technology
@@ -246,7 +247,7 @@ The hosted instance is a development preview. Do not enter real personal, medica
 
 ## Current boundaries
 
-- Tenant provisioning is an administrative infrastructure operation; self-service onboarding is not implemented.
+- Tenant provisioning and identity-account creation remain administrative operations; workspace invitations, account linking, role changes, and removal are managed in the application.
 - Waitlist offers are tracked and deduplicated, while external email/SMS delivery is not yet connected.
 - Payments, public customer registration, billing, and subscription management are outside the current scope.
 - The included deployment favors a reviewable, low-cost staging topology over multi-region availability.

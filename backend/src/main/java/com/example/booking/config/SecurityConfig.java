@@ -62,6 +62,8 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers("/api/platform/**")
                     .hasRole("PLATFORM_ADMIN")
+                    .requestMatchers("/api/account/**", "/api/invitations/**")
+                    .authenticated()
                     .requestMatchers("/api/v1/**")
                     .hasAnyRole("TENANT_ADMIN", "STAFF")
                     .anyRequest()
@@ -93,7 +95,7 @@ public class SecurityConfig {
         );
 
         configuration.setAllowedHeaders(
-            List.of("Authorization", "Content-Type")
+            List.of("Authorization", "Content-Type", "X-Workspace")
         );
 
         configuration.setAllowCredentials(false);

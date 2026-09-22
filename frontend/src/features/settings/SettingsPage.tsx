@@ -3,11 +3,12 @@ import PrivacySettings from "./PrivacySettings";
 import { useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Building2, CalendarDays, Clock3, Save } from "lucide-react";
-import keycloak from "../../auth/keycloak";
+import { hasCapability } from "../../auth/permissions";
 import { useTenantSettings } from "./useTenantSettings";
 import { updateTenantSettings } from "./settingsApi";
 import type { TenantSettings } from "./settingsTypes";
 import { invalidateBookingData } from "../assignments/invalidateBookingData";
+import WorkspaceAccessPanel from "./WorkspaceAccessPanel";
 
 function SettingsEditor({
     settings,
@@ -294,9 +295,7 @@ export default function SettingsPage() {
                 {query.error.message}
             </p>
         );
-    const editable =
-        keycloak.tokenParsed?.realm_access?.roles?.includes("TENANT_ADMIN") ??
-        false;
+    const editable = hasCapability("settings.manage");
     return (
         <div className="management-page settings-page">
             <div className="page-header">
@@ -309,7 +308,12 @@ export default function SettingsPage() {
                 </div>
             </div>
             <SettingsEditor settings={query.data} editable={editable} />
-            {editable && <PrivacySettings />}
+            {editable && (
+                <>
+                    <WorkspaceAccessPanel />
+                    <PrivacySettings />
+                </>
+            )}
         </div>
     );
 }

@@ -1080,6 +1080,97 @@ input[type="checkbox"]:checked {
     font-weight: 650;
 }
 
+.sidebar-workspace-picker {
+    display: grid;
+    gap: 6px;
+    margin-bottom: 14px;
+    color: #b9a58e;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.sidebar-workspace-picker .input {
+    min-width: 0;
+    height: 40px;
+    padding: 0 10px;
+    font-size: 0.78rem;
+}
+
+.workspace-access-panel {
+    display: grid;
+    gap: 24px;
+}
+
+.workspace-invite-form {
+    display: grid;
+    grid-template-columns: minmax(200px, 1.4fr) minmax(150px, 0.7fr) minmax(200px, 1fr) auto;
+    align-items: end;
+    gap: 12px;
+}
+
+.invite-link-result,
+.workspace-access-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.workspace-access-section,
+.workspace-access-list,
+.workspace-access-row > div:first-child {
+    display: grid;
+    gap: 10px;
+}
+
+.workspace-access-row {
+    padding: 14px;
+    border: 1px solid #44382e;
+    border-radius: 14px;
+    background: #17130f;
+}
+
+.workspace-access-row > div:first-child {
+    flex: 1;
+    gap: 3px;
+    min-width: 180px;
+}
+
+.compact-input {
+    width: min(210px, 100%);
+    min-height: 44px;
+}
+
+.invitation-accept-card .button {
+    width: 100%;
+}
+
+@media (max-width: 900px) {
+    .workspace-invite-form {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .workspace-access-row {
+        align-items: stretch;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 600px) {
+    .workspace-invite-form {
+        grid-template-columns: 1fr;
+    }
+
+    .invite-link-result {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .workspace-access-row .compact-input {
+        width: 100%;
+    }
+}
+
 /*
  * Final field guardrail. Feature styles intentionally use stronger selectors,
  * so keep this block last and scoped to the authenticated application.

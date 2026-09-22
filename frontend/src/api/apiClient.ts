@@ -1,4 +1,5 @@
 import keycloak from "../auth/keycloak";
+import { currentWorkspace } from "../auth/workspaceSession";
 
 const API_URL = import.meta.env?.VITE_API_URL ?? "http://localhost:8080";
 
@@ -16,6 +17,9 @@ export async function apiFetch<T>(
     const headers = new Headers(options.headers);
 
     headers.set("Authorization", `Bearer ${keycloak.token}`);
+
+    const workspace = currentWorkspace();
+    if (workspace) headers.set("X-Workspace", workspace.slug);
 
     if (options.body) {
         headers.set("Content-Type", "application/json");

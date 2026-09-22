@@ -32,3 +32,5 @@ app:
     password: booking
   security:
     jwt-enabled: true
+    membership-enforcement: false
+    frontend-origin: http://localhost:5173

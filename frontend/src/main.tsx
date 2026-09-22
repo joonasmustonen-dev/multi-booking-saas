@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 
 import App from "./App";
 import keycloak from "./auth/keycloak";
+import { initializeWorkspaceSession } from "./auth/workspaceSession";
 import "./index.css";
 import "./features/customers/CustomerStyles.css";
 import "./components/InteractionStyles.css";
@@ -42,8 +43,11 @@ if (window.location.pathname === "/") {
             pkceMethod: "S256",
             checkLoginIframe: false
         })
-        .then(authenticated => {
-            if (authenticated) render();
+        .then(async authenticated => {
+            if (authenticated) {
+                await initializeWorkspaceSession();
+                render();
+            }
         })
         .catch(error => {
             console.error("Keycloak initialization failed", error);
