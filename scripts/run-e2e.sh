@@ -50,25 +50,6 @@ if [[ "$keycloak_ready" != true ]]; then
 fi
 echo "[e2e] Keycloak realm is ready."
 
-echo "[e2e] Resolving the imported administrator identity..."
-e2e_token_response=$(curl --fail --silent \
-    --request POST \
-    --data-urlencode 'client_id=booking-frontend' \
-    --data-urlencode 'username=e2e-admin' \
-    --data-urlencode 'password=playwright-only-password' \
-    --data-urlencode 'grant_type=password' \
-    http://localhost:8081/realms/booking/protocol/openid-connect/token)
-e2e_admin_subject=$(printf '%s' "$e2e_token_response" | node -e '
-const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
-if (!input.access_token) process.exit(1);
-const segments = input.access_token.split(".");
-if (segments.length !== 3) process.exit(1);
-const claims = JSON.parse(Buffer.from(segments[1], "base64url").toString());
-if (!claims.sub) process.exit(1);
-process.stdout.write(claims.sub);
-')
-echo "[e2e] Imported administrator identity resolved."
-
 echo "[e2e] Building the Spring Boot application..."
 (cd backend && bash mvnw --batch-mode --no-transfer-progress -DskipTests package)
 echo "[e2e] Creating and migrating disposable tenant databases..."
@@ -111,7 +92,6 @@ echo "[e2e] Loading deterministic booking fixtures..."
 postgres_container=$(docker compose -f "$compose_file" ps -q postgres)
 docker exec -i "$postgres_container" psql \
     -U booking -d platform_db -v ON_ERROR_STOP=1 \
-    --set=e2e_admin_subject="$e2e_admin_subject" \
     < scripts/e2e-seed.sql
 
 echo "[e2e] Running Playwright in Chromium..."

@@ -13,7 +13,7 @@ INSERT INTO workspace_memberships (
 SELECT
     'e2000000-0000-4000-8000-000000000011',
     id,
-    :'e2e_admin_subject',
+    'unclaimed:e2e-admin@example.invalid',
     'e2e-admin@example.invalid',
     'TENANT_ADMIN',
     'ACTIVE',

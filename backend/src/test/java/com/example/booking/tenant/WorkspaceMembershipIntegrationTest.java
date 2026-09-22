@@ -83,6 +83,63 @@ class WorkspaceMembershipIntegrationTest {
     }
 
     @Test
+    void verifiedAccountClaimsPreprovisionedMembershipByEmail()
+        throws Exception {
+        createMembership(
+            "unclaimed:preprovisioned@example.test",
+            "preprovisioned@example.test",
+            WorkspaceRole.TENANT_ADMIN
+        );
+
+        mvc.perform(
+            get("/api/account/workspaces").with(
+                jwt().jwt(token ->
+                    token
+                        .subject("claimed-keycloak-subject")
+                        .claim("email", "preprovisioned@example.test")
+                        .claim("email_verified", true)
+                )
+            )
+        )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].slug").value("tenant-a"))
+            .andExpect(jsonPath("$[0].role").value("TENANT_ADMIN"));
+
+        Assertions.assertTrue(
+            memberships
+                .findByTenantSlugAndIdentitySubjectAndStatus(
+                    "tenant-a",
+                    "claimed-keycloak-subject",
+                    MembershipStatus.ACTIVE
+                )
+                .isPresent()
+        );
+    }
+
+    @Test
+    void unverifiedEmailCannotClaimPreprovisionedMembership()
+        throws Exception {
+        createMembership(
+            "unclaimed:unverified@example.test",
+            "unverified@example.test",
+            WorkspaceRole.TENANT_ADMIN
+        );
+
+        mvc.perform(
+            get("/api/account/workspaces").with(
+                jwt().jwt(token ->
+                    token
+                        .subject("unverified-keycloak-subject")
+                        .claim("email", "unverified@example.test")
+                        .claim("email_verified", false)
+                )
+            )
+        )
+            .andExpect(status().isOk())
+            .andExpect(content().json("[]"));
+    }
+
+    @Test
     void removingMembershipTakesEffectWithoutWaitingForANewToken()
         throws Exception {
         createMembership(

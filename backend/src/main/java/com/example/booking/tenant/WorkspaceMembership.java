@@ -71,6 +71,18 @@ public class WorkspaceMembership {
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
 
+    public boolean hasUnclaimedIdentity() {
+        return identitySubject.startsWith("unclaimed:");
+    }
+
+    public void claimIdentity(String identitySubject) {
+        if (!hasUnclaimedIdentity()) {
+            throw new IllegalStateException("Membership identity is already claimed");
+        }
+        this.identitySubject = identitySubject;
+        this.updatedAt = OffsetDateTime.now();
+    }
+
     public void changeRole(WorkspaceRole role) {
         this.role = role;
         this.updatedAt = OffsetDateTime.now();

@@ -24,7 +24,10 @@ public class WorkspaceAccessController {
     public List<WorkspaceSummary> workspaces(
         JwtAuthenticationToken authentication
     ) {
-        return access.workspaces(WorkspaceAccessService.subject(authentication));
+        return access.workspaces(
+            WorkspaceAccessService.subject(authentication),
+            WorkspaceAccessService.verifiedEmail(authentication)
+        );
     }
 
     @GetMapping("/api/invitations/{token}")

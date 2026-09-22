@@ -56,9 +56,12 @@ public class WorkspaceAccessService {
         );
     }
 
-    @Transactional(value = "platformTransactionManager", readOnly = true)
-    public List<WorkspaceSummary> workspaces(String subject) {
-        return memberships
+    @Transactional("platformTransactionManager")
+    public List<WorkspaceSummary> workspaces(
+        String subject,
+        String verifiedEmail
+    ) {
+        List<WorkspaceMembership> resolved = memberships
             .findByIdentitySubjectAndStatusOrderByCreatedAt(
                 subject,
                 MembershipStatus.ACTIVE
@@ -67,6 +70,35 @@ public class WorkspaceAccessService {
             .filter(membership ->
                 "ACTIVE".equals(membership.getTenant().getStatus())
             )
+            .toList();
+
+        if (resolved.isEmpty() && verifiedEmail != null) {
+            resolved = memberships
+                .findByVerifiedEmailForUpdate(
+                    normalizeEmail(verifiedEmail),
+                    MembershipStatus.ACTIVE
+                )
+                .stream()
+                .filter(WorkspaceMembership::hasUnclaimedIdentity)
+                .filter(membership ->
+                    "ACTIVE".equals(membership.getTenant().getStatus())
+                )
+                .peek(membership -> {
+                    membership.claimIdentity(subject);
+                    record(
+                        membership.getTenant().getId(),
+                        subject,
+                        "MEMBERSHIP_IDENTITY_CLAIMED",
+                        subject,
+                        null,
+                        membership.getEmail()
+                    );
+                })
+                .toList();
+        }
+
+        return resolved
+            .stream()
             .map(membership ->
                 new WorkspaceSummary(
                     membership.getTenant().getId(),
@@ -522,5 +554,18 @@ public class WorkspaceAccessService {
             );
         }
         return email;
+    }
+
+    public static String verifiedEmail(
+        JwtAuthenticationToken authentication
+    ) {
+        if (
+            !Boolean.TRUE.equals(
+                authentication.getToken().getClaim("email_verified")
+            )
+        ) return null;
+
+        String email = authentication.getToken().getClaimAsString("email");
+        return email == null || email.isBlank() ? null : email;
     }
 }
