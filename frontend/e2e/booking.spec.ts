@@ -1,6 +1,8 @@
 import { expect, type Page, test } from "@playwright/test";
 
 const customerName = "E2E Customer";
+const frontendPort = process.env.E2E_FRONTEND_PORT ?? "5173";
+const keycloakPort = process.env.E2E_KEYCLOAK_PORT ?? "8081";
 
 function nextMonday(): string {
     const date = new Date();
@@ -17,15 +19,25 @@ function addDays(date: string, days: number): string {
 
 async function login(page: Page) {
     await page.goto("/app");
-    await expect(page).toHaveURL(/localhost:8081\/realms\/booking/);
+    await expect(page).toHaveURL(
+        new RegExp(`localhost:${keycloakPort}/realms/booking/`)
+    );
     await page.locator("#username").fill("e2e-admin");
     await page.locator("#password").fill("playwright-only-password");
     const workspaceResponse = page.waitForResponse(
         response => response.url().endsWith("/api/account/workspaces"),
         { timeout: 15_000 }
     );
+    const dashboardResponse = page.waitForResponse(
+        response => response.url().endsWith("/api/v1/dashboard/summary"),
+        { timeout: 15_000 }
+    );
     await page.locator("#kc-login").click();
-    await expect(page).toHaveURL(/^http:\/\/localhost:5173\/app\/?(?:#.*)?$/);
+    await expect(page).toHaveURL(
+        new RegExp(
+            `^http://localhost:${frontendPort}/app/?(?:#.*)?$`
+        )
+    );
     const workspaceResult = await workspaceResponse;
     expect(workspaceResult.status()).toBe(200);
     expect(await workspaceResult.json()).toEqual([
@@ -34,7 +46,16 @@ async function login(page: Page) {
             role: "TENANT_ADMIN"
         })
     ]);
-    await expect(page.getByRole("heading", { name: /Good (morning|afternoon|evening)/ })).toBeVisible();
+    const dashboardResult = await dashboardResponse;
+    expect(
+        dashboardResult.status(),
+        await dashboardResult.text()
+    ).toBe(200);
+    await expect(
+        page.getByRole("heading", {
+            name: /Good (morning|afternoon|evening)/
+        })
+    ).toBeVisible();
 }
 
 async function chooseSearchOption(

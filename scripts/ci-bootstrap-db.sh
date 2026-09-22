@@ -3,6 +3,7 @@ set -euo pipefail
 
 # Run from the repository root against the disposable Actions service container.
 : "${POSTGRES_CONTAINER:?Set POSTGRES_CONTAINER to the CI PostgreSQL container ID}"
+postgres_host_port="${POSTGRES_HOST_PORT:-5432}"
 jar_files=(backend/target/booking-backend-*.jar)
 if [[ ${#jar_files[@]} -ne 1 || ! -f "${jar_files[0]}" ]]; then
     echo 'Build the backend JAR before initializing CI databases.' >&2
@@ -21,7 +22,7 @@ fi
 # Keycloak is unnecessary here; JWT-enabled tests supply their own test decoder.
 java -jar "${jar_files[0]}" \
     --app.security.jwt-enabled=false \
-    --spring.datasource.url=jdbc:postgresql://localhost:5432/platform_db \
+    --spring.datasource.url="jdbc:postgresql://localhost:${postgres_host_port}/platform_db" \
     --spring.datasource.username=booking \
     --spring.datasource.password=booking \
     --server.address=127.0.0.1 \

@@ -6,6 +6,10 @@ compose_file="$repo_root/infrastructure/e2e/docker-compose.yml"
 backend_log="$repo_root/e2e-backend.log"
 compose_log="$repo_root/e2e-compose.log"
 backend_pid=""
+export E2E_POSTGRES_PORT="${E2E_POSTGRES_PORT:-15432}"
+export E2E_KEYCLOAK_PORT="${E2E_KEYCLOAK_PORT:-18081}"
+export E2E_BACKEND_PORT="${E2E_BACKEND_PORT:-18080}"
+export E2E_FRONTEND_PORT="${E2E_FRONTEND_PORT:-15173}"
 
 cleanup() {
     status=$?
@@ -31,7 +35,7 @@ last_keycloak_status=unreachable
 for ((attempt = 1; attempt <= 60; attempt++)); do
     last_keycloak_status=$(curl --silent --output /dev/null --write-out '%{http_code}' \
         --max-time 2 \
-        http://localhost:8081/realms/booking/.well-known/openid-configuration
+        "http://localhost:${E2E_KEYCLOAK_PORT}/realms/booking/.well-known/openid-configuration"
     ) || last_keycloak_status=unreachable
     if [[ "$last_keycloak_status" == 200 ]]; then
         keycloak_ready=true
@@ -54,13 +58,19 @@ echo "[e2e] Building the Spring Boot application..."
 (cd backend && bash mvnw --batch-mode --no-transfer-progress -DskipTests package)
 echo "[e2e] Creating and migrating disposable tenant databases..."
 POSTGRES_CONTAINER=$(docker compose -f "$compose_file" ps -q postgres) \
+    POSTGRES_HOST_PORT="$E2E_POSTGRES_PORT" \
     bash scripts/ci-bootstrap-db.sh
 
 echo "[e2e] Starting the JWT-enabled backend..."
 jar_files=(backend/target/booking-backend-*.jar)
 java -jar "${jar_files[0]}" \
     --server.address=127.0.0.1 \
-    --server.port=8080 \
+    --server.port="$E2E_BACKEND_PORT" \
+    --spring.datasource.url="jdbc:postgresql://localhost:${E2E_POSTGRES_PORT}/platform_db" \
+    --spring.security.oauth2.resourceserver.jwt.issuer-uri="http://localhost:${E2E_KEYCLOAK_PORT}/realms/booking" \
+    --app.tenant-database.port="$E2E_POSTGRES_PORT" \
+    --app.security.cors-origins="http://localhost:${E2E_FRONTEND_PORT}" \
+    --app.security.frontend-origin="http://localhost:${E2E_FRONTEND_PORT}" \
     --app.security.membership-enforcement=true \
     > "$backend_log" 2>&1 &
 backend_pid=$!
@@ -72,7 +82,7 @@ for ((attempt = 1; attempt <= 90; attempt++)); do
         cat "$backend_log"
         exit 1
     fi
-    if curl --fail --silent --max-time 2 http://127.0.0.1:8080/api/health >/dev/null; then
+    if curl --fail --silent --max-time 2 "http://127.0.0.1:${E2E_BACKEND_PORT}/api/health" >/dev/null; then
         backend_ready=true
         break
     fi
@@ -95,5 +105,7 @@ docker exec -i "$postgres_container" psql \
     < scripts/e2e-seed.sql
 
 echo "[e2e] Running Playwright in Chromium..."
+export VITE_API_URL="http://localhost:${E2E_BACKEND_PORT}"
+export VITE_KEYCLOAK_URL="http://localhost:${E2E_KEYCLOAK_PORT}"
 cd frontend
 npm run test:e2e

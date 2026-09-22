@@ -117,7 +117,11 @@ public class TenantContextFilter extends OncePerRequestFilter {
                     return;
                 }
                 var membership = workspaceAccess
-                    .activeMembership(tenantId, subject)
+                    .activeMembership(
+                        tenantId,
+                        subject,
+                        WorkspaceAccessService.verifiedEmail(jwtAuthentication)
+                    )
                     .orElse(null);
                 if (membership == null) {
                     response.sendError(
@@ -139,13 +143,15 @@ public class TenantContextFilter extends OncePerRequestFilter {
                         "ROLE_" + membership.getRole().name()
                     )
                 );
-                SecurityContextHolder.getContext().setAuthentication(
-                    new JwtAuthenticationToken(
-                        jwtAuthentication.getToken(),
-                        authorities,
-                        jwtAuthentication.getName()
-                    )
+                var membershipAuthentication = new JwtAuthenticationToken(
+                    jwtAuthentication.getToken(),
+                    authorities,
+                    jwtAuthentication.getName()
                 );
+                var membershipContext = SecurityContextHolder
+                    .createEmptyContext();
+                membershipContext.setAuthentication(membershipAuthentication);
+                SecurityContextHolder.setContext(membershipContext);
             }
 
             TenantContext.setTenantId(tenantId);

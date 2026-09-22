@@ -22,14 +22,25 @@
       "protocol": "openid-connect",
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,
-      "redirectUris": ["http://localhost:5173/*"],
-      "webOrigins": ["http://localhost:5173"],
+      "redirectUris": ["http://localhost:15173/*"],
+      "webOrigins": ["http://localhost:15173"],
       "defaultClientScopes": ["web-origins", "acr", "roles", "profile", "email"],
       "attributes": {
         "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": "http://localhost:5173/*"
+        "post.logout.redirect.uris": "http://localhost:15173/*"
       },
       "protocolMappers": [
+        {
+          "name": "subject",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-sub-mapper",
+          "consentRequired": false,
+          "config": {
+            "access.token.claim": "true",
+            "lightweight.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        },
         {
           "name": "booking-backend-audience",
           "protocol": "openid-connect",
@@ -61,6 +72,7 @@
   ],
   "users": [
     {
+      "id": "e2000000-0000-4000-8000-000000000010",
       "username": "e2e-admin",
       "enabled": true,
       "emailVerified": true,

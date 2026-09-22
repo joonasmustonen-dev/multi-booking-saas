@@ -83,7 +83,7 @@ class WorkspaceMembershipIntegrationTest {
     }
 
     @Test
-    void verifiedAccountClaimsPreprovisionedMembershipByEmail()
+    void verifiedAccountResolvesPreprovisionedMembershipByEmail()
         throws Exception {
         createMembership(
             "unclaimed:preprovisioned@example.test",
@@ -109,11 +109,34 @@ class WorkspaceMembershipIntegrationTest {
             memberships
                 .findByTenantSlugAndIdentitySubjectAndStatus(
                     "tenant-a",
-                    "claimed-keycloak-subject",
+                    "unclaimed:preprovisioned@example.test",
                     MembershipStatus.ACTIVE
                 )
                 .isPresent()
         );
+    }
+
+    @Test
+    void verifiedAccountUsesPreprovisionedMembershipRoleForWorkspaceRequests()
+        throws Exception {
+        createMembership(
+            "unclaimed:workspace-admin@example.test",
+            "workspace-admin@example.test",
+            WorkspaceRole.TENANT_ADMIN
+        );
+
+        mvc.perform(
+            get("/api/v1/dashboard/summary")
+                .header("X-Workspace", "tenant-a")
+                .with(
+                    jwt().jwt(token ->
+                        token
+                            .subject("claimed-keycloak-subject")
+                            .claim("email", "workspace-admin@example.test")
+                            .claim("email_verified", true)
+                    )
+                )
+        ).andExpect(status().isOk());
     }
 
     @Test

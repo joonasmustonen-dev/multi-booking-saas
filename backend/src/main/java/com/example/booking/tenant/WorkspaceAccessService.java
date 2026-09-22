@@ -47,16 +47,26 @@ public class WorkspaceAccessService {
     @Transactional(value = "platformTransactionManager", readOnly = true)
     public Optional<WorkspaceMembership> activeMembership(
         String tenantSlug,
-        String subject
+        String subject,
+        String verifiedEmail
     ) {
-        return memberships.findByTenantSlugAndIdentitySubjectAndStatus(
+        var membership = memberships.findByTenantSlugAndIdentitySubjectAndStatus(
             tenantSlug,
             subject,
             MembershipStatus.ACTIVE
         );
+        if (membership.isPresent() || verifiedEmail == null) return membership;
+
+        return memberships
+            .findByTenantSlugAndEmailIgnoreCaseAndStatus(
+                tenantSlug,
+                normalizeEmail(verifiedEmail),
+                MembershipStatus.ACTIVE
+            )
+            .filter(WorkspaceMembership::hasUnclaimedIdentity);
     }
 
-    @Transactional("platformTransactionManager")
+    @Transactional(value = "platformTransactionManager", readOnly = true)
     public List<WorkspaceSummary> workspaces(
         String subject,
         String verifiedEmail
@@ -74,7 +84,7 @@ public class WorkspaceAccessService {
 
         if (resolved.isEmpty() && verifiedEmail != null) {
             resolved = memberships
-                .findByVerifiedEmailForUpdate(
+                .findByEmailIgnoreCaseAndStatusOrderByCreatedAt(
                     normalizeEmail(verifiedEmail),
                     MembershipStatus.ACTIVE
                 )
@@ -83,17 +93,6 @@ public class WorkspaceAccessService {
                 .filter(membership ->
                     "ACTIVE".equals(membership.getTenant().getStatus())
                 )
-                .peek(membership -> {
-                    membership.claimIdentity(subject);
-                    record(
-                        membership.getTenant().getId(),
-                        subject,
-                        "MEMBERSHIP_IDENTITY_CLAIMED",
-                        subject,
-                        null,
-                        membership.getEmail()
-                    );
-                })
                 .toList();
         }
 
